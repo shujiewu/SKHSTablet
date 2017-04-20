@@ -3,6 +3,7 @@ package cn.sk.skhstablet.fragment;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,9 +35,9 @@ public class MutiMonitorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mDatas= PatientDetailList.PATIENTS;
-        view=inflater.inflate(R.layout.fragment_muti_monitor, null);
+        view=inflater.inflate(R.layout.fragment_muti_monitor,container,false);
         recyclerView = (RecyclerView) view.findViewById(R.id.ry_muti_monitor);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),3));
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
 
         recyclerView.setAdapter(mutiMonitorAdapter = new MutiMonitorAdapter(mDatas));
 

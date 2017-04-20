@@ -208,7 +208,7 @@ public abstract class BorderActivity extends FragmentActivity {
 
         //缩放内容界面
         float originalWidth = contentView.getWidth();
-        float width = contentView.getWidth() - Utils.dpToPx(56, getResources());
+        float width = contentView.getWidth() - Utils.dpToPx(48, getResources());
         float scaleX = width / originalWidth;
         float originalHeight = contentView.getHeight();
         float height = contentView.getHeight(); //- Utils.dpToPx(56, getResources());

@@ -31,7 +31,7 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:textColorHint="@color/white"
-            android:hint="请输入您的手机号"
+            android:hint="请输入您的账号"
             android:textSize="13sp"
             android:background="@null"
             android:layout_marginRight="10dp"
