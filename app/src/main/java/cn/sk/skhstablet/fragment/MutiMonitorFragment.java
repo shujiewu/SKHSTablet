@@ -1,0 +1,59 @@
+package cn.sk.skhstablet.fragment;
+
+import android.app.Fragment;
+import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import java.util.List;
+
+import cn.sk.skhstablet.MainActivity;
+import cn.sk.skhstablet.R;
+import cn.sk.skhstablet.adapter.MutiMonitorAdapter;
+import cn.sk.skhstablet.adapter.PatientListAdapter;
+import cn.sk.skhstablet.model.PatientDetail;
+import cn.sk.skhstablet.model.PatientDetailList;
+
+/**
+ * Created by ldkobe on 2017/4/17.
+ */
+
+public class MutiMonitorFragment extends Fragment {
+    private RecyclerView recyclerView;
+    private MutiMonitorAdapter mutiMonitorAdapter;
+    private List<PatientDetail> mDatas;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+    View view;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        mDatas= PatientDetailList.PATIENTS;
+        view=inflater.inflate(R.layout.fragment_muti_monitor, null);
+        recyclerView = (RecyclerView) view.findViewById(R.id.ry_muti_monitor);
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),3));
+
+        recyclerView.setAdapter(mutiMonitorAdapter = new MutiMonitorAdapter(mDatas));
+
+        mutiMonitorAdapter.setOnItemClickListener(new MutiMonitorAdapter.OnRecyclerViewItemClickListener(){
+            @Override
+            public void onItemClick(View view , String data){
+                //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
+                MainActivity mainActivity=(MainActivity) getActivity();
+                view.setPressed(true);
+                view.postDelayed(() -> {
+                    view.setPressed(false);
+                    mainActivity.showFragment(mainActivity.FRAGMENT_ONE);
+                    //callback.onClick(holder.getAdapterPosition());
+                }, 200);
+
+            }
+        });
+        return view;
+    }
+}

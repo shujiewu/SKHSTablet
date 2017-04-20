@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SKHSTablet</string>
+    <string name="menu_name">一键监控</string>
+
+    <string name="nothing_selected">未选择病人(</string>
+
+    <plurals name="you_selected_x_patients">
+        <item quantity="one">你选择了 %d 位病人. 开始单人监控!</item>
+        <item quantity="other">你选择了 %d 位病人. 开始多人监控!</item>
+    </plurals>
+</resources>
