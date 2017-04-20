@@ -141,10 +141,12 @@ public abstract class BorderActivity extends FragmentActivity {
 
             @Override
             public void onAnimationEnd(Animation arg0) {
-                if(!topItems.isEmpty())
-                    topItems.get(0).show();
-                if(!leftItems.isEmpty())
-                    leftItems.get(0).show();
+                //if(!topItems.isEmpty())
+                //    topItems.get(0).show();
+                //if(!leftItems.isEmpty())
+                 //   leftItems.get(0).show();
+                for(MenuItem menuItem : leftItems)
+                    menuItem.show();
             }
         });
         icn_menu_center.startAnimation(rotateAnimationCenter);
@@ -205,7 +207,12 @@ public abstract class BorderActivity extends FragmentActivity {
 
 
         menuShowed = true;
-
+        if(patientListShow==true)
+        {
+            origin = ViewHelper.getX(containerRight);
+            ObjectAnimator.ofFloat(containerRight, "x",Utils.dpToPx(48, getResources()))
+                    .setDuration(ANIMATIONDURATION).start();
+        }
         //缩放内容界面
         float originalWidth = contentView.getWidth();
         float width = contentView.getWidth() - Utils.dpToPx(48, getResources());
@@ -226,17 +233,30 @@ public abstract class BorderActivity extends FragmentActivity {
      //   DisplayMetrics  dm = new DisplayMetrics();
      //   getWindowManager().getDefaultDisplay().getMetrics(dm);
     //    int screenWidth = dm.widthPixels;
-        ViewHelper.setX(containerRight, -containerRight.getWidth()+Utils.dpToPx(48, getResources()));
-        float origin = ViewHelper.getX(containerRight);
-        ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
-                .setDuration(ANIMATIONDURATION).start();
-        Log.e("dd",String.valueOf(origin));
-        patientListShow=true;
+        if(menuShowed)
+        {
+            ViewHelper.setX(containerRight, -containerRight.getWidth()+Utils.dpToPx(48, getResources()));
+            float origin = ViewHelper.getX(containerRight);
+            ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
+                    .setDuration(ANIMATIONDURATION).start();
+            Log.e("dd",String.valueOf(origin));
+            patientListShow=true;
+        }
+        else
+        {
+            ViewHelper.setX(containerRight, -containerRight.getWidth());
+            float origin = ViewHelper.getX(containerRight);
+            ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
+                    .setDuration(ANIMATIONDURATION).start();
+            Log.e("dd",String.valueOf(origin));
+            patientListShow=true;
+        }
+
     }
     public void hidePatientList()
     {
         float origin = ViewHelper.getX(containerRight);
-        ObjectAnimator.ofFloat(containerRight, "x", origin-containerRight.getWidth()-Utils.dpToPx(48, getResources()))
+        ObjectAnimator.ofFloat(containerRight, "x", -containerRight.getWidth())
                 .setDuration(ANIMATIONDURATION).start();
         patientListShow=false;
     }
@@ -304,8 +324,14 @@ public abstract class BorderActivity extends FragmentActivity {
         ObjectAnimator.ofFloat(containerLeft, "y", -containerLeft.getHeight())
                 .setDuration(ANIMATIONDURATION).start();
 
-        if(patientListShow=true)
-            hidePatientList();
+        if(patientListShow==true)
+        {
+            //hidePatientList();
+            origin = ViewHelper.getX(containerRight);
+            ObjectAnimator.ofFloat(containerRight, "x",0)
+                    .setDuration(ANIMATIONDURATION).start();
+        }
+
         // hide RIGHT menu
       //  DisplayMetrics  dm = new DisplayMetrics();
      //   getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -324,8 +350,8 @@ public abstract class BorderActivity extends FragmentActivity {
         scaleAnimation.setFillAfter(true);
         contentView.startAnimation(scaleAnimation);
 
-        for(MenuItem menuItem : topItems)
-            menuItem.hide();
+     //   for(MenuItem menuItem : topItems)
+     //       menuItem.hide();
        for(MenuItem menuItem : leftItems)
             menuItem.hide();
 

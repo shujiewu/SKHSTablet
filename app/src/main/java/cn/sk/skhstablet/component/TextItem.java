@@ -28,7 +28,7 @@ public class TextItem extends MenuItem {
 	}
 	
 	private void configure(){
-		setMinimumHeight(Utils.dpToPx(56, getResources()));
+		setMinimumHeight(Utils.dpToPx(48, getResources()));
 		textView = new TextView(getContext());
 		textView.setText(text);
 		textView.setTextColor(textColor);

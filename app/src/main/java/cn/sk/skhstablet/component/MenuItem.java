@@ -77,7 +77,7 @@ public abstract class MenuItem extends RelativeLayout{
 	public void show(){
 		setVisibility(View.VISIBLE);
 		ScaleAnimation scaleAnimation = new ScaleAnimation(0, 1, 0, 1,getWidth() / 2, getHeight() / 2);
-		scaleAnimation.setDuration(300);
+		scaleAnimation.setDuration(200);
 		scaleAnimation.setInterpolator(new BounceInterpolator());
 		scaleAnimation.setAnimationListener(new AnimationListener() {
 			
@@ -91,8 +91,8 @@ public abstract class MenuItem extends RelativeLayout{
 			
 			@Override
 			public void onAnimationEnd(Animation arg0) {
-				if(nexItem != null)
-					nexItem.show();
+				//if(nexItem != null)
+				//	nexItem.show();
 			}
 		});
 		startAnimation(scaleAnimation);

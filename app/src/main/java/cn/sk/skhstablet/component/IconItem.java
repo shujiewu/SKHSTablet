@@ -15,8 +15,8 @@ public class IconItem extends MenuItem {
 	public IconItem(BorderActivity borderMenuActivity, int id, int idResource) {
 		super(borderMenuActivity, id);
 		icon = new ImageView(borderMenuActivity);
-		setMinimumHeight(Utils.dpToPx(56, getResources()));
-		setMinimumWidth(Utils.dpToPx(56, getResources()));
+		setMinimumHeight(Utils.dpToPx(48, getResources()));
+		setMinimumWidth(Utils.dpToPx(48, getResources()));
 		icon.setAdjustViewBounds(true);
 		icon.setScaleType(ScaleType.CENTER_CROP);
 		icon.setImageResource(idResource);

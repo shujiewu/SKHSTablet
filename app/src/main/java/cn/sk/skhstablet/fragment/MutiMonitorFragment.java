@@ -49,7 +49,7 @@ public class MutiMonitorFragment extends Fragment {
                 view.setPressed(true);
                 view.postDelayed(() -> {
                     view.setPressed(false);
-                    mainActivity.showFragment(mainActivity.FRAGMENT_ONE);
+                    mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
                     //callback.onClick(holder.getAdapterPosition());
                 }, 200);
 

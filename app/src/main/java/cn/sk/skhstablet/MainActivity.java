@@ -20,6 +20,7 @@ import java.util.List;
 
 import cn.sk.skhstablet.adapter.PatientListAdapter;
 import cn.sk.skhstablet.component.IconItem;
+import cn.sk.skhstablet.component.MenuItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
 import cn.sk.skhstablet.fragment.MutiMonitorFragment;
@@ -50,8 +51,9 @@ public class MainActivity extends BorderActivity {
         super.onCreate(savedInstanceState);
 
         mDatas= PatientList.PATIENTS;
-        IconItem iconItem = new IconItem(this,SHOWALL , R.drawable.ic_sort_white_24dp);
+        IconItem iconItem = new IconItem(this,SHOWALL , R.drawable.messenger);
         addTopItem(iconItem);
+        iconItem.show();
         TextItem textItem = new TextItem(this, MONITORALL, "全部选择", Color.parseColor("#1E88E5"));
         addTopItem(textItem);
         textItem = new TextItem(this, STARTMONITOR, "开始监控", Color.parseColor("#1E88E5"));
@@ -72,11 +74,11 @@ public class MainActivity extends BorderActivity {
 
         fm = getFragmentManager();
         if(savedInstanceState==null)
-            showFragment(FRAGMENT_ONE);
+            showFragment(FRAGMENT_MUTI);
     }
     public static final String POSITION = "position";
-    public static final int FRAGMENT_ONE=0;
-    public static final int FRAGMENT_TWO=1;
+    public static final int FRAGMENT_SINGLE=0;
+    public static final int FRAGMENT_MUTI=1;
     private int position;
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -126,7 +128,7 @@ public class MainActivity extends BorderActivity {
 
         switch (index){
 
-            case FRAGMENT_ONE:
+            case FRAGMENT_SINGLE:
                 /**
                  * 如果Fragment为空，就新建一个实例
                  * 如果不为空，就将它从栈中显示出来
@@ -138,9 +140,10 @@ public class MainActivity extends BorderActivity {
                 }else {
                     ft.show(singleMonitorFragment);
                 }
-
+                //MenuItem textItem2=getItemById(STARTMONITOR);
+                //textItem2.hide();
                 break;
-            case FRAGMENT_TWO:
+            case FRAGMENT_MUTI:
                 if (mutiMonitorFragment==null){
                     mutiMonitorFragment=new MutiMonitorFragment();
                     ft.add(R.id.contentView,mutiMonitorFragment);
@@ -148,7 +151,8 @@ public class MainActivity extends BorderActivity {
                 }else {
                     ft.show(mutiMonitorFragment);
                 }
-
+                //MenuItem textItem=getItemById(STARTMONITOR);
+                //textItem.show();
                 break;
         }
 
@@ -176,7 +180,7 @@ public class MainActivity extends BorderActivity {
                 patientListAdapter.notifyDataSetChanged();
                 break;
             case SINGLEMONITOR:
-                showFragment(FRAGMENT_ONE);
+                showFragment(FRAGMENT_SINGLE);
                 break;
             case SHOWALL:
                 if(getPatientShow())
@@ -185,11 +189,11 @@ public class MainActivity extends BorderActivity {
                     showPatientList();
                 break;
             case MUTIMOITOR:
-                showFragment(FRAGMENT_TWO);
+                showFragment(FRAGMENT_MUTI);
                 break;
             case STARTMONITOR:
                 hidePatientList();
-                showFragment(FRAGMENT_TWO);
+                showFragment(FRAGMENT_MUTI);
                 break;
         }
     }
