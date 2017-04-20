@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -51,14 +52,11 @@ public class MainActivity extends BorderActivity {
         super.onCreate(savedInstanceState);
 
         mDatas= PatientList.PATIENTS;
-        IconItem iconItem = new IconItem(this,SHOWALL , R.drawable.messenger);
-        addTopItem(iconItem);
-        iconItem.show();
-        TextItem textItem = new TextItem(this, MONITORALL, "全部选择", Color.parseColor("#1E88E5"));
-        addTopItem(textItem);
-        textItem = new TextItem(this, STARTMONITOR, "开始监控", Color.parseColor("#1E88E5"));
-        addTopItem(textItem);
-        iconItem = new IconItem(this,MUTIMOITOR , R.drawable.ic_content_copy_white_24dp);
+        IconItem iconItem2 = new IconItem(this,SHOWALL , R.drawable.messenger);
+        addTopItem(iconItem2);
+        iconItem2.show();
+
+        IconItem  iconItem = new IconItem(this,MUTIMOITOR , R.drawable.ic_content_copy_white_24dp);
         addLeftItem(iconItem);
         iconItem = new IconItem(this,SINGLEMONITOR , R.drawable.ic_content_paste_white_24dp);
         addLeftItem(iconItem);
@@ -178,21 +176,47 @@ public class MainActivity extends BorderActivity {
                     patient.setIdcard("已选择");
                 }
                 patientListAdapter.notifyDataSetChanged();
+
                 break;
             case SINGLEMONITOR:
                 showFragment(FRAGMENT_SINGLE);
                 break;
             case SHOWALL:
                 if(getPatientShow())
+                {
                     hidePatientList();
+                    new Handler().post(new Runnable() {
+                        public void run() {
+                            removeTopItem(STARTMONITOR);
+                            removeTopItem(MONITORALL);
+                        }
+                    });
+                   // removeTopItem(STARTMONITOR);
+                }
                 else
+                {
                     showPatientList();
+                    TextItem textItem = new TextItem(this, MONITORALL, "全部选择", Color.parseColor("#1E88E5"));
+                    addTopItem(textItem);
+                    textItem.show();
+                    textItem = new TextItem(this, STARTMONITOR, "开始监控", Color.parseColor("#1E88E5"));
+                    addTopItem(textItem);
+                    textItem.show();
+                }
+
                 break;
             case MUTIMOITOR:
                 showFragment(FRAGMENT_MUTI);
+
                 break;
             case STARTMONITOR:
                 hidePatientList();
+                new Handler().post(new Runnable() {
+                    public void run() {
+                        removeTopItem(STARTMONITOR);
+                        removeTopItem(MONITORALL);
+                    }
+                });
                 showFragment(FRAGMENT_MUTI);
                 break;
         }

@@ -2,6 +2,8 @@ package cn.sk.skhstablet.adapter;
 
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,14 +53,14 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
                 mDatas.get(position).setIdcard("已选择");
                 holder.idcard.setText("已选择");
-                holder.idcard.setTextColor(Color.parseColor("#FFAD5B"));
+            //    holder.idcard.setTextColor(Color.parseColor("#FFAD5B"));
             }
             else if(mDatas.get(position).getIdcard().equals("已选择"))
             {
                 Log.e("2","2");
                 mDatas.get(position).setIdcard("未选择");
                 holder.idcard.setText("未选择");
-                holder.idcard.setTextColor(Color.parseColor("#3F51B5"));
+            //    holder.idcard.setTextColor(Color.parseColor("#3F51B5"));
             }
 
             view.setPressed(true);
@@ -98,6 +100,28 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             rfid = (TextView) view.findViewById(R.id.rfid);
             idcard = (TextView) view.findViewById(R.id.idcard);
             gender=(TextView) view.findViewById(R.id.gender);
+            TextWatcher textWatcher = new TextWatcher() {
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    // TODO Auto-generated method stub
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count,
+                                              int after) {
+                    // TODO Auto-generated method stub
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (s.toString().equals("未选择"))
+                        idcard.setTextColor(Color.parseColor("#3F51B5"));
+                    else if(s.toString().equals("已选择"))
+                        idcard.setTextColor(Color.parseColor("#FFAD5B"));
+                }
+            };
+            idcard.addTextChangedListener(textWatcher);
         }
 
         public void bind(PatientListHolder viewHolder, Patient patient) {

@@ -45,6 +45,7 @@
         android:background="#333"
         android:orientation="horizontal"
         android:paddingLeft="48dp">
+
     </LinearLayout>
     <LinearLayout
         android:id="@+id/ly_container_left"
