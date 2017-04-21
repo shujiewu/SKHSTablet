@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/changeParaSportName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_weight="0.4"
+            android:gravity="center"
+            android:text="坡度"
+            />
+
+        <cn.sk.skhstablet.component.EditTextWithDel
+            android:id="@+id/changeParaSportValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:layout_weight="0.6"
+            android:textColor="@color/blue_btn_bg_color"
+            android:gravity="center"
+            android:inputType="number"
+            android:shadowColor="@color/bg_Gray"
+            android:background="@null"
+            android:text="10"
+            />
+
+    <SeekBar
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/changeSeekBarValue"
+        android:layout_weight="1"
+        android:layout_gravity="center"/>
+</LinearLayout>

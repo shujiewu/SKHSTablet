@@ -23,6 +23,7 @@ import cn.sk.skhstablet.model.Patient;
 public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.PatientListHolder>
 {
     public List<Patient> mDatas;
+    private OnPatientItemLongClickListener mOnItemLongClickListener = null;
     public PatientListAdapter(List<Patient> datas)
     {
         mDatas=datas;
@@ -43,6 +44,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     public void onBindViewHolder(PatientListHolder holder, int position)
     {
         holder.bind(holder, mDatas.get(position));
+        holder.itemView.setTag( mDatas.get(position).getName());
         holder.itemView.setOnClickListener(view -> {
             //int position1 = holder.getLayoutPosition();
            // Log.e("position1",String.valueOf(position1));
@@ -64,18 +66,24 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             }
 
             view.setPressed(true);
-            view.postDelayed(() -> {
+           view.postDelayed(() -> {
                 view.setPressed(false);
                 //callback.onClick(holder.getAdapterPosition());
             }, 200);
         });
-        holder.itemView.setOnLongClickListener(view -> {
+       holder.itemView.setOnLongClickListener(view -> {
             view.setPressed(true);
             view.postDelayed(() -> {
                 view.setPressed(false);
                 //callback.onClick(holder.getAdapterPosition());
             }, 200);
-            Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
+           Log.e("longclick","text1");
+           if (mOnItemLongClickListener != null) {
+               //注意这里使用getTag方法获取数据
+               mOnItemLongClickListener.onItemLongClick(view,(String)view.getTag());
+               Log.e("longclick","text");
+           }
+            //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
             return true;
         });
     }
@@ -85,7 +93,10 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     {
         return mDatas.size();
     }
-
+    public void setOnItemLongClickListener(OnPatientItemLongClickListener listener) {
+        this.mOnItemLongClickListener = listener;
+        Log.e("longclick","text2");
+    }
     public class PatientListHolder extends RecyclerView.ViewHolder
     {
 
@@ -131,5 +142,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             viewHolder.gender.setText(patient.getGender());
         }
     }
-
+    public static interface OnPatientItemLongClickListener {
+        void onItemLongClick(View view , String data);
+    }
 }

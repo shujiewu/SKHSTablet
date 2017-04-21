@@ -33,7 +33,7 @@
 
     <dimen name="card_margin">2dp</dimen>
 
-
+    <dimen name="recycler_margin">3dp</dimen>
     <!-- PaperButton Default -->
     <dimen name="paper_text_size">15sp</dimen>
     <color name="paper_text_color">#60000000</color>

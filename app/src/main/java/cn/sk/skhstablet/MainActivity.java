@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +18,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.view.ViewHelper;
+
 import java.util.List;
 
 import cn.sk.skhstablet.adapter.PatientListAdapter;
@@ -28,6 +32,7 @@ import cn.sk.skhstablet.fragment.MutiMonitorFragment;
 import cn.sk.skhstablet.fragment.SingleMonitorFragment;
 import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientList;
+import cn.sk.skhstablet.utlis.Utils;
 
 public class MainActivity extends BorderActivity {
     private RecyclerView mRecyclerView;
@@ -37,9 +42,10 @@ public class MainActivity extends BorderActivity {
     final int ORDER = 3;
     final int SHOWALL = 4;
     final int  CREATE = 5;
-    final int MUTIMOITOR=6;
-    final int SINGLEMONITOR=7;
+    final static int MUTIMOITOR=6;
+    final static int SINGLEMONITOR=7;
     final int STARTMONITOR=8;
+    public final int SAVEEdit=9;
     private List<Patient> mDatas;
     private PatientListAdapter patientListAdapter;
 
@@ -69,6 +75,24 @@ public class MainActivity extends BorderActivity {
         TracksItemDecorator itemDecorator = new TracksItemDecorator(
                 getResources().getDimensionPixelSize(R.dimen.decoration_size));
         mRecyclerView.addItemDecoration(itemDecorator);
+        patientListAdapter.setOnItemLongClickListener(new PatientListAdapter.OnPatientItemLongClickListener(){
+            @Override
+            public void onItemLongClick(View view , String data){
+                //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
+                //MainActivity mainActivity=(MainActivity) getActivity();
+                view.setPressed(true);
+                //Toast.makeText(view.getContext(),"long click "+data,Toast.LENGTH_SHORT).show();
+                Snackbar.make(view, "开始监控"+data, Snackbar.LENGTH_LONG)
+                        .show();
+                view.postDelayed(() -> {
+                    view.setPressed(false);
+                    hidePatientList();
+                    showFragment(FRAGMENT_SINGLE);
+                    //callback.onClick(holder.getAdapterPosition());
+                }, 200);
+
+            }
+        });
 
         fm = getFragmentManager();
         if(savedInstanceState==null)
@@ -106,6 +130,46 @@ public class MainActivity extends BorderActivity {
        //     showPatientList();
         // else
         //     findViewById(R.id.btn_menu).performClick();
+    }
+
+    public void showPatientList()
+    {
+        // show RIGHT menu
+        //   DisplayMetrics  dm = new DisplayMetrics();
+        //   getWindowManager().getDefaultDisplay().getMetrics(dm);
+        //    int screenWidth = dm.widthPixels;
+        if(isMenuShowed())
+        {
+            ViewHelper.setX(containerRight, -containerRight.getWidth()+ Utils.dpToPx(48, getResources()));
+            float origin = ViewHelper.getX(containerRight);
+            ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
+                    .setDuration(ANIMATIONDURATION).start();
+            Log.e("dd",String.valueOf(origin));
+            setPatientShow(true);
+        }
+        else
+        {
+            ViewHelper.setX(containerRight, -containerRight.getWidth());
+            float origin = ViewHelper.getX(containerRight);
+            ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
+                    .setDuration(ANIMATIONDURATION).start();
+            Log.e("dd",String.valueOf(origin));
+            setPatientShow(true);
+        }
+
+    }
+    public void hidePatientList()
+    {
+        float origin = ViewHelper.getX(containerRight);
+        ObjectAnimator.ofFloat(containerRight, "x", -containerRight.getWidth())
+                .setDuration(ANIMATIONDURATION).start();
+        setPatientShow(false);
+        new Handler().post(new Runnable() {
+            public void run() {
+                removeTopItem(STARTMONITOR);
+                removeTopItem(MONITORALL);
+            }
+        });
     }
     public void hideFragment(FragmentTransaction ft){
         //如果不为空，就先隐藏起来
@@ -149,6 +213,8 @@ public class MainActivity extends BorderActivity {
                 }else {
                     ft.show(mutiMonitorFragment);
                 }
+                if(hasMenuItem(SAVEEdit))
+                    removeTopItem(SAVEEdit);
                 //MenuItem textItem=getItemById(STARTMONITOR);
                 //textItem.show();
                 break;
@@ -185,12 +251,7 @@ public class MainActivity extends BorderActivity {
                 if(getPatientShow())
                 {
                     hidePatientList();
-                    new Handler().post(new Runnable() {
-                        public void run() {
-                            removeTopItem(STARTMONITOR);
-                            removeTopItem(MONITORALL);
-                        }
-                    });
+
                    // removeTopItem(STARTMONITOR);
                 }
                 else
@@ -211,12 +272,12 @@ public class MainActivity extends BorderActivity {
                 break;
             case STARTMONITOR:
                 hidePatientList();
-                new Handler().post(new Runnable() {
-                    public void run() {
-                        removeTopItem(STARTMONITOR);
-                        removeTopItem(MONITORALL);
-                    }
-                });
+                //new Handler().post(new Runnable() {
+                //    public void run() {
+                 //       removeTopItem(STARTMONITOR);
+                //       removeTopItem(MONITORALL);
+                //    }
+               // });
                 showFragment(FRAGMENT_MUTI);
                 break;
         }

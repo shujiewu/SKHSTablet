@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -227,40 +228,9 @@ public abstract class BorderActivity extends FragmentActivity {
         contentView.startAnimation(scaleAnimation);
 
     }
-    public void showPatientList()
-    {
-        // show RIGHT menu
-     //   DisplayMetrics  dm = new DisplayMetrics();
-     //   getWindowManager().getDefaultDisplay().getMetrics(dm);
-    //    int screenWidth = dm.widthPixels;
-        if(menuShowed)
-        {
-            ViewHelper.setX(containerRight, -containerRight.getWidth()+Utils.dpToPx(48, getResources()));
-            float origin = ViewHelper.getX(containerRight);
-            ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
-                    .setDuration(ANIMATIONDURATION).start();
-            Log.e("dd",String.valueOf(origin));
-            patientListShow=true;
-        }
-        else
-        {
-            ViewHelper.setX(containerRight, -containerRight.getWidth());
-            float origin = ViewHelper.getX(containerRight);
-            ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
-                    .setDuration(ANIMATIONDURATION).start();
-            Log.e("dd",String.valueOf(origin));
-            patientListShow=true;
-        }
 
-    }
-    public void hidePatientList()
-    {
-        float origin = ViewHelper.getX(containerRight);
-        ObjectAnimator.ofFloat(containerRight, "x", -containerRight.getWidth())
-                .setDuration(ANIMATIONDURATION).start();
-        patientListShow=false;
-    }
     public boolean getPatientShow(){return patientListShow;}
+    public void setPatientShow(boolean show){ patientListShow=show;}
     public void hideMenu(){
         // Animate icon button
         final float centerRotateAnimation = Utils.dpToPx(48, getResources()) / 2;
@@ -379,7 +349,7 @@ public abstract class BorderActivity extends FragmentActivity {
         items.put(item.id, item);
         containerTop.addView(item);
         configureTopAnimations();
-        if(menuShowed)
+        //if(menuShowed)
             item.show();
     }
 
@@ -538,5 +508,17 @@ public abstract class BorderActivity extends FragmentActivity {
     // Hide icon menu
     public void hideIconMenu(){
         findViewById(R.id.btn_menu).setVisibility(View.INVISIBLE);
+    }
+
+    public boolean hasMenuItem(int id)
+    {
+        if(items.containsKey(id))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

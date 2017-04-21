@@ -10,31 +10,125 @@
         android:layout_weight="0.5"
         android:orientation="vertical"
         android:id="@+id/linear1">
-        <include layout="@layout/card_patient_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.5"
-            android:id="@+id/detail1"/>
         <android.support.v7.widget.CardView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.5"
+            android:layout_height="match_parent"
             android:foreground="?android:attr/selectableItemBackground"
             app:cardPreventCornerOverlap="false"
             app:cardUseCompatPadding="true"
             android:clickable="true"
+            app:cardCornerRadius="1dp"
             android:stateListAnimator="@drawable/selector_elevation"
-
             >
-            <TextView
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="控制"
-                android:gravity="left"
-                android:textColor="@color/cardview_dark_background"
-                android:textSize="@dimen/sp_12"/>
-        </android.support.v7.widget.CardView>
+                android:layout_height="match_parent"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_margin="10dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.15"
+                            android:gravity="center"
+                            android:text="姓名"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.35"
+                            android:gravity="center"
+                            android:textSize="16sp"
+                            android:id="@+id/sname"
+                            android:text="张三三"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.15"
+                            android:gravity="center"
+                            android:text="设备"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.35"
+                            android:gravity="center"
+                            android:id="@+id/sdev"
+                            android:textSize="16sp"
+                            android:text="跑步机"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.15"
+                            android:gravity="center"
+                            android:text="ID"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.35"
+                            android:gravity="center"
+                            android:id="@+id/sid"
+                            android:text="1212"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.15"
+                            android:gravity="center"
+                            android:text="完成"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.35"
+                            android:gravity="center"
+                            android:id="@+id/spercent"
+                            android:text="10%"/>
+                    </LinearLayout>
+                </LinearLayout>
+                <View android:layout_width="wrap_content"
+                    android:layout_height="0.5px"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@color/gray"/>
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.35"
+                    android:layout_margin="@dimen/recycler_margin"
+                    android:id="@+id/sry_phy_para">
+                </android.support.v7.widget.RecyclerView>
+                <View android:layout_width="wrap_content"
+                    android:layout_height="0.5px"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_margin="@dimen/recycler_margin"
+                    android:background="@color/gray"/>
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.65"
+                    android:id="@+id/sry_sport_para">
+                </android.support.v7.widget.RecyclerView>
 
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
     </LinearLayout>
     <LinearLayout
         android:layout_width="0dp"

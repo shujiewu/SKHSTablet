@@ -18,9 +18,9 @@ public class SportDevParaAdapter extends RecyclerView.Adapter<SportDevParaAdapte
     List<String> sportDevName;
     List<String> sportDevValue;
 
-    public SportDevParaAdapter(List<String> phyDevName, List<String> phyDevValue) {
-        this.sportDevName = phyDevName;
-        this.sportDevValue = phyDevValue;
+    public SportDevParaAdapter(List<String> sportDevName, List<String> sportDevValue) {
+        this.sportDevName = sportDevName;
+        this.sportDevValue = sportDevValue;
     }
 
     @Override
