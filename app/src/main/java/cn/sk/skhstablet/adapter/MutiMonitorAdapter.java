@@ -1,5 +1,8 @@
 package cn.sk.skhstablet.adapter;
 
+import android.content.Context;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +14,7 @@ import java.util.List;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientDetail;
+import cn.sk.skhstablet.utlis.Utils;
 
 /**
  * Created by ldkobe on 2017/4/18.
@@ -19,8 +23,10 @@ import cn.sk.skhstablet.model.PatientDetail;
 public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.MutiMonitorHolder> implements View.OnClickListener{
     List<PatientDetail> patientDetailList;
     private OnRecyclerViewItemClickListener mOnItemClickListener = null;
-    public MutiMonitorAdapter(List<PatientDetail> datas)
+    Context context;
+    public MutiMonitorAdapter(Context context, List<PatientDetail> datas)
     {
+        this.context=context;
         patientDetailList=datas;
     }
     @Override
@@ -28,7 +34,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     {
         View view =  LayoutInflater.from(parent.getContext()).inflate(R.layout.card_patient_view, parent, false);
         view.setOnClickListener(this);
-        return new MutiMonitorHolder(view);
+        return new MutiMonitorHolder(context,view);
     }
     @Override
     public void onClick(View v) {
@@ -57,13 +63,19 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         TextView id;
         TextView dev;
         TextView percent;
+        RecyclerView recyclerPhyParaView;
 
-        public MutiMonitorHolder(View view) {
+        RecyclerView recyclerSportParaView;
+        Context context;
+        public MutiMonitorHolder(Context context,View view) {
             super(view);
             name = (TextView) view.findViewById(R.id.mname);
             id = (TextView) view.findViewById(R.id.mid);
             dev = (TextView) view.findViewById(R.id.mdev);
             percent=(TextView) view.findViewById(R.id.mpercent);
+            recyclerPhyParaView=(RecyclerView)view.findViewById(R.id.ry_phy_para);
+            recyclerSportParaView=(RecyclerView)view.findViewById(R.id.ry_sport_para);
+            this.context=context;
         }
 
         public void bind(MutiMonitorHolder viewHolder, PatientDetail patient) {
@@ -71,6 +83,17 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
             viewHolder.id.setText(patient.getId());
             viewHolder.dev.setText(patient.getDev());
             viewHolder.percent.setText(patient.getPercent());
+
+            recyclerPhyParaView.setLayoutManager(new GridLayoutManager(context,2));
+            ViewGroup.LayoutParams layoutParams = recyclerPhyParaView.getLayoutParams();
+            int lineNumber = patient.getPhyDevName().size()%2;
+            //layoutParams.height =200;
+            recyclerPhyParaView.setLayoutParams(layoutParams);
+            //recyclerPhyParaView.setLayoutManager(new LinearLayoutManager(context));
+            recyclerPhyParaView.setAdapter(new PatientParaAdapter(patient.getPhyDevName(),patient.getPhyDevValue()));
+
+            recyclerSportParaView.setLayoutManager(new GridLayoutManager(context,2));
+            recyclerSportParaView.setAdapter(new SportDevParaAdapter(patient.getSportDevName(),patient.getSportDevValue()));
         }
     }
     public static interface OnRecyclerViewItemClickListener {

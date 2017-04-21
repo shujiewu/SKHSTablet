@@ -11,15 +11,21 @@ public class PatientDetail {
     private String id;
     private String dev;
     private String percent;
-    private List<String> sportDev;
-    private List<String> phyDev;
+    private List<String> sportDevName;
+    private List<String> phyDevName;
+    private List<String> sportDevValue;
+    private List<String> phyDevValue;
     private String gender;
-    public PatientDetail(String name, String id,String dev,String percent)
+    public PatientDetail(String name, String id,String dev,String percent,List<String> phyDevName,List<String> phyDevValue,List<String> sportDevName,List<String> sportDevValue )
     {
         this.name=name;
         this.id=id;
         this.dev=dev;
         this.percent=percent;
+        this.phyDevName=phyDevName;
+        this.phyDevValue=phyDevValue;
+        this.sportDevName=sportDevName;
+        this.sportDevValue=sportDevValue;
     }
     public void setName(String name) {
         this.name = name;
@@ -29,12 +35,36 @@ public class PatientDetail {
         return name;
     }
 
-    public List<String> getPhyDev() {
-        return phyDev;
+    public List<String> getPhyDevName() {
+        return phyDevName;
     }
 
-    public List<String> getSportDev() {
-        return sportDev;
+    public List<String> getPhyDevValue() {
+        return phyDevValue;
+    }
+
+    public List<String> getSportDevName() {
+        return sportDevName;
+    }
+
+    public List<String> getSportDevValue() {
+        return sportDevValue;
+    }
+
+    public void setPhyDevName(List<String> phyDevName) {
+        this.phyDevName = phyDevName;
+    }
+
+    public void setPhyDevValue(List<String> phyDevValue) {
+        this.phyDevValue = phyDevValue;
+    }
+
+    public void setSportDevName(List<String> sportDevName) {
+        this.sportDevName = sportDevName;
+    }
+
+    public void setSportDevValue(List<String> sportDevValue) {
+        this.sportDevValue = sportDevValue;
     }
 
     public String getDev() {
@@ -61,11 +91,5 @@ public class PatientDetail {
         this.percent = percent;
     }
 
-    public void setPhyDev(List<String> phyDev) {
-        this.phyDev = phyDev;
-    }
 
-    public void setSportDev(List<String> sportDev) {
-        this.sportDev = sportDev;
-    }
 }

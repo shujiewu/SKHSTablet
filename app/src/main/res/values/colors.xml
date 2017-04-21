@@ -48,7 +48,7 @@
     <!-- 黑色 -->
     <color name="black">#ff000000</color>
     <!-- 深绿 -->
-    <color name="m29c741">#29c741</color>
+    <color name="textgreen">#29c741</color>
     <!-- 灰色 -->
     <color name="green">#146621</color>
     <!-- 红色 -->

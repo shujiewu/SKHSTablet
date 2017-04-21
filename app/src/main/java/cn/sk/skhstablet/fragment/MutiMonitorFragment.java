@@ -37,9 +37,10 @@ public class MutiMonitorFragment extends Fragment {
         mDatas= PatientDetailList.PATIENTS;
         view=inflater.inflate(R.layout.fragment_muti_monitor,container,false);
         recyclerView = (RecyclerView) view.findViewById(R.id.ry_muti_monitor);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2));
-
-        recyclerView.setAdapter(mutiMonitorAdapter = new MutiMonitorAdapter(mDatas));
+      //  recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),1));
+       // recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL,false));
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
+        recyclerView.setAdapter(mutiMonitorAdapter = new MutiMonitorAdapter(getActivity(),mDatas));
 
         mutiMonitorAdapter.setOnItemClickListener(new MutiMonitorAdapter.OnRecyclerViewItemClickListener(){
             @Override
