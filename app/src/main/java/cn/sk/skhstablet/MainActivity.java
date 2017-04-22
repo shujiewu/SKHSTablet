@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.nineoldandroids.view.ViewHelper;
+import com.tapadoo.alerter.Alerter;
 
 import java.util.List;
 
@@ -46,6 +47,8 @@ public class MainActivity extends BorderActivity {
     final static int SINGLEMONITOR=7;
     final int STARTMONITOR=8;
     public final int SAVEEdit=9;
+    final  int LOG_OUT=10;
+
     private List<Patient> mDatas;
     private PatientListAdapter patientListAdapter;
 
@@ -66,6 +69,10 @@ public class MainActivity extends BorderActivity {
         addLeftItem(iconItem);
         iconItem = new IconItem(this,SINGLEMONITOR , R.drawable.ic_content_paste_white_24dp);
         addLeftItem(iconItem);
+
+        iconItem = new IconItem(this,LOG_OUT, R.drawable.ic_create_white_24dp);
+        addLeftItem(iconItem);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.left_recycler);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -280,6 +287,22 @@ public class MainActivity extends BorderActivity {
                // });
                 showFragment(FRAGMENT_MUTI);
                 break;
+            case LOG_OUT:
+                Alerter.create(this)
+                        .setTitle("病人预警")
+                        .setText("赵六血压超过上限！")
+                        .setBackgroundColor(R.color.yal_ms_colorPrimary)
+                        .setDuration(10000)
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(!getPatientShow()) {
+                                    showPatientList();
+                                }
+                                mRecyclerView.getLayoutManager().scrollToPosition(3);
+                            }
+                        })
+                        .show();
         }
     }
     @Override

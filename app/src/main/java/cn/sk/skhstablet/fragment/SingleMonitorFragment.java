@@ -10,12 +10,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import cn.sk.skhstablet.MainActivity;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.DevParaChangeAdapter;
+import cn.sk.skhstablet.adapter.ExercisePlanAdapter;
 import cn.sk.skhstablet.adapter.PatientParaAdapter;
 import cn.sk.skhstablet.adapter.SportDevParaAdapter;
 import cn.sk.skhstablet.component.TextItem;
@@ -32,6 +34,7 @@ public class SingleMonitorFragment extends Fragment {
     private PatientDetail patientDetail;
     private DevParaChangeAdapter devParaChangeAdapter;
     private MainActivity mainActivity;
+    private ExpandableListView elvExPlaen;
     TextView name;
     TextView id;
     TextView dev;
@@ -80,6 +83,14 @@ public class SingleMonitorFragment extends Fragment {
 
         ryPhyParaView.setLayoutManager(new GridLayoutManager(getActivity(),2));
         ryPhyParaView.setAdapter(new PatientParaAdapter(patientDetail.getPhyDevName(),patientDetail.getPhyDevValue()));
+
+        elvExPlaen = (ExpandableListView) view.findViewById(R.id.elv_exercise_plan);
+
+        ExercisePlanAdapter expandableListAdapter = new ExercisePlanAdapter(getActivity());
+        elvExPlaen.setAdapter(expandableListAdapter);
+        for(int i = 0; i < expandableListAdapter.getGroupCount(); i++){
+            elvExPlaen.expandGroup(i);
+        }
         return view;
     }
 }

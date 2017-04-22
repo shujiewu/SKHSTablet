@@ -184,13 +184,23 @@
             android:clickable="true"
             android:stateListAnimator="@drawable/selector_elevation"
             >
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="医嘱"
-                android:gravity="left"
-                android:textColor="@color/cardview_dark_background"
-                android:textSize="@dimen/sp_12"/>
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="今日医嘱"
+                    android:gravity="left|center_vertical"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/cardview_dark_background"
+                    android:textSize="@dimen/sp_12"/>
+                <ExpandableListView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/elv_exercise_plan"/>
+            </LinearLayout>
         </android.support.v7.widget.CardView>
     </LinearLayout>
 </LinearLayout>
