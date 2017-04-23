@@ -9,12 +9,12 @@ import java.util.List;
 
 public class PatientList {
     public final static List<Patient> PATIENTS = new ArrayList<Patient>(){{
-        add(new Patient("张三", "Muse", "142333199900001800","未选择"));
-        add(new Patient("李四", "Hurts", "142333199900001800","未选择"));
-        add(new Patient("王五", "The Kills", "142333199900001800","未选择"));
-        add(new Patient("赵六", "Thousand Foot Krunch","142333199900001800","未选择"));
-        add(new Patient("赵六", "Thousand Foot Krunch", "121","未选择"));
-        add(new Patient("三个字", "Hurts", "121","未选择"));
-        add(new Patient("四个字", "Korn", "121","未选择"));
+        add(new Patient("张三", "男", "142333199900001800","未选择"));
+        add(new Patient("李四", "男", "142333199900001800","未选择"));
+        add(new Patient("王五", "男", "142333199900001800","未选择"));
+        add(new Patient("赵六", "男","142333199900001800","未选择"));
+        add(new Patient("赵六", "男", "121","未选择"));
+        add(new Patient("三个字", "男", "121","未选择"));
+        add(new Patient("四个字", "男", "121","未选择"));
     }};
 }

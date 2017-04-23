@@ -54,13 +54,13 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
 
     public class DevParaChangeHolder extends RecyclerView.ViewHolder {
         private TextView tvSportParaName;
-        private EditTextWithDel etSportParaValue;
+        private EditText etSportParaValue;
         private SeekBar sbSportParaValue;
         public DevParaChangeHolder(View view) {
             super(view);
             tvSportParaName = (TextView) view.findViewById(R.id.changeParaSportName);
             //tvParaName2 = (TextView) view.findViewById(R.id.paraname2);
-            etSportParaValue = (EditTextWithDel) view.findViewById(R.id.changeParaSportValue);
+            etSportParaValue = (EditText) view.findViewById(R.id.changeParaSportValue);
             //tvParaValue2=(TextView) view.findViewById(R.id.paravalue2);
             sbSportParaValue=(SeekBar)view.findViewById(R.id.changeSeekBarValue);
 
@@ -70,6 +70,13 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
             viewHolder.etSportParaValue.setText(paraValue);
             viewHolder.sbSportParaValue.setMax(50);
             viewHolder.sbSportParaValue.setProgress(Integer.valueOf(paraValue));
+
+            if (!paraName.equals("坡度"))
+            {
+                viewHolder.etSportParaValue.setFocusableInTouchMode(false);
+                viewHolder.sbSportParaValue.setVisibility(View.GONE);
+            }
+
             sbSportParaValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 
                 @Override

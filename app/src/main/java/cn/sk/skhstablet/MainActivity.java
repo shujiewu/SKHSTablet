@@ -48,7 +48,7 @@ public class MainActivity extends BorderActivity {
     final int STARTMONITOR=8;
     public final int SAVEEdit=9;
     final  int LOG_OUT=10;
-
+    public final int CLOSE_SINGLE=11;
     private List<Patient> mDatas;
     private PatientListAdapter patientListAdapter;
 
@@ -206,9 +206,12 @@ public class MainActivity extends BorderActivity {
                     singleMonitorFragment=new SingleMonitorFragment();
                     Log.e("TestA", "view == 2");
                     ft.add(R.id.contentView,singleMonitorFragment);
+
                 }else {
                     ft.show(singleMonitorFragment);
                 }
+              //  TextItem textItem = new TextItem(this, CLOSE_SINGLE, "取消监控", Color.parseColor("#1E88E5"));
+              //  addRightTopItem(textItem);
                 //MenuItem textItem2=getItemById(STARTMONITOR);
                 //textItem2.hide();
                 break;
@@ -221,9 +224,11 @@ public class MainActivity extends BorderActivity {
                     ft.show(mutiMonitorFragment);
                 }
                 if(hasMenuItem(SAVEEdit))
-                    removeTopItem(SAVEEdit);
+                    removeRightTopItem(SAVEEdit);
                 //MenuItem textItem=getItemById(STARTMONITOR);
                 //textItem.show();
+              //  removeRightTopItem(CLOSE_SINGLE);
+
                 break;
         }
 

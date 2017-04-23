@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
@@ -37,6 +38,9 @@ public abstract class BorderActivity extends FragmentActivity {
     LinearLayout containerTop;
     LinearLayout containerLeft;
     LinearLayout containerRight;
+
+    LinearLayout containerRightTop;
+    private ArrayList<MenuItem> rightTopItems = new ArrayList<MenuItem>();
 
     Drawable icon_menu_top;
     Drawable icon_menu_top_short;
@@ -105,6 +109,17 @@ public abstract class BorderActivity extends FragmentActivity {
         float origin = ViewHelper.getX(containerTop);
         ObjectAnimator.ofFloat(containerTop, "x", 0)
                 .setDuration(200).start();*/
+
+        containerRightTop = (LinearLayout) findViewById(R.id.ly_container_righttop);
+        containerRightTop.post(new Runnable() {
+
+            @Override
+            public void run() {
+                float origin = ViewHelper.getX(containerRightTop);
+                ViewHelper.setX(containerRightTop, origin);
+            }
+        });
+
     }
 
     private void configureMenuButton(){
@@ -341,6 +356,24 @@ public abstract class BorderActivity extends FragmentActivity {
      * Add a MenuItem to Top menu container
      * @param item
      */
+    public void addRightTopItem(MenuItem item){
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.gravity= Gravity.RIGHT;
+        containerRightTop.setLayoutParams(params);
+        rightTopItems.add(item);
+        items.put(item.id, item);
+        containerRightTop.addView(item);
+        configureRightTopAnimations();
+        //if(menuShowed)
+            item.show();
+    }
+    private void configureRightTopAnimations(){
+        for(int i = 0; i < rightTopItems.size(); i ++){
+            MenuItem menuItem = rightTopItems.get(i);
+            if(i+1 != rightTopItems.size())
+                menuItem.setNextItem(rightTopItems.get(i+1));
+        }
+    }
     public void addTopItem(MenuItem item){
         //	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
         //	params.gravity= Gravity.RIGHT;
@@ -350,7 +383,7 @@ public abstract class BorderActivity extends FragmentActivity {
         containerTop.addView(item);
         configureTopAnimations();
         //if(menuShowed)
-            item.show();
+        item.show();
     }
 
     /**
@@ -364,6 +397,17 @@ public abstract class BorderActivity extends FragmentActivity {
         containerTop.removeAllViews();
         for(MenuItem menuItem : topItems)
             containerTop.addView(menuItem);
+        configureTopAnimations();
+
+    }
+
+    public void removeRightTopItem(int id){
+        MenuItem item = getItemById(id);
+        items.remove(id);
+        rightTopItems.remove(item);
+        containerRightTop.removeAllViews();
+        for(MenuItem menuItem : rightTopItems)
+            containerRightTop.addView(menuItem);
         configureTopAnimations();
 
     }
@@ -405,6 +449,14 @@ public abstract class BorderActivity extends FragmentActivity {
         topItems.clear();
         topItems = new ArrayList<MenuItem>();
         containerTop.removeAllViews();
+    }
+
+    public void removeAllRightTopItems(){
+        for(MenuItem menuItem : rightTopItems)
+            items.remove(menuItem.id);
+        rightTopItems.clear();
+        rightTopItems = new ArrayList<MenuItem>();
+        containerRightTop.removeAllViews();
     }
 
     /**

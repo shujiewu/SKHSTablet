@@ -20,7 +20,9 @@ import cn.sk.skhstablet.adapter.DevParaChangeAdapter;
 import cn.sk.skhstablet.adapter.ExercisePlanAdapter;
 import cn.sk.skhstablet.adapter.PatientParaAdapter;
 import cn.sk.skhstablet.adapter.SportDevParaAdapter;
+import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.TextItem;
+import cn.sk.skhstablet.component.TracksItemDecorator;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 
@@ -66,6 +68,11 @@ public class SingleMonitorFragment extends Fragment {
         ryPhyParaView=(RecyclerView)view.findViewById(R.id.sry_phy_para);
         rySportParaView.setLayoutManager(new LinearLayoutManager(getActivity()));
         rySportParaView.setAdapter(devParaChangeAdapter=new DevParaChangeAdapter(patientDetail.getSportDevName(),patientDetail.getSportDevValue()));
+        TracksItemDecorator itemDecorator = new TracksItemDecorator(1);
+        rySportParaView.addItemDecoration(itemDecorator);
+
+        itemDecorator = new TracksItemDecorator(10);
+        ryPhyParaView.addItemDecoration(itemDecorator);
         devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
             @Override
             public void SaveEdit(int position, String string) {
@@ -74,7 +81,7 @@ public class SingleMonitorFragment extends Fragment {
                 {
                     Log.e("testsava","1");
                     TextItem textItem = new TextItem(mainActivity, mainActivity.SAVEEdit, "保存修改", Color.parseColor("#1E88E5"));
-                    mainActivity.addTopItem(textItem);
+                    mainActivity.addRightTopItem(textItem);
                 }
             }
         }
@@ -91,6 +98,11 @@ public class SingleMonitorFragment extends Fragment {
         for(int i = 0; i < expandableListAdapter.getGroupCount(); i++){
             elvExPlaen.expandGroup(i);
         }
+
+      //  IconItem iconItem = new IconItem(mainActivity, mainActivity.CLOSE_SINGLE , R.drawable.close_pushcha);
+      //  mainActivity.addRightTopItem(iconItem);
+      //  TextItem textItem = new TextItem(mainActivity, mainActivity.CLOSE_SINGLE, "取消监控", Color.parseColor("#1E88E5"));
+      //  mainActivity.addRightTopItem(textItem);
         return view;
     }
 }

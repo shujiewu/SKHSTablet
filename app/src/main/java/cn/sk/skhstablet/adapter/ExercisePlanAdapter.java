@@ -86,9 +86,10 @@ public class ExercisePlanAdapter implements ExpandableListAdapter {
         //ll.addView(logo);
         LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.
                 LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+        param.setMarginStart(100);
         TextView textView = getTextView();
         textView.setText(getGroup(groupPosition).toString());
-        textView.setPadding(10, 0, 0, 0);
+        textView.setPadding(0,15, 0, 15);
         textView.setTextSize(12);
         ll.addView(textView,param);
         return ll;
@@ -146,7 +147,7 @@ public class ExercisePlanAdapter implements ExpandableListAdapter {
         TextView textView = new TextView(context);
         textView.setLayoutParams(lp);
         textView.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
-        textView.setPadding(36, 0, 0, 0);
+        textView.setPadding(50, 15, 0, 15);
         textView.setTextSize(20);
         return textView;
     }

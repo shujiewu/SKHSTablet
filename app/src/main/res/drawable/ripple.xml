@@ -6,7 +6,7 @@
 
     <!-- the normal bg color will be light grey -->
     <item>
-        <color android:color="#0e000000" />
+        <color android:color="#80000000" />
     </item>
 
     <!-- make sure the ripple doesn't exceed the bounds -->

@@ -14,7 +14,7 @@
             android:id="@+id/paraSportName1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:textColor="@android:color/darker_gray"
             android:layout_weight="0.4"
             android:gravity="center"
@@ -24,9 +24,9 @@
             android:id="@+id/paraSportValue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:layout_weight="0.6"
-            android:textColor="@color/blue_btn_bg_color"
+            android:textColor="@color/maincolor"
             android:gravity="center"
             />
 
