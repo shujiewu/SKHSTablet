@@ -13,31 +13,47 @@
         android:layout_marginTop="48dp">
     </RelativeLayout>
     <LinearLayout
-        android:id="@+id/container_patient"
         android:layout_width="200dp"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:paddingTop="48dp">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/left_recycler"
+        android:orientation="vertical"
+        android:background="#c0000000"
+        android:id="@+id/container_patient">
+        <SearchView
+            android:id="@+id/searchView"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:queryHint="搜索"
+android:searchIcon="@drawable/ic_search_white"
+            android:layout_marginTop="48dp"
+            android:background="#80000000"
+            />
+        <LinearLayout
+            android:layout_width="200dp"
             android:layout_height="match_parent"
-            android:background="#c0000000"
-            />
-        <View
-            android:layout_width="@dimen/yal_ms_knob_width_half"
-            android:layout_height="@dimen/yal_ms_knob_height"
-            android:layout_gravity="left|center_vertical"
-            android:background="@drawable/yal_ms_round_left"
-            />
-        <View
-            android:layout_width="@dimen/yal_ms_knob_width_half"
-            android:layout_height="@dimen/yal_ms_knob_height"
-            android:layout_gravity="right|center_vertical"
-            android:background="@drawable/yal_ms_round_right"
-            />
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/left_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                />
+            <View
+                android:layout_width="@dimen/yal_ms_knob_width_half"
+                android:layout_height="@dimen/yal_ms_knob_height"
+                android:layout_gravity="left|center_vertical"
+                android:background="@drawable/yal_ms_round_left"
+                />
+            <View
+                android:layout_width="@dimen/yal_ms_knob_width_half"
+                android:layout_height="@dimen/yal_ms_knob_height"
+                android:layout_gravity="right|center_vertical"
+                android:background="@drawable/yal_ms_round_right"
+                />
+        </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"

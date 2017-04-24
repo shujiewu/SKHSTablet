@@ -11,10 +11,13 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +25,7 @@ import com.nineoldandroids.animation.ObjectAnimator;
 import com.nineoldandroids.view.ViewHelper;
 import com.tapadoo.alerter.Alerter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cn.sk.skhstablet.adapter.PatientListAdapter;
@@ -51,7 +55,7 @@ public class MainActivity extends BorderActivity {
     public final int CLOSE_SINGLE=11;
     private List<Patient> mDatas;
     private PatientListAdapter patientListAdapter;
-
+    SearchView searchView;
     private FragmentManager fm;
     private FragmentTransaction ft;
     private SingleMonitorFragment singleMonitorFragment;
@@ -104,7 +108,59 @@ public class MainActivity extends BorderActivity {
         fm = getFragmentManager();
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
+        initSearchView();
     }
+    private void initSearchView()
+    {
+        searchView=(SearchView)findViewById(R.id.searchView);
+        int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
+        //searchView.setQueryHint("搜索");
+        TextView textView = (TextView)findViewById(id);
+        textView.setTextColor(Color.WHITE);
+
+        textView.setHintTextColor(Color.WHITE);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+
+        id=searchView.getContext().getResources().getIdentifier("android:id/search_close_btn",null,null);
+        ImageView closeButton = (ImageView)findViewById(id);
+        closeButton.setImageDrawable(getDrawable(R.drawable.ic_close_white)); //设置为自己定义的Icon
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                final List<Patient> filteredModelList = filter(mDatas, newText);
+
+                //reset
+                patientListAdapter.setFilter(filteredModelList);
+                patientListAdapter.animateTo(filteredModelList);
+                mRecyclerView.scrollToPosition(0);
+                return true;
+            }
+        });
+    }
+    private List<Patient> filter(List<Patient> peoples, String query) {
+
+        final List<Patient> filteredModelList = new ArrayList<>();
+        for (Patient people : peoples) {
+
+            final String nameEn = people.getName();
+            //final String desEn = people.getDescription().toLowerCase();
+            //final String name = people.getName();
+            //final String des = people.getDescription();
+            if (nameEn.contains(query)) {
+
+                filteredModelList.add(people);
+            }
+        }
+        return filteredModelList;
+    }
+
     public static final String POSITION = "position";
     public static final int FRAGMENT_SINGLE=0;
     public static final int FRAGMENT_MUTI=1;

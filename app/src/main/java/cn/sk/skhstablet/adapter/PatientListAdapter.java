@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cn.sk.skhstablet.R;
@@ -97,6 +98,62 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         this.mOnItemLongClickListener = listener;
         Log.e("longclick","text2");
     }
+    public void setFilter(List<Patient> peoples) {
+        mDatas = new ArrayList<>();
+        mDatas.addAll(peoples);
+        notifyDataSetChanged();
+    }
+    public void animateTo(List<Patient> peoples) {
+        applyAndAnimateRemovals(peoples);
+        applyAndAnimateAdditions(peoples);
+        applyAndAnimateMovedItems(peoples);
+    }
+    private void applyAndAnimateRemovals(List<Patient> peoples) {
+        for (int i = mDatas.size() - 1; i >= 0; i--) {
+            final Patient people = mDatas.get(i);
+            if (!peoples.contains(people)) {
+                removeItem(i);
+            }
+        }
+    }
+    private void applyAndAnimateAdditions(List<Patient> peoples) {
+        for (int i = 0, count = peoples.size(); i < count; i++) {
+            final Patient people = mDatas.get(i);
+            if (!mDatas.contains(people)) {
+                addItem(i, people);
+            }
+        }
+    }
+
+    private void applyAndAnimateMovedItems(List<Patient> peoples) {
+        for (int toPosition = peoples.size() - 1; toPosition >= 0; toPosition--) {
+            final Patient people = peoples.get(toPosition);
+            final int fromPosition = mDatas.indexOf(people);
+            if (fromPosition >= 0 && fromPosition != toPosition) {
+                moveItem(fromPosition, toPosition);
+            }
+        }
+    }
+
+
+    public Patient removeItem(int position) {
+        final Patient people = mDatas.remove(position);
+        notifyItemRemoved(position);
+        return people;
+    }
+
+
+    public void addItem(int position, Patient people) {
+        mDatas.add(position, people);
+        notifyItemInserted(position);
+    }
+
+    public void moveItem(int fromPosition, int toPosition) {
+        final Patient people = mDatas.remove(fromPosition);
+        mDatas.add(toPosition, people);
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
     public class PatientListHolder extends RecyclerView.ViewHolder
     {
 

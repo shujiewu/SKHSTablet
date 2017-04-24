@@ -21,9 +21,9 @@ import cn.sk.skhstablet.utlis.Utils;
  * Created by ldkobe on 2017/4/18.
  */
 
-public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.MutiMonitorHolder> implements View.OnClickListener{
+public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.MutiMonitorHolder>{
     List<PatientDetail> patientDetailList;
-    private OnRecyclerViewItemClickListener mOnItemClickListener = null;
+    private OnRecyclerViewItemLongClickListener mOnItemLongClickListener = null;
     Context context;
     public MutiMonitorAdapter(Context context, List<PatientDetail> datas)
     {
@@ -34,23 +34,37 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     public MutiMonitorHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         View view =  LayoutInflater.from(parent.getContext()).inflate(R.layout.card_patient_view, parent, false);
-        view.setOnClickListener(this);
+        //view.setOnClickListener(this);
         return new MutiMonitorHolder(context,view);
     }
-    @Override
+    /*@Override
     public void onClick(View v) {
         if (mOnItemClickListener != null) {
             //注意这里使用getTag方法获取数据
             mOnItemClickListener.onItemClick(v,(String)v.getTag());
         }
-    }
-    public void setOnItemClickListener(OnRecyclerViewItemClickListener listener) {
-        this.mOnItemClickListener = listener;
+    }*/
+    public void setOnItemLongClickListener(OnRecyclerViewItemLongClickListener listener) {
+        this.mOnItemLongClickListener = listener;
     }
     @Override
     public void onBindViewHolder(MutiMonitorHolder holder, int position) {
         holder.bind(holder, patientDetailList.get(position));
         holder.itemView.setTag(patientDetailList.get(position).getName());
+
+        holder.itemView.setOnLongClickListener(view -> {
+            view.setPressed(true);
+            view.postDelayed(() -> {
+                view.setPressed(false);
+                //callback.onClick(holder.getAdapterPosition());
+            }, 200);
+            if (mOnItemLongClickListener != null) {
+                //注意这里使用getTag方法获取数据
+                mOnItemLongClickListener.onItemLongClick(view,(String)view.getTag());
+            }
+            //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
+            return true;
+        });
     }
     @Override
     public int getItemCount()
@@ -102,7 +116,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
             recyclerPhyParaView.addItemDecoration(itemDecorator);
         }
     }
-    public static interface OnRecyclerViewItemClickListener {
-        void onItemClick(View view , String data);
+    public static interface OnRecyclerViewItemLongClickListener {
+        void onItemLongClick(View view , String data);
     }
 }

@@ -42,18 +42,18 @@ public class MutiMonitorFragment extends Fragment {
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
         recyclerView.setAdapter(mutiMonitorAdapter = new MutiMonitorAdapter(getActivity(),mDatas));
 
-        mutiMonitorAdapter.setOnItemClickListener(new MutiMonitorAdapter.OnRecyclerViewItemClickListener(){
+        mutiMonitorAdapter.setOnItemLongClickListener(new MutiMonitorAdapter.OnRecyclerViewItemLongClickListener(){
             @Override
-            public void onItemClick(View view , String data){
+            public void onItemLongClick(View view , String data){
                 //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
                 MainActivity mainActivity=(MainActivity) getActivity();
-                view.setPressed(true);
-                view.postDelayed(() -> {
+             //   view.setPressed(true);
+            //    view.postDelayed(() -> {
                     view.setPressed(false);
-                    mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
-                    //callback.onClick(holder.getAdapterPosition());
-                }, 200);
 
+                    //callback.onClick(holder.getAdapterPosition());
+            //    }, 200);
+                mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
             }
         });
         return view;
