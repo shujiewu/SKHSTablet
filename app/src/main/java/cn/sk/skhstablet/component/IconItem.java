@@ -5,7 +5,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.RelativeLayout;
 
-import cn.sk.skhstablet.BorderActivity;
+import cn.sk.skhstablet.ui.activity.BorderActivity;
 import cn.sk.skhstablet.utlis.Utils;
 
 public class IconItem extends MenuItem {

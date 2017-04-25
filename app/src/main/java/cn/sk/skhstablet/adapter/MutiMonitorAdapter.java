@@ -22,9 +22,13 @@ import cn.sk.skhstablet.utlis.Utils;
  */
 
 public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.MutiMonitorHolder>{
-    List<PatientDetail> patientDetailList;
+    public List<PatientDetail> patientDetailList;
     private OnRecyclerViewItemLongClickListener mOnItemLongClickListener = null;
     Context context;
+    public MutiMonitorAdapter(List<PatientDetail> datas)
+    {
+        patientDetailList=datas;
+    }
     public MutiMonitorAdapter(Context context, List<PatientDetail> datas)
     {
         this.context=context;
@@ -33,6 +37,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     @Override
     public MutiMonitorHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
+        context=parent.getContext();
         View view =  LayoutInflater.from(parent.getContext()).inflate(R.layout.card_patient_view, parent, false);
         //view.setOnClickListener(this);
         return new MutiMonitorHolder(context,view);

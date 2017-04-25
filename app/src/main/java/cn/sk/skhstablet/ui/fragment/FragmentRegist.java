@@ -1,4 +1,4 @@
-package cn.sk.skhstablet.fragment;
+package cn.sk.skhstablet.ui.fragment;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -20,6 +20,9 @@ import org.xutils.x;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.component.EditTextWithDel;
 import cn.sk.skhstablet.component.PaperButton;
+import cn.sk.skhstablet.presenter.IChangekeyPresenter;
+import cn.sk.skhstablet.presenter.impl.ChangeKeyPresenterImpl;
+import cn.sk.skhstablet.ui.base.BaseFragment;
 import cn.sk.skhstablet.utlis.CheckUtils;
 import cn.sk.skhstablet.utlis.Tools;
 
@@ -32,7 +35,7 @@ import cn.bmob.v3.listener.RequestSMSCodeListener;
 import cn.bmob.v3.listener.SaveListener;
 */
 @ContentView(R.layout.fragment_regist)
-public class FragmentRegist extends BaseFragment  {
+public class FragmentRegist extends BaseFragment<ChangeKeyPresenterImpl> implements IChangekeyPresenter.View{
 @ViewInject(R.id.next)
 PaperButton nextBt;
     @ViewInject(R.id.userpassword)
@@ -282,6 +285,20 @@ PaperButton nextBt;
         if(timer!=null){
             timer.cancel();
         }
+    }
+    @Override
+    public void refreshView(Boolean mData) {
+
+    }
+
+    @Override
+    protected void initInject() {
+
+    }
+
+    @Override
+    protected void loadData() {
+
     }
 }
 	

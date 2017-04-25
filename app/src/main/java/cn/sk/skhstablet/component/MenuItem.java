@@ -11,7 +11,7 @@ import android.view.animation.BounceInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.RelativeLayout;
 
-import cn.sk.skhstablet.BorderActivity;
+import cn.sk.skhstablet.ui.activity.BorderActivity;
 import cn.sk.skhstablet.utlis.Utils;
 
 public abstract class MenuItem extends RelativeLayout{

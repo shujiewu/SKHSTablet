@@ -78,4 +78,11 @@
     <color name="blue_btn_bg_pressed_color">#96BFD2</color>
     <color name="float_transparent">#66000000</color>
     <color name="button_text_color">#FFFFFF</color>
+
+
+
+    <!--页面背景的颜色-->
+    <color name="colorPageBg">#f2f4f5</color>
+    <!--tab标签栏文字的颜色-->
+    <color name="colorTabText">#585858</color>
 </resources>

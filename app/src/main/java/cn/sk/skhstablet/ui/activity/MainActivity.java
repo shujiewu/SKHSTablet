@@ -1,25 +1,21 @@
-package cn.sk.skhstablet;
+package cn.sk.skhstablet.ui.activity;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nineoldandroids.animation.ObjectAnimator;
 import com.nineoldandroids.view.ViewHelper;
@@ -28,13 +24,16 @@ import com.tapadoo.alerter.Alerter;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.PatientListAdapter;
 import cn.sk.skhstablet.component.IconItem;
-import cn.sk.skhstablet.component.MenuItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
-import cn.sk.skhstablet.fragment.MutiMonitorFragment;
-import cn.sk.skhstablet.fragment.SingleMonitorFragment;
+import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
+import cn.sk.skhstablet.ui.base.BaseFragment;
+import cn.sk.skhstablet.ui.fragment.MutiMonitorFragment;
+import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
 import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientList;
 import cn.sk.skhstablet.utlis.Utils;
@@ -54,7 +53,10 @@ public class MainActivity extends BorderActivity {
     final  int LOG_OUT=10;
     public final int CLOSE_SINGLE=11;
     private List<Patient> mDatas;
+
+
     private PatientListAdapter patientListAdapter;
+
     SearchView searchView;
     private FragmentManager fm;
     private FragmentTransaction ft;
@@ -105,7 +107,7 @@ public class MainActivity extends BorderActivity {
             }
         });
 
-        fm = getFragmentManager();
+        fm = getSupportFragmentManager();;
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
         initSearchView();
@@ -374,58 +376,4 @@ public class MainActivity extends BorderActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
-    /*class HomeAdapter extends RecyclerView.Adapter<MyViewHolder>
-    {
-
-        @Override
-        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
-        {
-            View view =  LayoutInflater.from(parent.getContext()).inflate(R.layout.item_patient_view, parent, false);
-            return new MyViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(MyViewHolder holder, int position)
-        {
-            MyViewHolder.bind(holder, mDatas.get(position));
-            holder.itemView.setOnClickListener(view -> {
-                view.setPressed(true);
-                view.postDelayed(() -> {
-                    view.setPressed(false);
-                    //callback.onClick(holder.getAdapterPosition());
-                }, 200);
-            });
-        }
-
-        @Override
-        public int getItemCount()
-        {
-            return mDatas.size();
-        }
-
-
-    }*/
 }
-/*class MyViewHolder extends RecyclerView.ViewHolder
-{
-
-    TextView name;
-    TextView rfid;
-    TextView idcard;
-    TextView gender;
-
-    public MyViewHolder(View view) {
-        super(view);
-        name = (TextView) view.findViewById(R.id.name);
-        rfid = (TextView) view.findViewById(R.id.rfid);
-        idcard = (TextView) view.findViewById(R.id.idcard);
-        gender=(TextView) view.findViewById(R.id.gender);
-    }
-
-    public static void bind(MyViewHolder viewHolder, Patient patient) {
-        viewHolder.name.setText(patient.getName());
-        viewHolder.rfid.setText(patient.getRfid());
-        viewHolder.idcard.setText(patient.getIdcard());
-        viewHolder.gender.setText(patient.getGender());
-    }
-}*/

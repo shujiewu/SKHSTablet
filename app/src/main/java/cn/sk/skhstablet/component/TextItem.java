@@ -6,7 +6,7 @@ import android.graphics.Typeface;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import cn.sk.skhstablet.BorderActivity;
+import cn.sk.skhstablet.ui.activity.BorderActivity;
 import cn.sk.skhstablet.utlis.Utils;
 
 public class TextItem extends MenuItem {

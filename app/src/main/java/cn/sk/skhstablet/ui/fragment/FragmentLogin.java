@@ -1,4 +1,4 @@
-package cn.sk.skhstablet.fragment;
+package cn.sk.skhstablet.ui.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,12 +19,14 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
-import cn.sk.skhstablet.MainActivity;
+import cn.sk.skhstablet.presenter.ILoginPresenter;
+import cn.sk.skhstablet.presenter.impl.LoginPresenterImpl;
+import cn.sk.skhstablet.ui.activity.MainActivity;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.component.EditTextWithDel;
 import cn.sk.skhstablet.component.PaperButton;
+import cn.sk.skhstablet.ui.base.BaseFragment;
 import cn.sk.skhstablet.utlis.CheckUtils;
-import cn.sk.skhstablet.utlis.Tools;
 
 //import cn.cqu.sk.HomeActivity;
 //import cn.cqu.sk.UserNameActivity;
@@ -36,7 +37,7 @@ import cn.bmob.v3.listener.LogInListener;
 import cn.bmob.v3.listener.SaveListener;
 */
 @ContentView(R.layout.fragment_login)
-public class FragmentLogin extends BaseFragment  {
+public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements ILoginPresenter.View  {
     @ViewInject(R.id.userph)
     EditTextWithDel userphone;
     @ViewInject(R.id.userpass)
@@ -65,10 +66,15 @@ public class FragmentLogin extends BaseFragment  {
         return x.view().inject(this,inflater,container);
     }
 
+
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        initInject();
+        if (mPresenter!=null){
+            mPresenter.setView(this);}
         initLogin();
         textListener();
 
@@ -194,6 +200,28 @@ public class FragmentLogin extends BaseFragment  {
 
 
 
+
+    }
+
+    @Override
+    public void refreshView(Boolean mData) {
+        if(mData==true)
+        {
+            Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
+            getActivity().overridePendingTransition(R.anim.fade,
+                    R.anim.my_alpha_action);
+        }
+
+    }
+
+    @Override
+    protected void initInject() {
+
+    }
+
+    @Override
+    protected void loadData() {
 
     }
 }

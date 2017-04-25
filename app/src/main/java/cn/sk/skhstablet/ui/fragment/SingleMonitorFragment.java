@@ -1,4 +1,4 @@
-package cn.sk.skhstablet.fragment;
+package cn.sk.skhstablet.ui.fragment;
 
 import android.app.Fragment;
 import android.graphics.Color;
@@ -12,25 +12,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import cn.sk.skhstablet.MainActivity;
+import java.util.List;
+
+import cn.sk.skhstablet.presenter.ISingleMonPresenter;
+import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
+import cn.sk.skhstablet.ui.activity.MainActivity;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.DevParaChangeAdapter;
 import cn.sk.skhstablet.adapter.ExercisePlanAdapter;
 import cn.sk.skhstablet.adapter.PatientParaAdapter;
-import cn.sk.skhstablet.adapter.SportDevParaAdapter;
-import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
+import cn.sk.skhstablet.ui.base.BaseFragment;
 
 /**
  * Created by ldkobe on 2017/4/18.
  */
 
-public class SingleMonitorFragment extends Fragment {
+public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> implements ISingleMonPresenter.View {
     private RecyclerView rySportParaView;
     private RecyclerView ryPhyParaView;
     private PatientDetail patientDetail;
@@ -104,5 +106,20 @@ public class SingleMonitorFragment extends Fragment {
       //  TextItem textItem = new TextItem(mainActivity, mainActivity.CLOSE_SINGLE, "取消监控", Color.parseColor("#1E88E5"));
       //  mainActivity.addRightTopItem(textItem);
         return view;
+    }
+
+    @Override
+    protected void initInject() {
+
+    }
+
+    @Override
+    protected void loadData() {
+
+    }
+
+    @Override
+    public void refreshView(List<PatientDetail> mData) {
+
     }
 }
