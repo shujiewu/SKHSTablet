@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,6 +53,49 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
       //  recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),1));
        // recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL,false));
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
+        /*{
+            @Override
+            public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state, int widthSpec, int heightSpec) {
+                super.onMeasure(recycler, state, widthSpec, heightSpec);
+                int measuredWidth = recyclerView.getMeasuredWidth();
+                int measuredHeight = recyclerView.getMeasuredHeight();
+                Log.e("menseh", String.valueOf(measuredHeight));
+                Log.e("mensw", String.valueOf(measuredWidth ));
+                int myMeasureHeight = 0;
+                int count = state.getItemCount();
+                Log.e("mensw", String.valueOf(count));
+           /*     for (int i = 0; i < count; i++) {
+                    View view = recycler.getViewForPosition(i);
+                    if (view != null) {
+                        /*if (myMeasureHeight < measuredHeight && i % 2 == 0) {
+                            RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
+                            int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
+                                    getPaddingLeft() + getPaddingRight(), p.width);
+                            int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
+                                    getPaddingTop() + getPaddingBottom(), p.height);
+                            view.measure(childWidthSpec, childHeightSpec);
+                            myMeasureHeight += view.getMeasuredHeight() + p.bottomMargin + p.topMargin;
+                        }
+                        RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
+                        int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
+                                getPaddingLeft() + getPaddingRight(), p.width);
+                        int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
+                                getPaddingTop() + getPaddingBottom(), p.height);
+                        view.measure(childWidthSpec, childHeightSpec);
+                        myMeasureHeight += view.getMeasuredHeight() + p.bottomMargin + p.topMargin;
+                        recycler.recycleView(view);
+                    }
+                }
+                  //DisplayMetrics  dm = new DisplayMetrics();
+                  //getWindowManager().getDefaultDisplay().getMetrics(dm);
+                   int screenHeight = getActivity().getWindowManager().getDefaultDisplay().getHeight();
+                Log.e("mese",String.valueOf(screenHeight));
+//                    Log.i("Height", "" + Math.min(measuredHeight, myMeasureHeight));
+                //myMeasureHeight=
+                setMeasuredDimension(measuredWidth,screenHeight);
+            }
+
+        });*/
         initInject();
         recyclerView.setAdapter(mutiMonitorAdapter);
 

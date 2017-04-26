@@ -70,7 +70,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mDatas=new ArrayList<>();
         initInject();
         if (mPresenter!=null){
             mPresenter.setView(this);}
@@ -127,12 +127,14 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         fm = getSupportFragmentManager();;
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
-        initSearchView();
 
+        initSearchView();
         loadData();
+
     }
     private void initSearchView()
     {
+
         searchView=(SearchView)findViewById(R.id.searchView);
         int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
         //searchView.setQueryHint("搜索");
@@ -405,7 +407,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
     @Override
     public void refreshView(List<Patient> mData) {
-        patientListAdapter.mDatas=mData;
+        mDatas=mData;
+        patientListAdapter.mDatas= mDatas;
         patientListAdapter.notifyDataSetChanged();
     }
     void loadData()
