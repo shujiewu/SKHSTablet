@@ -15,6 +15,10 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
+import cn.sk.skhstablet.injector.module.fragment.SingleMonitorModule;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
 import cn.sk.skhstablet.ui.activity.MainActivity;
@@ -36,9 +40,15 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     private RecyclerView rySportParaView;
     private RecyclerView ryPhyParaView;
     private PatientDetail patientDetail;
-    private DevParaChangeAdapter devParaChangeAdapter;
+    @Inject
+    public DevParaChangeAdapter devParaChangeAdapter;
+    @Inject
+    public PatientParaAdapter patientParaAdapter;
+    @Inject
+    public  ExercisePlanAdapter exercisePlanAdapter;
+
     private MainActivity mainActivity;
-    private ExpandableListView elvExPlaen;
+    private ExpandableListView elvExPlan;
     TextView name;
     TextView id;
     TextView dev;
@@ -52,29 +62,25 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        patientDetail= PatientDetailList.PATIENTS.get(0);
+
         view = inflater.inflate(R.layout.fragment_single_monitor, container,false);
         //View subLayout1 = view.findViewById(R.id.sPatientDetail);
+        initInject();
+        if (mPresenter!=null){
+            mPresenter.setView(this);}
+
         mainActivity=(MainActivity) getActivity();
         name = (TextView) view.findViewById(R.id.sname);
         id = (TextView) view.findViewById(R.id.sid);
         dev = (TextView) view.findViewById(R.id.sdev);
         percent=(TextView) view.findViewById(R.id.spercent);
 
-        name.setText(patientDetail.getName());
-        id.setText(patientDetail.getId());
-        dev.setText(patientDetail.getDev());
-        percent.setText(patientDetail.getPercent());
 
         rySportParaView = (RecyclerView) view.findViewById(R.id.sry_sport_para);
-        ryPhyParaView=(RecyclerView)view.findViewById(R.id.sry_phy_para);
         rySportParaView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        rySportParaView.setAdapter(devParaChangeAdapter=new DevParaChangeAdapter(patientDetail.getSportDevName(),patientDetail.getSportDevValue()));
+        rySportParaView.setAdapter(devParaChangeAdapter);
         TracksItemDecorator itemDecorator = new TracksItemDecorator(1);
         rySportParaView.addItemDecoration(itemDecorator);
-
-        itemDecorator = new TracksItemDecorator(10);
-        ryPhyParaView.addItemDecoration(itemDecorator);
         devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
             @Override
             public void SaveEdit(int position, String string) {
@@ -89,37 +95,69 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         }
         );
 
-
+        ryPhyParaView=(RecyclerView)view.findViewById(R.id.sry_phy_para);
+        itemDecorator = new TracksItemDecorator(10);
+        ryPhyParaView.addItemDecoration(itemDecorator);
         ryPhyParaView.setLayoutManager(new GridLayoutManager(getActivity(),2));
-        ryPhyParaView.setAdapter(new PatientParaAdapter(patientDetail.getPhyDevName(),patientDetail.getPhyDevValue()));
+        ryPhyParaView.setAdapter(patientParaAdapter);
 
-        elvExPlaen = (ExpandableListView) view.findViewById(R.id.elv_exercise_plan);
-
-        ExercisePlanAdapter expandableListAdapter = new ExercisePlanAdapter(getActivity());
-        elvExPlaen.setAdapter(expandableListAdapter);
-        for(int i = 0; i < expandableListAdapter.getGroupCount(); i++){
-            elvExPlaen.expandGroup(i);
-        }
+        elvExPlan = (ExpandableListView) view.findViewById(R.id.elv_exercise_plan);
+        //exercisePlanAdapter = new ExercisePlanAdapter();
+        elvExPlan.setAdapter(exercisePlanAdapter);
+       // for(int i = 0; i < exercisePlanAdapter.getGroupCount(); i++){
+       //     elvExPlan.expandGroup(i);
+       // }
 
       //  IconItem iconItem = new IconItem(mainActivity, mainActivity.CLOSE_SINGLE , R.drawable.close_pushcha);
       //  mainActivity.addRightTopItem(iconItem);
       //  TextItem textItem = new TextItem(mainActivity, mainActivity.CLOSE_SINGLE, "取消监控", Color.parseColor("#1E88E5"));
       //  mainActivity.addRightTopItem(textItem);
+
+        loadData();
         return view;
     }
 
     @Override
     protected void initInject() {
-
+        DaggerSingleMonitorComponent.builder()
+                .singleMonitorModule(new SingleMonitorModule())
+                .build().injectSingleMonitor(this);
     }
 
     @Override
     protected void loadData() {
+        mPresenter.fetchExercisePlan();
+        mPresenter.fetchPatientDetailData();
+    }
+
+    @Override
+    public void refreshView(PatientDetail mData) {
+
+
+        patientDetail= PatientDetailList.PATIENTS.get(0);
+        patientParaAdapter.phyDevName=patientDetail.getPhyDevName();
+        patientParaAdapter.phyDevValue=patientDetail.getPhyDevValue();
+        patientParaAdapter.notifyDataSetChanged();
+
+        devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
+        devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
+        devParaChangeAdapter.notifyDataSetChanged();
+
+        name.setText(patientDetail.getName());
+        id.setText(patientDetail.getId());
+        dev.setText(patientDetail.getDev());
+        percent.setText(patientDetail.getPercent());
 
     }
 
     @Override
-    public void refreshView(List<PatientDetail> mData) {
-
+    public void refreshExercisePlan(List<String> armTypes,List<List<String>> arms) {
+        exercisePlanAdapter.armTypes=armTypes;
+        exercisePlanAdapter.arms=arms;
+        exercisePlanAdapter.notifyDataSetChanged();
+        for(int i = 0; i < exercisePlanAdapter.getGroupCount(); i++){
+            elvExPlan.collapseGroup(i);
+            elvExPlan.expandGroup(i);
+        }
     }
 }

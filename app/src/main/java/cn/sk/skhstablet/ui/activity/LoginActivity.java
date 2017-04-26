@@ -10,8 +10,8 @@ import android.view.WindowManager;
 
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.TabViewPagerAdapter;
+import cn.sk.skhstablet.ui.fragment.FragmentChangeKey;
 import cn.sk.skhstablet.ui.fragment.FragmentLogin;
-import cn.sk.skhstablet.ui.fragment.FragmentRegist;
 import cn.sk.skhstablet.ui.base.BaseActivity;
 
 public class LoginActivity extends BaseActivity {
@@ -24,6 +24,12 @@ public class LoginActivity extends BaseActivity {
         setupViewPager();
 
     }
+
+    @Override
+    protected void initInject() {
+
+    }
+
     //设置tab下的viewpager
     private void setupViewPager() {
 
@@ -54,7 +60,7 @@ public class LoginActivity extends BaseActivity {
     private void setupViewPager(ViewPager viewPager) {
         TabViewPagerAdapter adapter = new TabViewPagerAdapter(getSupportFragmentManager());
         adapter.addFrag(new FragmentLogin(), "登录");
-        adapter.addFrag(new FragmentRegist(), "修改密码");
+        adapter.addFrag(new FragmentChangeKey(), "修改密码");
         viewPager.setAdapter(adapter);
     }
 

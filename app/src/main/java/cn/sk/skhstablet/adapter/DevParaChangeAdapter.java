@@ -23,8 +23,8 @@ import cn.sk.skhstablet.model.PatientDetail;
 
 public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdapter.DevParaChangeHolder>{
 
-    List<String> sportDevName;
-    List<String> sportDevValue;
+    public List<String> sportDevName;
+    public List<String> sportDevValue;
     private SaveEditListener mOnEditChangeListener = null;
 
     public DevParaChangeAdapter(List<String> sportDevName, List<String> sportDevValue)
@@ -65,7 +65,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
             sbSportParaValue=(SeekBar)view.findViewById(R.id.changeSeekBarValue);
 
         }
-        public void bind(DevParaChangeHolder viewHolder, String paraName, String paraValue) {
+        public void bind(final DevParaChangeHolder viewHolder, String paraName, String paraValue) {
             viewHolder.tvSportParaName.setText(paraName);
             viewHolder.etSportParaValue.setText(paraValue);
             viewHolder.sbSportParaValue.setMax(50);

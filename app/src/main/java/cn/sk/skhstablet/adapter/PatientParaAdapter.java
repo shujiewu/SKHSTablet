@@ -16,8 +16,8 @@ import cn.sk.skhstablet.model.PatientDetail;
  */
 
 public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.PatientParaHolder> {
-    List<String> phyDevName;
-    List<String> phyDevValue;
+    public List<String> phyDevName;
+    public List<String> phyDevValue;
     public PatientParaAdapter(List<String> phyDevName,List<String> phyDevValue)
     {
         this.phyDevName=phyDevName;

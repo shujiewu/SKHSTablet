@@ -9,10 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        jackOptions {
-            enabled true
-            additionalParameters('jack.incremental': 'true')
-        }
+
     }
     buildTypes {
         release {
@@ -20,15 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        encoding ='utf-8'
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 
-    dexOptions {
-        javaMaxHeapSize '4096m'
-    }
 }
 
 dependencies {

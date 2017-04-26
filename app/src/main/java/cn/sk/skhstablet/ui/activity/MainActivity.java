@@ -25,11 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import javax.inject.Inject;
+
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.PatientListAdapter;
 import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
+import cn.sk.skhstablet.injector.component.fragment.DaggerMainActivtityComponent;
+import cn.sk.skhstablet.injector.module.activity.MainActivityModule;
+import cn.sk.skhstablet.presenter.IPatientListPresenter;
 import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import cn.sk.skhstablet.ui.fragment.MutiMonitorFragment;
@@ -38,7 +43,7 @@ import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientList;
 import cn.sk.skhstablet.utlis.Utils;
 
-public class MainActivity extends BorderActivity {
+public class MainActivity extends BorderActivity implements IPatientListPresenter.View {
     private RecyclerView mRecyclerView;
     final int COPY = 0;
     final int PASTE = 1;
@@ -54,8 +59,8 @@ public class MainActivity extends BorderActivity {
     public final int CLOSE_SINGLE=11;
     private List<Patient> mDatas;
 
-
-    private PatientListAdapter patientListAdapter;
+    @Inject
+    public PatientListAdapter patientListAdapter;
 
     SearchView searchView;
     private FragmentManager fm;
@@ -66,7 +71,11 @@ public class MainActivity extends BorderActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mDatas= PatientList.PATIENTS;
+        initInject();
+        if (mPresenter!=null){
+            mPresenter.setView(this);}
+
+        //mDatas= PatientList.PATIENTS;
         IconItem iconItem2 = new IconItem(this,SHOWALL , R.drawable.messenger);
         addTopItem(iconItem2);
         iconItem2.show();
@@ -83,25 +92,33 @@ public class MainActivity extends BorderActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        mRecyclerView.setAdapter(patientListAdapter = new PatientListAdapter(mDatas));
+        mRecyclerView.setAdapter(patientListAdapter);
 
         TracksItemDecorator itemDecorator = new TracksItemDecorator(
                 getResources().getDimensionPixelSize(R.dimen.decoration_size));
         mRecyclerView.addItemDecoration(itemDecorator);
         patientListAdapter.setOnItemLongClickListener(new PatientListAdapter.OnPatientItemLongClickListener(){
             @Override
-            public void onItemLongClick(View view , String data){
+            public void onItemLongClick(final View view , String data){
                 //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
                 //MainActivity mainActivity=(MainActivity) getActivity();
                 view.setPressed(true);
                 //Toast.makeText(view.getContext(),"long click "+data,Toast.LENGTH_SHORT).show();
                 Snackbar.make(view, "开始监控"+data, Snackbar.LENGTH_LONG)
                         .show();
-                view.postDelayed(() -> {
+      /*         view.postDelayed(() -> {
                     view.setPressed(false);
                     hidePatientList();
                     showFragment(FRAGMENT_SINGLE);
                     //callback.onClick(holder.getAdapterPosition());
+                }, 200);*/
+                view.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        view.setPressed(false);
+                        hidePatientList();
+                        showFragment(FRAGMENT_SINGLE);
+                    }
                 }, 200);
 
             }
@@ -111,6 +128,8 @@ public class MainActivity extends BorderActivity {
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
         initSearchView();
+
+        loadData();
     }
     private void initSearchView()
     {
@@ -375,5 +394,22 @@ public class MainActivity extends BorderActivity {
             return false;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void initInject() {
+        DaggerMainActivtityComponent.builder()
+                .mainActivityModule(new MainActivityModule())
+                .build().injectMainActivity(this);
+    }
+
+    @Override
+    public void refreshView(List<Patient> mData) {
+        patientListAdapter.mDatas=mData;
+        patientListAdapter.notifyDataSetChanged();
+    }
+    void loadData()
+    {
+        mPresenter.fetchPatientListData();
     }
 }

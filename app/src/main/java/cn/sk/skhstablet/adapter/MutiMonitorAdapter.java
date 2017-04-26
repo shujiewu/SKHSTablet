@@ -57,18 +57,26 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         holder.bind(holder, patientDetailList.get(position));
         holder.itemView.setTag(patientDetailList.get(position).getName());
 
-        holder.itemView.setOnLongClickListener(view -> {
-            view.setPressed(true);
-            view.postDelayed(() -> {
-                view.setPressed(false);
-                //callback.onClick(holder.getAdapterPosition());
-            }, 200);
-            if (mOnItemLongClickListener != null) {
-                //注意这里使用getTag方法获取数据
-                mOnItemLongClickListener.onItemLongClick(view,(String)view.getTag());
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(final View view) {
+                view.setPressed(true);
+                view.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        view.setPressed(false);
+                    }
+                }, 200);
+
+                    //callback.onClick(holder.getAdapterPosition());
+
+                if (mOnItemLongClickListener != null) {
+                    //注意这里使用getTag方法获取数据
+                    mOnItemLongClickListener.onItemLongClick(view, (String) view.getTag());
+                }
+                //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
+                return true;
             }
-            //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
-            return true;
         });
     }
     @Override

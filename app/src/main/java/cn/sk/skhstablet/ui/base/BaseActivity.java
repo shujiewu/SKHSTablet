@@ -26,12 +26,13 @@ import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.receiver.NetworkStateReceiver;
 
 @SuppressLint({ "ResourceAsColor", "NewApi" })
-public abstract class BaseActivity extends AppCompatActivity{
+public abstract class BaseActivity<T extends BasePresenter> extends AppCompatActivity{
    // protected LoadingPage mLoadingPage;
    // @Inject
    // protected T mPresenter;
 
-
+    @Inject
+    protected T mPresenter;
     private Context mContext = this;
     private NetworkStateReceiver networkStateReceiver;
     private long preTime;
@@ -106,7 +107,7 @@ public abstract class BaseActivity extends AppCompatActivity{
         context.startActivity(intent);
     }
 
-
+    protected abstract void initInject();
 
 /*
     @Override

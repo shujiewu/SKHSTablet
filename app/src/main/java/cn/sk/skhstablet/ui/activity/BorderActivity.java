@@ -25,13 +25,16 @@ import java.util.HashMap;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.MenuItem;
+import cn.sk.skhstablet.presenter.IPatientListPresenter;
+import cn.sk.skhstablet.presenter.impl.PatientListPresenterImpl;
+import cn.sk.skhstablet.ui.base.BaseActivity;
 import cn.sk.skhstablet.utlis.Utils;
 
 /**
  * Created by ldkobe on 2017/4/17.
  */
 
-public abstract class BorderActivity extends FragmentActivity {
+public abstract class BorderActivity extends BaseActivity<PatientListPresenterImpl> {
     View contentView;
     LinearLayout containerTop;
     LinearLayout containerLeft;

@@ -16,6 +16,8 @@ import javax.inject.Inject;
 
 //import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 //mport cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
+//import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
+import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.MutiMonitorModule;
 import cn.sk.skhstablet.presenter.IMutiMonPresenter;
 import cn.sk.skhstablet.presenter.impl.MutiMonPresenterImpl;
@@ -49,7 +51,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
       //  recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),1));
        // recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL,false));
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
-
+        initInject();
         recyclerView.setAdapter(mutiMonitorAdapter);
 
         mutiMonitorAdapter.setOnItemLongClickListener(new MutiMonitorAdapter.OnRecyclerViewItemLongClickListener(){
@@ -57,16 +59,18 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
             public void onItemLongClick(View view , String data){
                 //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
                 MainActivity mainActivity=(MainActivity) getActivity();
-             //   view.setPressed(true);
-            //    view.postDelayed(() -> {
-                    view.setPressed(false);
+                //   view.setPressed(true);
+                //    view.postDelayed(() -> {
+                view.setPressed(false);
 
-                    //callback.onClick(holder.getAdapterPosition());
-            //    }, 200);
+                //callback.onClick(holder.getAdapterPosition());
+                //    }, 200);
                 mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
             }
         });
         loadData();
+
+
         return view;
     }
 

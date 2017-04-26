@@ -35,7 +35,7 @@ import cn.bmob.v3.listener.RequestSMSCodeListener;
 import cn.bmob.v3.listener.SaveListener;
 */
 @ContentView(R.layout.fragment_regist)
-public class FragmentRegist extends BaseFragment<ChangeKeyPresenterImpl> implements IChangekeyPresenter.View{
+public class FragmentChangeKey extends BaseFragment<ChangeKeyPresenterImpl> implements IChangekeyPresenter.View{
 @ViewInject(R.id.next)
 PaperButton nextBt;
     @ViewInject(R.id.userpassword)

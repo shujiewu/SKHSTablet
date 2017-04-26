@@ -42,51 +42,64 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     }
 
     @Override
-    public void onBindViewHolder(PatientListHolder holder, int position)
+    public void onBindViewHolder(final PatientListHolder holder, final int position)
     {
         holder.bind(holder, mDatas.get(position));
         holder.itemView.setTag( mDatas.get(position).getName());
-        holder.itemView.setOnClickListener(view -> {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                if(mDatas.get(position).getIdcard().equals("未选择"))
+                {
+                    Log.e("1","1");
+
+                    mDatas.get(position).setIdcard("已选择");
+                    holder.idcard.setText("已选择");
+                    //    holder.idcard.setTextColor(Color.parseColor("#FFAD5B"));
+                }
+                else if(mDatas.get(position).getIdcard().equals("已选择"))
+                {
+                    Log.e("2","2");
+                    mDatas.get(position).setIdcard("未选择");
+                    holder.idcard.setText("未选择");
+                    //    holder.idcard.setTextColor(Color.parseColor("#3F51B5"));
+                }
+
+                view.setPressed(true);
+                view.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        view.setPressed(false);
+                    }
+                }, 200);
+            }
+        });
             //int position1 = holder.getLayoutPosition();
            // Log.e("position1",String.valueOf(position1));
            // Log.e("position",String.valueOf(position));
-            if(mDatas.get(position).getIdcard().equals("未选择"))
-            {
-                Log.e("1","1");
 
-                mDatas.get(position).setIdcard("已选择");
-                holder.idcard.setText("已选择");
-            //    holder.idcard.setTextColor(Color.parseColor("#FFAD5B"));
-            }
-            else if(mDatas.get(position).getIdcard().equals("已选择"))
-            {
-                Log.e("2","2");
-                mDatas.get(position).setIdcard("未选择");
-                holder.idcard.setText("未选择");
-            //    holder.idcard.setTextColor(Color.parseColor("#3F51B5"));
-            }
+       holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+           @Override
+           public boolean onLongClick(final View view) {
+               view.setPressed(true);
+               view.postDelayed(new Runnable() {
+                   @Override
+                   public void run() {
+                       view.setPressed(false);
+                   }
+               },200);
 
-            view.setPressed(true);
-           view.postDelayed(() -> {
-                view.setPressed(false);
-                //callback.onClick(holder.getAdapterPosition());
-            }, 200);
-        });
-       holder.itemView.setOnLongClickListener(view -> {
-            view.setPressed(true);
-            view.postDelayed(() -> {
-                view.setPressed(false);
-                //callback.onClick(holder.getAdapterPosition());
-            }, 200);
-           Log.e("longclick","text1");
-           if (mOnItemLongClickListener != null) {
-               //注意这里使用getTag方法获取数据
-               mOnItemLongClickListener.onItemLongClick(view,(String)view.getTag());
-               Log.e("longclick","text");
+                   //callback.onClick(holder.getAdapterPosition());
+               Log.e("longclick", "text1");
+               if (mOnItemLongClickListener != null) {
+                   //注意这里使用getTag方法获取数据
+                   mOnItemLongClickListener.onItemLongClick(view, (String) view.getTag());
+                   Log.e("longclick", "text");
+               }
+               //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
+               return true;
            }
-            //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
-            return true;
-        });
+       });
     }
 
     @Override

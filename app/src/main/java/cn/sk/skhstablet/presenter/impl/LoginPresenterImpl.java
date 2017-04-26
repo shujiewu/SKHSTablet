@@ -1,5 +1,7 @@
 package cn.sk.skhstablet.presenter.impl;
 
+import javax.inject.Inject;
+
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ILoginPresenter;
 
@@ -11,5 +13,10 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
     @Override
     public void fetchStateData() {
         mView.refreshView(true);
+    }
+    @Inject
+    public LoginPresenterImpl()
+    {
+
     }
 }

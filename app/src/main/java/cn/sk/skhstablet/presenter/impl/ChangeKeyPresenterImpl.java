@@ -1,5 +1,7 @@
 package cn.sk.skhstablet.presenter.impl;
 
+import javax.inject.Inject;
+
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.IChangekeyPresenter;
 
@@ -10,6 +12,11 @@ import cn.sk.skhstablet.presenter.IChangekeyPresenter;
 public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.View> implements IChangekeyPresenter.Presenter {
     @Override
     public void fetchStateData() {
+
+    }
+    @Inject
+    public ChangeKeyPresenterImpl()
+    {
 
     }
 }

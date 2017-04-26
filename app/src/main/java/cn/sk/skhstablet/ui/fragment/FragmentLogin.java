@@ -19,6 +19,7 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
+import cn.sk.skhstablet.injector.component.fragment.DaggerLoginComponent;
 import cn.sk.skhstablet.presenter.ILoginPresenter;
 import cn.sk.skhstablet.presenter.impl.LoginPresenterImpl;
 import cn.sk.skhstablet.ui.activity.MainActivity;
@@ -159,10 +160,11 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 }*/
                 login_progress.setVisibility(View.VISIBLE);
                 login_progress.setVisibility(View.GONE);
-                Intent intent = new Intent(getActivity(), MainActivity.class);
+                /*Intent intent = new Intent(getActivity(), MainActivity.class);
                 startActivity(intent);
                 getActivity().overridePendingTransition(R.anim.fade,
-                        R.anim.my_alpha_action);
+                        R.anim.my_alpha_action);*/
+                loadData();
 
 /*
                 BmobUser.loginByAccount(getActivity(), phone, passwords, new LogInListener<MyUser>() {
@@ -217,12 +219,13 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
 
     @Override
     protected void initInject() {
-
+        DaggerLoginComponent.builder()
+                .build().injectLogin(this);
     }
 
     @Override
     protected void loadData() {
-
+        mPresenter.fetchStateData();
     }
 }
 	

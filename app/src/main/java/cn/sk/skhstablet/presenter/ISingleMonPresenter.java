@@ -9,9 +9,11 @@ import cn.sk.skhstablet.model.PatientDetail;
  */
 
 public interface ISingleMonPresenter {
-    interface View extends BaseView<List<PatientDetail>>{
+    interface View extends BaseView<PatientDetail>{
+        void refreshExercisePlan(List<String> armTypes,List<List<String>> arms);
     }
     interface Presenter{
         void fetchPatientDetailData();
+        void fetchExercisePlan();
     }
 }
