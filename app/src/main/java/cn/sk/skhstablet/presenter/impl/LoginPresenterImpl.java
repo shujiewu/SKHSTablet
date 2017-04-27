@@ -27,7 +27,7 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
                 //{
 
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(10);
                         sendVerify(0);
 
                     }catch (InterruptedException e) {
