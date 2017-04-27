@@ -12,12 +12,14 @@ import javax.inject.Inject;
 import cn.sk.skhstablet.component.LoadingPage;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.BaseView;
+import cn.sk.skhstablet.tcp.LifeSubscription;
+import cn.sk.skhstablet.tcp.Stateful;
 
 /**
  * Created by wyb on 2017/4/25.
  */
 
-public abstract class BaseFragment <P extends BasePresenter> extends Fragment{
+public abstract class BaseFragment <P extends BasePresenter> extends Fragment implements Stateful {
     @Inject
     protected P mPresenter;
 
@@ -119,4 +121,8 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment{
     }
     protected abstract void initInject();
     protected abstract void loadData();
+
+    @Override
+    public void setState(int state) {
+    }
 }

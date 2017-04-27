@@ -1,14 +1,16 @@
 package cn.sk.skhstablet.presenter;
 
 import cn.sk.skhstablet.app.AppConstants;
-import cn.sk.skhstablet.http.LifeSubscription;
-import cn.sk.skhstablet.http.Stateful;
-import cn.sk.skhstablet.http.utils.Callback;
+import cn.sk.skhstablet.tcp.LifeSubscription;
+import cn.sk.skhstablet.tcp.Stateful;
+import cn.sk.skhstablet.tcp.utils.Callback;
 import cn.sk.skhstablet.http.utils.HttpUtils;
 
 import java.util.List;
 
+import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import rx.Observable;
+import rx.functions.Action1;
 
 /**
  * Created by ldkobe on 2017/3/22.
@@ -26,9 +28,11 @@ public class BasePresenter<T extends BaseView> {
     }
 
     protected <T> void invoke(Observable<T> observable, Callback<T> callback) {
-        HttpUtils.invoke((LifeSubscription) mView, observable, callback);
+        TcpUtils.invoke(mView, observable, callback);
     }
-
+    protected <T> void invoke(Observable<T> observable, Action1<T> callback) {
+        TcpUtils.invoke(mView, observable, callback);
+    }
     /**
      * 给子类检查返回集合是否为空
      * 这样子做虽然耦合度高，但是接口都不是统一定的，我们没有什么更好的办法
