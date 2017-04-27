@@ -79,7 +79,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         rySportParaView = (RecyclerView) view.findViewById(R.id.sry_sport_para);
         rySportParaView.setLayoutManager(new LinearLayoutManager(getActivity()));
         rySportParaView.setAdapter(devParaChangeAdapter);
-        TracksItemDecorator itemDecorator = new TracksItemDecorator(1);
+        TracksItemDecorator itemDecorator = new TracksItemDecorator(10);
         rySportParaView.addItemDecoration(itemDecorator);
         devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
             @Override

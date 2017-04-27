@@ -1,6 +1,10 @@
 package cn.sk.skhstablet.presenter;
 
+import android.util.Log;
+
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.model.PatientDetail;
+import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.Stateful;
 import cn.sk.skhstablet.tcp.utils.Callback;
@@ -44,5 +48,30 @@ public class BasePresenter<T extends BaseView> {
                 ((Stateful) mView).setState(AppConstants.STATE_EMPTY);
             return;
         }
+    }
+
+    public void fetchVerifyState()
+    {
+        invoke(TcpUtils.receive(), new Callback<String>() {
+            @Override
+            public void onResponse(String data) {
+                Log.e("first",data);
+                if(data.equals("echo=> hello world!0"))
+                     mView.refreshView(data);
+                else if(data.equals("echo=> hello worldx!"))
+                {
+                  //  List<PatientDetail> mData = PatientDetailList.PATIENTS;
+                  //  mData.get(0).setName(data);
+                    PatientDetailList.PATIENTS.get(0).setName(data);
+                    //mView.refreshView(mData);
+                }
+            }
+        });
+        /*invoke(TcpUtils.receive(), new Action1<String>() {
+            @Override
+            public void call(String aVoid) {
+                System.out.println("send success!");
+            }
+        });*/
     }
 }

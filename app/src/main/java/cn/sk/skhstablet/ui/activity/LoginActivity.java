@@ -41,30 +41,36 @@ public class LoginActivity extends BaseActivity {
     }
     public void rxNettyServerTest() {
         TcpServer<String, String> server;
-        server = TcpServer.newServer(60000).<String, String>addChannelHandlerLast("string-decoder",
-                new Func0<ChannelHandler>() {
+        server = TcpServer.newServer(60000)
+                .<String, String>addChannelHandlerLast("string-decoder",
+                    new Func0<ChannelHandler>() {
+                        @Override
+                        public ChannelHandler call() {
+                            return new StringDecoder();
+                        }
+                    })
+                .<String, String>addChannelHandlerLast("string-encoder",
+                        new Func0<ChannelHandler>() {
+                        @Override
+                        public ChannelHandler call() {
+                            return new StringEncoder();
+                         }
+                    })
+                .start(new ConnectionHandler<String, String>() {
                     @Override
-                    public ChannelHandler call() {
-                        return new StringDecoder();
-                    }
-                }).<String, String>addChannelHandlerLast("string-encoder", new Func0<ChannelHandler>() {
-            @Override
-            public ChannelHandler call() {
-                return new StringEncoder();
-            }
-        }).start(new ConnectionHandler<String, String>() {
-            @Override
-            public Observable<Void> handle(Connection<String, String> newConnection) {
-                return newConnection.writeStringAndFlushOnEach(
-                        newConnection.getInput().map(new Func1<String, String>() {
-                            @Override
-                            public String call(String s) {
-                                System.out.println("receive:" + s);
-                                return "echo=> " + s;
-                            }
-                        }));
-            }
-        });
+                    public Observable<Void> handle(Connection<String, String> newConnection) {
+                        return newConnection.writeStringAndFlushOnEach(
+                            newConnection.getInput().map(
+                                    new Func1<String, String>() {
+                                    @Override
+                                    public String call(String s) {
+                                        System.out.println("receive:" + s);
+                                        return "echo=> " + s;
+                                    }}
+                            )
+                        );
+                     }
+                });
         server.awaitShutdown();
     }
 

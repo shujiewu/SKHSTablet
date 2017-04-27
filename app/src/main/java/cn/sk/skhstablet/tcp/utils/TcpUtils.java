@@ -65,34 +65,40 @@ public class TcpUtils {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {
-                TcpClient.newClient(url, port).<String, String>addChannelHandlerLast("decoder",
+                TcpClient.newClient(url, port)
+                        .<String, String>addChannelHandlerLast("decoder",
                         new Func0<ChannelHandler>() {
                             @Override
                             public ChannelHandler call() {
                                 return new StringDecoder();
                             }
-                        }).<String, String>addChannelHandlerLast("encoder", new Func0<ChannelHandler>() {
-                    @Override
-                    public ChannelHandler call() {
-                        return new StringEncoder();
-                    }
-                }).createConnectionRequest().subscribe(new Observer<Connection<String, String>>() {
-                    @Override
-                    public void onCompleted() {
+                        })
+                        .<String, String>addChannelHandlerLast("encoder",
+                        new Func0<ChannelHandler>() {
+                            @Override
+                            public ChannelHandler call() {
+                                return new StringEncoder();
+                            }
+
+                        })
+                        .createConnectionRequest()
+                        .subscribe(new Observer<Connection<String, String>>() {
+                            @Override
+                            public void onCompleted() {
                         subscriber.onCompleted();
                     }
 
-                    @Override
-                    public void onError(Throwable e) {
+                            @Override
+                            public void onError(Throwable e) {
                         subscriber.onError(e);
                     }
 
-                    @Override
-                    public void onNext(Connection<String, String> connection) {
-                        mConnection = connection;
-                        subscriber.onNext(true);
-                    }
-                });
+                            @Override
+                            public void onNext(Connection<String, String> connection) {
+                                mConnection = connection;
+                                subscriber.onNext(true);
+                            }
+                        });
             }
         });
     }

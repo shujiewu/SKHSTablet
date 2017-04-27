@@ -24,7 +24,7 @@
             android:id="@+id/paravalue1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:layout_weight="0.6"
             android:textColor="@color/textgreen"
             android:gravity="center"

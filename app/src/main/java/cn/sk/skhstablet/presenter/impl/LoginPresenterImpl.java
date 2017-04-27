@@ -18,24 +18,26 @@ import rx.functions.Action1;
 public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> implements ILoginPresenter.Presenter {
     @Override
     public void fetchStateData() {
+
         invoke(TcpUtils.connect("localhost", 60000), new Callback<Boolean>() {
             @Override
             public void onResponse(Boolean data) {
                 //mView.refreshView(data);
                 fetchVerifyState();
-                //for(int i=0;i<10;i++)
-                //{
+                //fetchVerifyState();
+                for(int i=0;i<10;i++)
+                {
 
                     try {
                         Thread.sleep(10);
-                        sendVerify(0);
+                        sendVerify(i);
 
                     }catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
-                //}
-
+                }
+                //mView.refreshView("121");
 
             }
         });
@@ -49,17 +51,17 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
             }
         });
     }
-    public void fetchVerifyState()
+    /*public void fetchVerifyState()
     {
         invoke(TcpUtils.receive(), new Callback<String>() {
             @Override
             public void onResponse(String data) {
                 Log.e("first",data);
-                if(data.equals("echo=> hello world!0"))
-                    mView.refreshView(true);
+                //if(data.equals("echo=> hello world!0"))
+                    mView.refreshView(data);
             }
         });
-    }
+    }*/
     @Inject
     public LoginPresenterImpl()
     {
