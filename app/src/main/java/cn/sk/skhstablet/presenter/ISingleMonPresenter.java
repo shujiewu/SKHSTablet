@@ -13,7 +13,7 @@ public interface ISingleMonPresenter {
         void refreshExercisePlan(List<String> armTypes,List<List<String>> arms);
     }
     interface Presenter{
-        void fetchPatientDetailData();
+        void fetchPatientDetailData(String ID);
         void fetchExercisePlan();
     }
 }

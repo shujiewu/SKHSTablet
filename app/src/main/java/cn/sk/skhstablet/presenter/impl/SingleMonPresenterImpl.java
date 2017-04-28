@@ -10,6 +10,8 @@ import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
+import cn.sk.skhstablet.tcp.utils.TcpUtils;
+import rx.functions.Action1;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -17,9 +19,10 @@ import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 
 public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.View> implements ISingleMonPresenter.Presenter {
     @Override
-    public void fetchPatientDetailData() {
-        PatientDetail patientDetail= PatientDetailList.PATIENTS.get(0);
-        mView.refreshView(patientDetail);
+    public void fetchPatientDetailData(String ID) {
+       // PatientDetail patientDetail= PatientDetailList.PATIENTS.get(0);
+       // mView.refreshView(patientDetail);
+        sendRequest(ID);
     }
 
     @Override
@@ -32,7 +35,15 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动4分钟", "第二段：以1米每秒的速度运动4分钟")));
         mView.refreshExercisePlan(armTypes,arms);
     }
-
+    public void sendRequest(String ID)
+    {
+        invoke(TcpUtils.send(ID), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send success!");
+            }
+        });
+    }
     @Inject
     public SingleMonPresenterImpl()
     {

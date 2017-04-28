@@ -206,19 +206,15 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     }
 
     @Override
-    public void refreshView(String mData) {
-        /*if(mData==true)
+    public void refreshView(Boolean mData) {
+        if(mData==true)
         {
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
             getActivity().overridePendingTransition(R.anim.fade,
                     R.anim.my_alpha_action);
-        }*/
+        }
         //userphone.setText(mData);
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        startActivity(intent);
-        getActivity().overridePendingTransition(R.anim.fade,
-                R.anim.my_alpha_action);
     }
 
     @Override

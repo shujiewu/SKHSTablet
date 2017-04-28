@@ -414,7 +414,7 @@ public abstract class BorderActivity extends BaseActivity<PatientListPresenterIm
         containerRightTop.removeAllViews();
         for(MenuItem menuItem : rightTopItems)
             containerRightTop.addView(menuItem);
-        configureTopAnimations();
+        configureRightTopAnimations();
 
     }
 

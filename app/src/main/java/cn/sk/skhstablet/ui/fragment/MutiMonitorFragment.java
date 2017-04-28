@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -19,16 +20,21 @@ import javax.inject.Inject;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 //mport cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.MutiMonitorModule;
 import cn.sk.skhstablet.presenter.IMutiMonPresenter;
 import cn.sk.skhstablet.presenter.impl.MutiMonPresenterImpl;
+import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.ui.activity.MainActivity;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.MutiMonitorAdapter;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.ui.base.BaseFragment;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by ldkobe on 2017/4/17.
@@ -39,7 +45,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
 
     @Inject
     MutiMonitorAdapter mutiMonitorAdapter;
-    private List<PatientDetail> mDatas;
+    private List<PatientDetail> mDatas=new ArrayList<>();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,13 +136,39 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
 
     @Override
     protected void loadData() {
+        if(mutiSubscription==null)
+        {
+            registerFetchResponse();
+        }
         mPresenter.fetchPatientDetailData();
     }
 
     @Override
     public void refreshView(List<PatientDetail> mData) {
-        mDatas=mData;
         mutiMonitorAdapter.patientDetailList=mDatas;
         mutiMonitorAdapter.notifyDataSetChanged();
+    }
+    private CompositeSubscription mutiSubscription;
+    public void registerFetchResponse()
+    {
+        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_DATA,PatientDetail.class)
+                .subscribe(new Action1<PatientDetail>() {
+                    @Override
+                    public void call(PatientDetail s) {
+                        mDatas.add(s);
+                        refreshView(mDatas);
+                    }
+                });
+        if (this.mutiSubscription == null) {
+            mutiSubscription = new CompositeSubscription();
+        }
+        mutiSubscription.add(mSubscription);
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (mutiSubscription != null &&  mutiSubscription.hasSubscriptions()) {
+            this. mutiSubscription.unsubscribe();
+        }
     }
 }

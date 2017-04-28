@@ -5,10 +5,13 @@ import android.util.Log;
 import javax.inject.Inject;
 import javax.security.auth.login.LoginException;
 
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ILoginPresenter;
+import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.utils.Callback;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
+import rx.Subscription;
 import rx.functions.Action1;
 
 /**
@@ -22,46 +25,33 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
         invoke(TcpUtils.connect("localhost", 60000), new Callback<Boolean>() {
             @Override
             public void onResponse(Boolean data) {
-                //mView.refreshView(data);
+                fetchData();
+                sendVerify();
                 fetchVerifyState();
-                //fetchVerifyState();
-                for(int i=0;i<10;i++)
-                {
-
-                    try {
-                        Thread.sleep(10);
-                        sendVerify(i);
-
-                    }catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                //mView.refreshView("121");
-
             }
         });
     }
-    public void sendVerify(int i)
+    public void sendVerify()
     {
-        invoke(TcpUtils.send("hello world!"+String.valueOf(i)), new Action1<Void>() {
+        invoke(TcpUtils.send("hello world!"), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
                 System.out.println("send success!");
             }
         });
     }
-    /*public void fetchVerifyState()
+    public void fetchVerifyState()
     {
-        invoke(TcpUtils.receive(), new Callback<String>() {
-            @Override
-            public void onResponse(String data) {
-                Log.e("first",data);
-                //if(data.equals("echo=> hello world!0"))
-                    mView.refreshView(data);
-            }
-        });
-    }*/
+        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        Log.e("login","succees1");
+                        mView.refreshView(s);
+
+                    }
+                });
+    }
     @Inject
     public LoginPresenterImpl()
     {

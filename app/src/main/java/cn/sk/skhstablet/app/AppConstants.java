@@ -14,4 +14,7 @@ public class AppConstants {
     public static final String KEY_API = "e6d6ec3ba2f9d7a3051a6c09f0524738";
 
     public static  final int WECHA_SEARCH = 1000;
+    public static  final int LOGIN_STATE=1001;
+    public static  final int MUTI_DATA=2000;
+    public static  final int SINGLE_DATA=3000;
 }

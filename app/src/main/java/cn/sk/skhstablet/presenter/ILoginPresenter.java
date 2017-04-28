@@ -5,7 +5,7 @@ package cn.sk.skhstablet.presenter;
  */
 
 public interface ILoginPresenter {
-    interface View extends BaseView<String>{
+    interface View extends BaseView<Boolean>{
     }
     interface Presenter{
         void fetchStateData();

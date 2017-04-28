@@ -17,10 +17,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.SingleMonitorModule;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
+import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.ui.activity.MainActivity;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.DevParaChangeAdapter;
@@ -31,6 +33,9 @@ import cn.sk.skhstablet.component.TracksItemDecorator;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.ui.base.BaseFragment;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by ldkobe on 2017/4/18.
@@ -53,11 +58,25 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     TextView id;
     TextView dev;
     TextView percent;
+    private String singleMonitorID;
+
+    public static SingleMonitorFragment newInstance(String singleMonitorID) {
+        SingleMonitorFragment newFragment = new SingleMonitorFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("singleMonitorID", singleMonitorID);
+        newFragment.setArguments(bundle);
+        return newFragment;
+    }
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
+        if (args != null) {
+            singleMonitorID = args.getString("singleMonitorID");
+            Log.e("single ID1",singleMonitorID);
+        }
+        Log.e("single ID1","1212");
     }
-
     View view;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -95,6 +114,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         }
         );
 
+
+
         ryPhyParaView=(RecyclerView)view.findViewById(R.id.sry_phy_para);
         itemDecorator = new TracksItemDecorator(10);
         ryPhyParaView.addItemDecoration(itemDecorator);
@@ -113,7 +134,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
       //  TextItem textItem = new TextItem(mainActivity, mainActivity.CLOSE_SINGLE, "取消监控", Color.parseColor("#1E88E5"));
       //  mainActivity.addRightTopItem(textItem);
 
-        loadData();
+        //loadData(singleMonitorID);
+        Log.e("single ID1","121");
         return view;
     }
 
@@ -126,15 +148,25 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     @Override
     protected void loadData() {
+
+    }
+
+
+    public void loadData(String ID) {
+        if(singleSubscription==null)
+        {
+            registerFetchResponse();
+        }
+//        Log.e("single ID",ID);
         mPresenter.fetchExercisePlan();
-        mPresenter.fetchPatientDetailData();
+        mPresenter.fetchPatientDetailData(ID);
     }
 
     @Override
     public void refreshView(PatientDetail mData) {
 
 
-        patientDetail= PatientDetailList.PATIENTS.get(0);
+        patientDetail= mData;
         patientParaAdapter.phyDevName=patientDetail.getPhyDevName();
         patientParaAdapter.phyDevValue=patientDetail.getPhyDevValue();
         patientParaAdapter.notifyDataSetChanged();
@@ -158,6 +190,29 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         for(int i = 0; i < exercisePlanAdapter.getGroupCount(); i++){
             elvExPlan.collapseGroup(i);
             elvExPlan.expandGroup(i);
+        }
+    }
+
+    private CompositeSubscription singleSubscription;
+    public void registerFetchResponse()
+    {
+        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_DATA,PatientDetail.class)
+                .subscribe(new Action1<PatientDetail>() {
+                    @Override
+                    public void call(PatientDetail s) {
+                        refreshView(s);
+                    }
+                });
+        if (this.singleSubscription == null) {
+            singleSubscription = new CompositeSubscription();
+        }
+        singleSubscription.add(mSubscription);
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (singleSubscription != null &&  singleSubscription.hasSubscriptions()) {
+            this. singleSubscription.unsubscribe();
         }
     }
 }

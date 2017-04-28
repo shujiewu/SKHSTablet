@@ -51,4 +51,6 @@ dependencies {
     // dagger2
     provided 'org.glassfish:javax.annotation:10.0-b28'
     compile 'io.reactivex:rxnetty-tcp:0.5.2'
+
+    compile 'cn.pedant.sweetalert:library:1.3'
 }

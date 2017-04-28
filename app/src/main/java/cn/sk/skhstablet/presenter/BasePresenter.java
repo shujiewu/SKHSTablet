@@ -58,14 +58,17 @@ public class BasePresenter<T extends BaseView> {
     public Action1<PatientDetail> onNextAction;
     public Observable<PatientDetail> onNextAction1;
     public Observable observable;
-    public void fetchVerifyState()
+    public void fetchData()
     {
         invoke(TcpUtils.receive(), new Callback<String>() {
             @Override
             public void onResponse(final String data) {
-                Log.e("first",data);
-                if(data.equals("echo=> hello world!0"))
-                     mView.refreshView(data);
+
+                if(data.equals("echo=> hello world!"))
+                {
+                    RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
+                    Log.e("login","succees");
+                }
                 else if(data.equals("echo=> hello worldx!"))
                 {
                   //  List<PatientDetail> mData = PatientDetailList.PATIENTS;
@@ -76,31 +79,18 @@ public class BasePresenter<T extends BaseView> {
                     //    PatientDetailList.PATIENTS.get(0).setName(data);
                     //    PatientDetailList.PATIENTS.get(1).setName(data);
                     Log.e("third",data);
-                    RxBus.getDefault().post(1, new PatientDetail("张er", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                    RxBus.getDefault().post(1, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                    /*onNextAction = new Action1<PatientDetail>() {
-                        // onNext()
-                        @Override
-                        public void call(PatientDetail s) {
-                            PatientDetailList.PATIENTS.get(0).setName(data);
-                        }
-                    };
-                    observable = Observable.create(new Observable.OnSubscribe<PatientDetail>() {
-                        @Override
-                        public void call(Subscriber<? super PatientDetail> subscriber) {
-                            subscriber.onNext(new PatientDetail("张er", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                            //subscriber.onNext("Hi");
-                            //subscriber.onNext("Aloha");
-                            //subscriber.onCompleted();
-                        }
-                    });*/
-                    //PatientDetailList.PATIENTS.get(0).setName(data);
-                    //PatientDetailList.PATIENTS.add(new PatientDetail("张er", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                   // }catch (InterruptedException e) {
-                    //    e.printStackTrace();
-                   // }
-
-                    //mView.refreshView(mData);
+                    RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                    RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                }
+                else if(data.equals("echo=> 张三"))
+                {
+                    Log.e("third",data);
+                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                }
+                else if(data.equals("echo=> 李四"))
+                {
+                    Log.e("third",data);
+                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("李四", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                 }
             }
         });

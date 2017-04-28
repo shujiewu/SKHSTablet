@@ -27,6 +27,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.PatientListAdapter;
 import cn.sk.skhstablet.component.IconItem;
@@ -58,7 +59,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     final  int LOG_OUT=10;
     public final int CLOSE_SINGLE=11;
     private List<Patient> mDatas;
-
+    public  final int CANCEL_SINGLE_MON=12;
     @Inject
     public PatientListAdapter patientListAdapter;
 
@@ -67,6 +68,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     private FragmentTransaction ft;
     private SingleMonitorFragment singleMonitorFragment;
     private MutiMonitorFragment mutiMonitorFragment;
+    private String singleMonitorID;
+    private String newSingleMonitorID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,14 +115,17 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     showFragment(FRAGMENT_SINGLE);
                     //callback.onClick(holder.getAdapterPosition());
                 }, 200);*/
+                newSingleMonitorID=data;
                 view.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         view.setPressed(false);
                         hidePatientList();
-                        showFragment(FRAGMENT_SINGLE);
+
+
                     }
                 }, 200);
+                showFragment(FRAGMENT_SINGLE);
 
             }
         });
@@ -200,6 +206,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             outState.putInt("patientshow",1);
         else
             outState.putInt("patientshow",0);
+        outState.putString("singleid",newSingleMonitorID);
         outState.putInt(POSITION, position);
         super.onSaveInstanceState(outState);
     }
@@ -209,7 +216,9 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         int show=savedInstanceState.getInt("menushow");
       //  if(show==1)
       //      findViewById(R.id.btn_menu).performClick();
+        newSingleMonitorID=savedInstanceState.getString("singleid");
         showFragment(savedInstanceState.getInt(POSITION));
+
         super.onRestoreInstanceState(savedInstanceState);
       //  int patientShow=savedInstanceState.getInt("patientshow");
       //  if(patientShow==1)
@@ -281,20 +290,35 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                  * 如果Fragment为空，就新建一个实例
                  * 如果不为空，就将它从栈中显示出来
                  */
+                if(!hasMenuItem(CANCEL_SINGLE_MON))
+                {
+                    TextItem textItem = new TextItem(this, this.CANCEL_SINGLE_MON, "取消监控", Color.parseColor("#1E88E5"));
+                    addRightTopItem(textItem);
+                }
+
                 if (singleMonitorFragment==null){
-                    singleMonitorFragment=new SingleMonitorFragment();
+                    singleMonitorFragment=SingleMonitorFragment.newInstance(newSingleMonitorID);
                     Log.e("TestA", "view == 2");
                     ft.add(R.id.contentView,singleMonitorFragment);
 
                 }else {
                     ft.show(singleMonitorFragment);
                 }
-              //  TextItem textItem = new TextItem(this, CLOSE_SINGLE, "取消监控", Color.parseColor("#1E88E5"));
-              //  addRightTopItem(textItem);
-                //MenuItem textItem2=getItemById(STARTMONITOR);
-                //textItem2.hide();
+                ft.commit();
+                fm.executePendingTransactions();
+
+                if(!newSingleMonitorID.equals(singleMonitorID))
+                {
+                    singleMonitorID=newSingleMonitorID;
+                    singleMonitorFragment.loadData(singleMonitorID);
+                }
                 break;
             case FRAGMENT_MUTI:
+                new Handler().post(new Runnable() {
+                    public void run() {
+                        removeAllRightTopItems();
+                    }
+                });
                 if (mutiMonitorFragment==null){
                     mutiMonitorFragment=new MutiMonitorFragment();
                     ft.add(R.id.contentView,mutiMonitorFragment);
@@ -302,16 +326,19 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 }else {
                     ft.show(mutiMonitorFragment);
                 }
-                if(hasMenuItem(SAVEEdit))
+                /*if(hasMenuItem(SAVEEdit))
                     removeRightTopItem(SAVEEdit);
+                if(hasMenuItem(CANCEL_SINGLE_MON))
+                    removeRightTopItem(CANCEL_SINGLE_MON);*/
+
                 //MenuItem textItem=getItemById(STARTMONITOR);
                 //textItem.show();
               //  removeRightTopItem(CLOSE_SINGLE);
-
+                ft.commit();
                 break;
         }
 
-        ft.commit();
+        //ft.commit();
     }
     @Override
     public void onAttachFragment(Fragment fragment){
@@ -319,6 +346,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         //当前的界面的保存状态，只是从新让新的Fragment指向了原本未被销毁的fragment，它就是onAttach方法对应的Fragment对象
         if(singleMonitorFragment == null && fragment instanceof SingleMonitorFragment){
             singleMonitorFragment = (SingleMonitorFragment)fragment;
+            Log.e("attach","single");
         }else if(mutiMonitorFragment == null && fragment instanceof MutiMonitorFragment){
             mutiMonitorFragment = (MutiMonitorFragment) fragment;
         }
@@ -387,6 +415,35 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                             }
                         })
                         .show();
+                break;
+            case SAVEEdit:
+                new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("提示")
+                        .setContentText("确定修改参数？")
+                        .setConfirmText("确定")
+                        .setCancelText("取消")
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                //sDialog.dismissWithAnimation();
+                                sDialog
+                                        .setTitleText("修改成功")
+                                        .setConfirmText("确定")
+                                        .setContentText("")
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                            }
+                        })
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                sDialog.cancel();
+                            }
+                        })
+                        .show();
+                break;
+            case CANCEL_SINGLE_MON:
+                showFragment(FRAGMENT_MUTI);
         }
     }
     @Override
