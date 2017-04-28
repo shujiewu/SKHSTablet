@@ -9,11 +9,11 @@ import java.util.List;
  */
 
 public class PatientDetailList {
-    static List<String> phyName=new ArrayList<String>(Arrays.asList("HR","SpO2","NIBR","RESP","test1","test2","test3"));
-    static List<String> phyValue=new ArrayList<String>(Arrays.asList("60","99","80/130","30","100","200","300"));
+    public static List<String> phyName=new ArrayList<String>(Arrays.asList("HR","SpO2","NIBR","RESP","test1","test2","test3"));
+    public static List<String> phyValue=new ArrayList<String>(Arrays.asList("60","99","80/130","30","100","200","300"));
 
-    static List<String> sportName=new ArrayList<String>(Arrays.asList("时间","距离","卡路里","速度","坡度"));
-    static List<String> sportValue=new ArrayList<String>(Arrays.asList("13","40","30","5","6"));
+    public static List<String> sportName=new ArrayList<String>(Arrays.asList("时间","距离","卡路里","速度","坡度"));
+    public static List<String> sportValue=new ArrayList<String>(Arrays.asList("13","40","30","5","6"));
     public final static List<PatientDetail> PATIENTS = new ArrayList<PatientDetail>(){{
         add(new PatientDetail("张三", "1", "跑步机","10%   第一段",phyName,phyValue,sportName,sportValue));
         add(new PatientDetail("李四", "2",  "跑步机","10%   第一段",phyName,phyValue,sportName,sportValue));
