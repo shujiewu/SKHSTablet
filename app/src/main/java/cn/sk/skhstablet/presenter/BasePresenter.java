@@ -79,7 +79,7 @@ public class BasePresenter<T extends BaseView> {
                     //    PatientDetailList.PATIENTS.get(0).setName(data);
                     //    PatientDetailList.PATIENTS.get(1).setName(data);
                     Log.e("third",data);
-                    RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                    RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                     RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                 }
                 else if(data.equals("echo=> 张三"))
@@ -91,6 +91,16 @@ public class BasePresenter<T extends BaseView> {
                 {
                     Log.e("third",data);
                     RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("李四", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                }
+                else if(data.equals("echo=> 张er1"))
+                {
+                    Log.e("third",data);
+                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                }
+                else if(data.equals("echo=> 张er2"))
+                {
+                    Log.e("third",data);
+                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                 }
             }
         });

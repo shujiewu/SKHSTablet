@@ -69,7 +69,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     private SingleMonitorFragment singleMonitorFragment;
     private MutiMonitorFragment mutiMonitorFragment;
     private String singleMonitorID;
-    private String newSingleMonitorID;
+    public String newSingleMonitorID;
+    public Boolean isNewSingle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -311,7 +312,22 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 {
                     singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.loadData(singleMonitorID);
+                    isNewSingle=true;
+                    /*if(hasMenuItem(SAVEEdit)) {
+                        new Handler().post(new Runnable() {
+                            public void run() {
+                                removeRightTopItem(SAVEEdit);
+                            }
+                        });
+                    }*/
                 }
+                /*if(hasMenuItem(SAVEEdit)) {
+                    new Handler().post(new Runnable() {
+                        public void run() {
+                            removeRightTopItem(SAVEEdit);
+                        }
+                    });
+                }*/
                 break;
             case FRAGMENT_MUTI:
                 new Handler().post(new Runnable() {

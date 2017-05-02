@@ -104,7 +104,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             @Override
             public void SaveEdit(int position, String string) {
                 //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
-                if(!mainActivity.hasMenuItem(mainActivity.SAVEEdit))
+                if(!mainActivity.hasMenuItem(mainActivity.SAVEEdit)&&!mainActivity.isNewSingle)
                 {
                     Log.e("testsava","1");
                     TextItem textItem = new TextItem(mainActivity, mainActivity.SAVEEdit, "保存修改", Color.parseColor("#1E88E5"));

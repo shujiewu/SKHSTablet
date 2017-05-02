@@ -15,6 +15,7 @@ import cn.sk.skhstablet.ui.fragment.FragmentChangeKey;
 import cn.sk.skhstablet.ui.fragment.FragmentLogin;
 import cn.sk.skhstablet.ui.base.BaseActivity;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.reactivex.netty.channel.Connection;
@@ -42,6 +43,13 @@ public class LoginActivity extends BaseActivity {
     public void rxNettyServerTest() {
         TcpServer<String, String> server;
         server = TcpServer.newServer(60000)
+                .<String, String>addChannelHandlerLast("linebase",
+                        new Func0<ChannelHandler>() {
+                            @Override
+                            public ChannelHandler call() {
+                                return new LineBasedFrameDecoder(1024);
+                            }
+                        })
                 .<String, String>addChannelHandlerLast("string-decoder",
                     new Func0<ChannelHandler>() {
                         @Override

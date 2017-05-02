@@ -116,6 +116,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
 
                 //callback.onClick(holder.getAdapterPosition());
                 //    }, 200);
+                mainActivity.newSingleMonitorID=data;
                 mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
             }
         });

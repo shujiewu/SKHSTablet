@@ -82,6 +82,7 @@ public class TcpUtils {
 
                         })
                         .createConnectionRequest()
+
                         .subscribe(new Observer<Connection<String, String>>() {
                             @Override
                             public void onCompleted() {
