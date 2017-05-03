@@ -8,4 +8,8 @@
         <item quantity="one">你选择了 %d 位病人. 开始单人监控!</item>
         <item quantity="other">你选择了 %d 位病人. 开始多人监控!</item>
     </plurals>
+
+
+    <string name="qv_add">+</string>
+    <string name="qv_remove">-</string>
 </resources>

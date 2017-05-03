@@ -1,13 +1,22 @@
 package cn.sk.skhstablet.tcp.utils;
 
+import android.util.Log;
+
 import com.blankj.utilcode.utils.NetworkUtils;
 import com.blankj.utilcode.utils.ToastUtils;
 
+import java.nio.ByteOrder;
+
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.handler.CUSUMHandler;
+import cn.sk.skhstablet.handler.ProtocolDecoder;
 import cn.sk.skhstablet.presenter.BaseView;
+import cn.sk.skhstablet.protocol.AbstractProtocol;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.Stateful;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.reactivex.netty.channel.Connection;
@@ -59,21 +68,36 @@ public class TcpUtils {
        // lifecycle.bindSubscription(subscription);
 
     }
-    static Connection<String, String> mConnection;
+    static Connection<AbstractProtocol,String> mConnection;
 
     public static Observable<Boolean> connect(final String url, final int port) {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {
                 TcpClient.newClient(url, port)
-                        .<String, String>addChannelHandlerLast("decoder",
+                        .<String,AbstractProtocol>addChannelHandlerLast("linebase",
+                                new Func0<ChannelHandler>() {
+                                    @Override
+                                    public ChannelHandler call() {
+                                        return   new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 32768,
+                                                4, 2, 0, 0, true);
+                                    }
+                                })
+                        .<String,AbstractProtocol>addChannelHandlerLast("checksum",
+                                new Func0<ChannelHandler>() {
+                                    @Override
+                                    public ChannelHandler call() {
+                                        return   new CUSUMHandler();
+                                    }
+                                })
+                        .<String,AbstractProtocol>addChannelHandlerLast("decoder",
                         new Func0<ChannelHandler>() {
                             @Override
                             public ChannelHandler call() {
-                                return new StringDecoder();
+                                return new ProtocolDecoder();
                             }
                         })
-                        .<String, String>addChannelHandlerLast("encoder",
+                        .<String,AbstractProtocol>addChannelHandlerLast("encoder",
                         new Func0<ChannelHandler>() {
                             @Override
                             public ChannelHandler call() {
@@ -83,27 +107,28 @@ public class TcpUtils {
                         })
                         .createConnectionRequest()
 
-                        .subscribe(new Observer<Connection<String, String>>() {
+                        .subscribe(new Observer<Connection<AbstractProtocol, String>>() {
                             @Override
                             public void onCompleted() {
-                        subscriber.onCompleted();
-                    }
+                                subscriber.onCompleted();
+                            }
 
                             @Override
                             public void onError(Throwable e) {
-                        subscriber.onError(e);
-                    }
+                                subscriber.onError(e);
+                             }
 
                             @Override
-                            public void onNext(Connection<String, String> connection) {
+                            public void onNext(Connection<AbstractProtocol, String> connection) {
                                 mConnection = connection;
                                 subscriber.onNext(true);
+                                Log.e("10.40","1");
                             }
                         });
             }
         });
     }
-    public static Observable<String> receive() {
+    public static Observable<AbstractProtocol> receive() {
         if (mConnection != null) {
             return mConnection.getInput();
         }
@@ -111,6 +136,7 @@ public class TcpUtils {
     }
 
     public static Observable<Void> send(String s) {
-        return mConnection.writeString(Observable.just(s));
+        Log.e("10.40","5");
+        return mConnection.write(Observable.just(s));
     }
 }

@@ -19,7 +19,7 @@
     android:layout_weight="0.8"
     android:orientation="horizontal">
 
-    <EditText
+    <TextView
         android:id="@+id/changeParaSportValue"
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -27,17 +27,20 @@
         android:layout_weight="0.3"
         android:textColor="@color/maincolor"
         android:gravity="center"
-        android:inputType="number"
         android:background="@null"
         android:text="10"
         />
-
-    <SeekBar
+    <cn.sk.skhstablet.component.QuantityView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/changeQVValue"
         android:layout_width="0dp"
+        android:layout_weight="0.5"
         android:layout_height="match_parent"
-        android:id="@+id/changeSeekBarValue"
-        android:layout_weight="0.7"
-        android:layout_gravity="center"/>
+        app:qv_removeButtonBackground="@color/maincolor"
+        app:qv_addButtonBackground="@color/main_bg_color"
+        app:qv_quantity="10" >
+    </cn.sk.skhstablet.component.QuantityView>
+/>
 </LinearLayout>
 
 </LinearLayout>

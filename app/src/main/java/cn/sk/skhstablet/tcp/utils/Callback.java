@@ -1,5 +1,7 @@
 package cn.sk.skhstablet.tcp.utils;
 
+import android.widget.Toast;
+
 import com.blankj.utilcode.utils.NetworkUtils;
 import com.blankj.utilcode.utils.ToastUtils;
 
@@ -53,15 +55,16 @@ public class Callback<T> extends Subscriber<T> {
 
     public void onfail() {
         if (!NetworkUtils.isAvailableByPing()) {
-            ToastUtils.showShortToast("你连接的网络有问题，请检查路由器");
+          /*  ToastUtils.showShortToast("你连接的网络有问题，请检查路由器");
             if (target != null) {
                 target.setState(AppConstants.STATE_ERROR);
             }
+        */
             return;
         }
-        ToastUtils.showShortToast("程序员哥哥偷懒去了，快去举报他");
+        /*ToastUtils.showShortToast("程序员哥哥偷懒去了，快去举报他");
         if (target != null) {
             target.setState(AppConstants.STATE_EMPTY);
-        }
+        }*/
     }
 }

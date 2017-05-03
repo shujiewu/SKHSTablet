@@ -27,5 +27,5 @@ public class CommandTypeConstant {
 	public static final byte ECP_PATIENT_LIST_REQUEST = (byte) 0xC5;
 	/** 获取体外反博病人列表响应 **/
 	public static final byte ECP_PATIENT_LIST_RESPONSE = (byte) 0x45;
-
+	public static final byte LOGIN_SUCCESS = (byte) 0x10;
 }

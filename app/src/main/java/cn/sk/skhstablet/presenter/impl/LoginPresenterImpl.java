@@ -22,11 +22,12 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
     @Override
     public void fetchStateData() {
 
-        invoke(TcpUtils.connect("localhost", 60000), new Callback<Boolean>() {
+        invoke(TcpUtils.connect("10.253.170.36", 9999), new Callback<Boolean>() {
             @Override
             public void onResponse(Boolean data) {
-                fetchData();
+                Log.e("10.40","4");
                 sendVerify();
+                fetchData();
                 fetchVerifyState();
             }
         });

@@ -15,6 +15,7 @@ import java.util.List;
 
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.component.EditTextWithDel;
+import cn.sk.skhstablet.component.QuantityView;
 import cn.sk.skhstablet.model.PatientDetail;
 
 /**
@@ -44,7 +45,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
     @Override
     public void onBindViewHolder(DevParaChangeHolder holder, int position) {
         holder.bind(holder, sportDevName.get(position), sportDevValue.get(position));
-        holder.etSportParaValue.setTag(position);
+        holder.qvSportParaValue.setTag(position);
     }
 
     @Override
@@ -54,30 +55,31 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
 
     public class DevParaChangeHolder extends RecyclerView.ViewHolder {
         private TextView tvSportParaName;
-        private EditText etSportParaValue;
-        private SeekBar sbSportParaValue;
+        private TextView tvSportParaValue;
+        //private SeekBar sbSportParaValue;
+        private QuantityView qvSportParaValue;
         public DevParaChangeHolder(View view) {
             super(view);
             tvSportParaName = (TextView) view.findViewById(R.id.changeParaSportName);
             //tvParaName2 = (TextView) view.findViewById(R.id.paraname2);
-            etSportParaValue = (EditText) view.findViewById(R.id.changeParaSportValue);
+            tvSportParaValue = (TextView) view.findViewById(R.id.changeParaSportValue);
             //tvParaValue2=(TextView) view.findViewById(R.id.paravalue2);
-            sbSportParaValue=(SeekBar)view.findViewById(R.id.changeSeekBarValue);
-
+            //sbSportParaValue=(SeekBar)view.findViewById(R.id.changeSeekBarValue);
+            qvSportParaValue=(QuantityView)view.findViewById(R.id.changeQVValue);
         }
         public void bind(final DevParaChangeHolder viewHolder, String paraName, String paraValue) {
             viewHolder.tvSportParaName.setText(paraName);
-            viewHolder.etSportParaValue.setText(paraValue);
-            viewHolder.sbSportParaValue.setMax(50);
-            viewHolder.sbSportParaValue.setProgress(Integer.valueOf(paraValue));
-
+            viewHolder.tvSportParaValue.setText(paraValue);
+            //viewHolder.sbSportParaValue.setMax(50);
+           // viewHolder.sbSportParaValue.setProgress(Integer.valueOf(paraValue));
+            viewHolder.qvSportParaValue.setQuantity(Integer.valueOf(paraValue));
             if (!paraName.equals("坡度"))
             {
-                viewHolder.etSportParaValue.setFocusableInTouchMode(false);
-                viewHolder.sbSportParaValue.setVisibility(View.GONE);
+                //viewHolder.tvSportParaValue.setFocusableInTouchMode(false);
+                viewHolder.qvSportParaValue.setVisibility(View.GONE);
             }
 
-            sbSportParaValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            /*sbSportParaValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -93,7 +95,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                 public void onStopTrackingTouch(SeekBar seekBar) {
 
                 }
-            });
+            });*/
 
             TextWatcher textWatcher = new TextWatcher() {
 
@@ -114,17 +116,17 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                     {
                         if (mOnEditChangeListener != null) {
                             //注意这里使用getTag方法获取数据
-                            mOnEditChangeListener.SaveEdit((int)etSportParaValue.getTag(),s.toString());
+                            mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getTag(),s.toString());
                         }
-                        viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
+                        //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
                     }
                     else
                     {
-                        viewHolder.sbSportParaValue.setProgress(0);
+                        //viewHolder.sbSportParaValue.setProgress(0);
                     }
                 }
             };
-            viewHolder.etSportParaValue.addTextChangedListener(textWatcher);
+            //viewHolder.qvSportParaValue.addTextChangedListener(textWatcher);
         }
     }
 

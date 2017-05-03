@@ -3,8 +3,12 @@ package cn.sk.skhstablet.presenter;
 import android.util.Log;
 
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
+import cn.sk.skhstablet.protocol.AbstractProtocol;
+import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
+import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.Stateful;
@@ -14,6 +18,8 @@ import cn.sk.skhstablet.http.utils.HttpUtils;
 import java.util.List;
 
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -55,16 +61,38 @@ public class BasePresenter<T extends BaseView> {
             return;
         }
     }
-    public Action1<PatientDetail> onNextAction;
-    public Observable<PatientDetail> onNextAction1;
-    public Observable observable;
     public void fetchData()
     {
-        invoke(TcpUtils.receive(), new Callback<String>() {
+        invoke(TcpUtils.receive(), new Callback<AbstractProtocol>() {
             @Override
-            public void onResponse(final String data) {
+            public void onResponse(final AbstractProtocol data) {
+               // ByteBuf buf = (ByteBuf)data;
+               // byte[] req = new byte[buf.readableBytes()];
+              //  buf.readBytes(req);
+//                int i=((ExerciseEquipmentDataResponse)data).getPatientId();
+//                Log.e("login",String.valueOf(i));
+                Log.e("10.40","2");
+                if(data==null)
+                    return;
+                byte dataType=(byte)((ExercisePhysiologicalDataResponse)data).getDeviceId().getDeviceType();
+                switch (dataType)
+                {
+                    case CommandTypeConstant.LOGIN_SUCCESS:
+                        RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
+                        break;
+                    case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_REQUEST:
+                        RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                        break;
+                    case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST:
+                        RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                        RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                        break;
+                }
 
-                if(data.equals("echo=> hello world!"))
+
+
+                //RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
+                /*if(data.equals("echo=> hello world!"))
                 {
                     RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
                     Log.e("login","succees");
@@ -101,7 +129,7 @@ public class BasePresenter<T extends BaseView> {
                 {
                     Log.e("third",data);
                     RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                }
+                }*/
             }
         });
         /*invoke(TcpUtils.receive(), new Action1<String>() {

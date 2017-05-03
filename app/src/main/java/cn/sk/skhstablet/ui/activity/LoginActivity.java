@@ -7,15 +7,30 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.WindowManager;
+
+import java.nio.ByteOrder;
 
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.TabViewPagerAdapter;
+import cn.sk.skhstablet.app.CommandTypeConstant;
+import cn.sk.skhstablet.handler.ProtocolDecoder;
+import cn.sk.skhstablet.handler.ProtocolEncoder;
+import cn.sk.skhstablet.protocol.AbstractProtocol;
+import cn.sk.skhstablet.protocol.DeviceId;
+import cn.sk.skhstablet.protocol.Version;
+import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.ui.fragment.FragmentChangeKey;
 import cn.sk.skhstablet.ui.fragment.FragmentLogin;
 import cn.sk.skhstablet.ui.base.BaseActivity;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LineBasedFrameDecoder;
+import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.reactivex.netty.channel.Connection;
@@ -33,53 +48,135 @@ public class LoginActivity extends BaseActivity {
         //透明状态栏
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         setupViewPager();
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 rxNettyServerTest();
             }
-        }).start();
+        }).start();*/
     }
     public void rxNettyServerTest() {
-        TcpServer<String, String> server;
+        TcpServer<String,AbstractProtocol> server;
         server = TcpServer.newServer(60000)
-                .<String, String>addChannelHandlerLast("linebase",
-                        new Func0<ChannelHandler>() {
-                            @Override
-                            public ChannelHandler call() {
-                                return new LineBasedFrameDecoder(1024);
-                            }
-                        })
-                .<String, String>addChannelHandlerLast("string-decoder",
+
+                .<String,AbstractProtocol>addChannelHandlerLast("string-decoder",
                     new Func0<ChannelHandler>() {
                         @Override
                         public ChannelHandler call() {
                             return new StringDecoder();
                         }
                     })
-                .<String, String>addChannelHandlerLast("string-encoder",
+                .<String,AbstractProtocol>addChannelHandlerLast("string-encoder",
                         new Func0<ChannelHandler>() {
                         @Override
                         public ChannelHandler call() {
-                            return new StringEncoder();
+                            return new MyEncoder();
                          }
                     })
-                .start(new ConnectionHandler<String, String>() {
+                .start(new ConnectionHandler<String, AbstractProtocol>() {
                     @Override
-                    public Observable<Void> handle(Connection<String, String> newConnection) {
-                        return newConnection.writeStringAndFlushOnEach(
+                    public Observable<Void> handle(Connection<String, AbstractProtocol> newConnection) {
+                        return newConnection.writeAndFlushOnEach(
                             newConnection.getInput().map(
-                                    new Func1<String, String>() {
+                                    new Func1<String, AbstractProtocol>() {
                                     @Override
-                                    public String call(String s) {
+                                    public AbstractProtocol call(String s) {
                                         System.out.println("receive:" + s);
-                                        return "echo=> " + s;
+                                        return test();
                                     }}
                             )
                         );
+
                      }
                 });
         server.awaitShutdown();
+    }
+    public static class MyEncoder extends MessageToByteEncoder<AbstractProtocol> {
+
+        @Override
+        protected void encode(ChannelHandlerContext ctx, AbstractProtocol request, ByteBuf out) throws Exception {
+            out.writeBytes(request.getStart());
+            int startIndex = out.writerIndex();
+            out.writeShortLE(1);
+            encodeVersion(request.getVersion(), out);
+            out.writeByte(request.getCommand());
+            encodeDeviceId(request.getDeviceId(), out);
+            switch (request.getCommand()) {
+                case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST: {
+                    encodeExerciseEquipmentDataRequest((ExerciseEquipmentDataResponse) request, out);
+                    break;
+                }
+            }
+            out.writeShortLE(0);
+            out.setShortLE(startIndex, out.writerIndex() - startIndex - 2);
+            accumulation(out);
+        }
+
+        private void accumulation(ByteBuf out) {
+            long start = System.currentTimeMillis();
+            int sumIndex = out.writerIndex() - 2;
+            int sum = 0;
+            for (int i = 4; i < sumIndex; i++) {
+                sum += out.getUnsignedByte(i);
+            }
+            out.setShortLE(sumIndex, sum);
+            long end = System.currentTimeMillis();
+            // System.out.println(end - start);
+        }
+        private void encodeExerciseEquipmentDataRequest(ExerciseEquipmentDataResponse request, ByteBuf out) {
+            out.writeLongLE(request.getRFID());
+            out.writeIntLE(request.getPatientId());
+            out.writeIntLE((int) request.getDataPacketNumber());
+            out.writeShortLE(request.getPhysiologicalLength());
+            out.writeBytes(request.getPhysiologicalData());
+            out.writeByte(request.getExercisePlanCompletionRate());
+            out.writeShortLE(request.getPerformedExecutionAmount());
+            out.writeIntLE(request.getExercisePlanId());
+            out.writeByte(request.getExercisePlanSectionNumber());
+            out.writeBytes(request.getEquipmentData());
+        }
+
+        private void encodeDeviceId(DeviceId deviceId, ByteBuf out) {
+            out.writeByte(deviceId.deviceType);
+            out.writeByte(deviceId.deviceModel);
+            out.writeLongLE(deviceId.deviceNumber);
+        }
+
+        private void encodeVersion(Version version, ByteBuf out) {
+            out.writeByte(version.majorVersionNumber);
+            out.writeByte(version.secondVersionNumber);
+            out.writeShortLE(version.reviseVersionNumber);
+        }
+    }
+    ExerciseEquipmentDataResponse test()
+    {
+        DeviceId deviceId = new DeviceId();
+        deviceId.deviceType = 0x02;
+        deviceId.deviceModel = 0x00;
+        ExerciseEquipmentDataResponse request = new ExerciseEquipmentDataResponse();
+        deviceId.deviceNumber = 10000L;
+        Version version = new Version();
+        version.majorVersionNumber = 1;
+        version.secondVersionNumber = 2;
+        version.reviseVersionNumber = 3;
+        request.setDeviceId(deviceId);
+        request.setVersion(version);
+        request.setPatientId(1);
+        request.setDataPacketNumber(8888L);
+        request.setRFID(111111L);
+        request.setPhysiologicalLength(6);
+        for (int i = 0; i < request.getPhysiologicalLength(); i++) {
+            request.getPhysiologicalData()[i] = 0x11;
+        }
+        request.setExercisePlanCompletionRate((short) 8);
+        request.setPerformedExecutionAmount(8);
+        request.setExercisePlanId(1);
+        request.setExercisePlanSectionNumber((short) 2);
+        byte[] equipmentData = new byte[6];
+        request.setEquipmentData(equipmentData);
+
+        Log.e("10.40","3");
+        return request;
     }
 
     @Override
