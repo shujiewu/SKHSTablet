@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -150,13 +151,22 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         mutiMonitorAdapter.notifyDataSetChanged();
     }
     private CompositeSubscription mutiSubscription;
+    private HashMap<String,Integer> hasPatient=new HashMap<>();
+    private int position=0;
     public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_DATA,PatientDetail.class)
                 .subscribe(new Action1<PatientDetail>() {
                     @Override
                     public void call(PatientDetail s) {
-                        mDatas.add(s);
+                        String id=s.getId();
+                        if(hasPatient.containsKey(id))
+                            mDatas.set(hasPatient.get(id),s);
+                        else
+                        {
+                            mDatas.add(s);
+                            hasPatient.put(id,position++);
+                        }
                         refreshView(mDatas);
                     }
                 });

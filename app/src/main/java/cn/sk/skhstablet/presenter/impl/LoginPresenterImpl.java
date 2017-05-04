@@ -14,6 +14,8 @@ import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import rx.Subscription;
 import rx.functions.Action1;
 
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
+
 /**
  * Created by wyb on 2017/4/25.
  */
@@ -21,8 +23,8 @@ import rx.functions.Action1;
 public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> implements ILoginPresenter.Presenter {
     @Override
     public void fetchStateData() {
-
-        invoke(TcpUtils.connect("10.253.170.36", 9999), new Callback<Boolean>() {
+        //TcpUtils.connect(AppConstants.url, AppConstants.port);
+        invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
             @Override
             public void onResponse(Boolean data) {
                 Log.e("10.40","4");

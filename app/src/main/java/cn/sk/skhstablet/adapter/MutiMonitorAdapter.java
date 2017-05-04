@@ -123,10 +123,10 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
             recyclerSportParaView.setLayoutManager(new GridLayoutManager(context,2));
             recyclerSportParaView.setAdapter(new SportDevParaAdapter(patient.getSportDevName(),patient.getSportDevValue()));
 
-            TracksItemDecorator itemDecorator = new TracksItemDecorator(
-                    context.getResources().getDimensionPixelSize(R.dimen.decoration_size));
-            recyclerSportParaView.addItemDecoration(itemDecorator);
-            recyclerPhyParaView.addItemDecoration(itemDecorator);
+            //TracksItemDecorator itemDecorator = new TracksItemDecorator(
+             //       context.getResources().getDimensionPixelSize(R.dimen.decoration_size));
+            //recyclerSportParaView.addItemDecoration(itemDecorator);
+           // recyclerPhyParaView.addItemDecoration(itemDecorator);
         }
     }
     public static interface OnRecyclerViewItemLongClickListener {

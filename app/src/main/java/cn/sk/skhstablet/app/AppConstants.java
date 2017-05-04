@@ -17,4 +17,7 @@ public class AppConstants {
     public static  final int LOGIN_STATE=1001;
     public static  final int MUTI_DATA=2000;
     public static  final int SINGLE_DATA=3000;
+
+    public static  final  String url="10.250.110.4";
+    public static  final  int port=9999;
 }
