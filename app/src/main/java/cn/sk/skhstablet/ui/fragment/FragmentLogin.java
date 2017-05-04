@@ -7,9 +7,11 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -19,15 +21,20 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.injector.component.fragment.DaggerLoginComponent;
 import cn.sk.skhstablet.presenter.ILoginPresenter;
 import cn.sk.skhstablet.presenter.impl.LoginPresenterImpl;
+import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.ui.activity.MainActivity;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.component.EditTextWithDel;
 import cn.sk.skhstablet.component.PaperButton;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import cn.sk.skhstablet.utlis.CheckUtils;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
 
 //import cn.cqu.sk.HomeActivity;
 //import cn.cqu.sk.UserNameActivity;
@@ -44,7 +51,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     @ViewInject(R.id.userpass)
     EditTextWithDel userpass;
     @ViewInject(R.id.bt_login)
-    PaperButton bt_login;
+    Button bt_login;
     @ViewInject(R.id.login_progress)
     ProgressBar login_progress;
     @ViewInject(R.id.tv_forgetcode)
@@ -159,13 +166,13 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                     return;
                 }*/
                 login_progress.setVisibility(View.VISIBLE);
-                login_progress.setVisibility(View.GONE);
+
                 /*Intent intent = new Intent(getActivity(), MainActivity.class);
                 startActivity(intent);
                 getActivity().overridePendingTransition(R.anim.fade,
                         R.anim.my_alpha_action);*/
                 loadData();
-
+                bt_login.setEnabled(false);
 /*
                 BmobUser.loginByAccount(getActivity(), phone, passwords, new LogInListener<MyUser>() {
 
@@ -209,12 +216,19 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     public void refreshView(Boolean mData) {
         if(mData==true)
         {
+            login_progress.setVisibility(View.GONE);
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
             getActivity().overridePendingTransition(R.anim.fade,
                     R.anim.my_alpha_action);
+            getActivity().finish();
         }
         //userphone.setText(mData);
+    }
+
+    @Override
+    public void reSendRequest() {
+        mPresenter.sendVerify();
     }
 
     @Override
@@ -225,7 +239,63 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
 
     @Override
     protected void loadData() {
+        if(mutiSubscription==null)
+        {
+            fetchVerifyState();
+        }
         mPresenter.fetchStateData();
+    }
+
+
+    private CompositeSubscription mutiSubscription;
+
+    public void fetchVerifyState()
+    {
+        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        Log.e("login","succees1");
+                        refreshView(s);
+
+                    }
+                });
+        Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        if(s==true)
+                            reSendRequest();
+                        else
+                        {
+                            bt_login.setEnabled(true);
+                            login_progress.setVisibility(View.INVISIBLE);
+                        }
+
+
+                    }
+                });
+        Subscription mSubscriptionRequestFail = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST_FAIL,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        if(s==true)
+                            reSendRequest();
+                    }
+                });
+        if (this.mutiSubscription == null) {
+            mutiSubscription = new CompositeSubscription();
+        }
+        mutiSubscription.add(mSubscription);
+        mutiSubscription.add(mSubscriptionRequest);
+        mutiSubscription.add(mSubscriptionRequestFail);
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (mutiSubscription != null &&  mutiSubscription.hasSubscriptions()) {
+            this. mutiSubscription.unsubscribe();
+        }
     }
 }
 	

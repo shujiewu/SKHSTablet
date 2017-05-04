@@ -183,6 +183,11 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     }
 
     @Override
+    public void reSendRequest() {
+
+    }
+
+    @Override
     public void refreshExercisePlan(List<String> armTypes,List<List<String>> arms) {
         exercisePlanAdapter.armTypes=armTypes;
         exercisePlanAdapter.arms=arms;

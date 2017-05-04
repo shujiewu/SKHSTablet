@@ -484,6 +484,12 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         patientListAdapter.mDatas= mDatas;
         patientListAdapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void reSendRequest() {
+
+    }
+
     void loadData()
     {
         mPresenter.fetchPatientListData();

@@ -23,6 +23,7 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 
 import cn.sk.skhstablet.R;
 
@@ -30,7 +31,7 @@ import cn.sk.skhstablet.R;
  * Date: 14-10-9.
  * Time: 17:04.
  */
-public class PaperButton extends View {
+public class PaperButton extends Button {
 
     private static final String TAG = PaperButton.class.getSimpleName();
     private static final long ANIMATION_DURATION = 200;

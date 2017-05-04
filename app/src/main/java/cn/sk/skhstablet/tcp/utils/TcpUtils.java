@@ -123,7 +123,8 @@ public class TcpUtils {
                             }
 
                         })
-                        //.readTimeOut(spacingTime, TimeUnit.SECONDS)
+                        .channelOption(ChannelOption.SO_KEEPALIVE, true)
+                        .channelOption(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000) //服务器掉线还要等五秒，自己掉线直接重连
                         .createConnectionRequest()
 
                         .subscribe(new Observer<Connection<AbstractProtocol, String>>() {
@@ -149,6 +150,62 @@ public class TcpUtils {
             }
         });
     }
+    public  static void re(String url,int port)
+    {
+        TcpClient.newClient(url, port)
+                .<String,AbstractProtocol>addChannelHandlerLast("linebase",
+                        new Func0<ChannelHandler>() {
+                            @Override
+                            public ChannelHandler call() {
+                                return   new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 32768,
+                                        4, 2, 0, 0, true);
+                            }
+                        })
+                .<String,AbstractProtocol>addChannelHandlerLast("checksum",
+                        new Func0<ChannelHandler>() {
+                            @Override
+                            public ChannelHandler call() {
+                                return   new CUSUMHandler();
+                            }
+                        })
+                .<String,AbstractProtocol>addChannelHandlerLast("decoder",
+                        new Func0<ChannelHandler>() {
+                            @Override
+                            public ChannelHandler call() {
+                                return new ProtocolDecoder();
+                            }
+                        })
+                .<String,AbstractProtocol>addChannelHandlerLast("encoder",
+                        new Func0<ChannelHandler>() {
+                            @Override
+                            public ChannelHandler call() {
+                                return new StringEncoder();
+                            }
+
+                        })
+                .readTimeOut(spacingTime, TimeUnit.SECONDS)
+                .createConnectionRequest()
+
+                .subscribe(new Observer<Connection<AbstractProtocol, String>>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        //reconnect();
+                    }
+
+                    @Override
+                    public void onNext(Connection<AbstractProtocol, String> connection) {
+                        RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(true));
+                        mConnection = connection;
+                        reconnectTime=0;
+                        Log.e("20.40","1");
+                    }
+                });
+    }
     public static Observable<AbstractProtocol> receive() {
         if (mConnection != null) {
             return mConnection.getInput();
@@ -166,7 +223,15 @@ public class TcpUtils {
     /**
      * 断开自动重新连接
      */
-    public static void reconnect(final BaseView lifecycle) {
+    private static int reconnectTime=0;
+    public static void reconnect() {
+        reconnectTime++;
+        if(reconnectTime==20)
+        {
+            RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
+            reconnectTime=0;
+            return;
+        }
 
         //延迟spacingTime秒后进行重连
         Observable.timer(spacingTime, TimeUnit.SECONDS).subscribe((new Action1<Long>() {
@@ -178,10 +243,14 @@ public class TcpUtils {
                     Log.e("error", "close");
                 }
                 Log.e("error", "reconnect");
-                invoke(lifecycle,TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
+                //re(AppConstants.url, AppConstants.port);
+                invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
                     @Override
                     public void onResponse(Boolean data) {
                         fetchData();
+                        RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(true));
+                        //lifecycle.reSendRequest();
+                        reconnectTime=0;
                     }
                 });
             }
@@ -276,11 +345,5 @@ public class TcpUtils {
                 }*/
             }
         });
-        /*invoke(TcpUtils.receive(), new Action1<String>() {
-            @Override
-            public void call(String aVoid) {
-                System.out.println("send success!");
-            }
-        });*/
     }
 }

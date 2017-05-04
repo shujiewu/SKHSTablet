@@ -150,6 +150,12 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         mutiMonitorAdapter.patientDetailList=mDatas;
         mutiMonitorAdapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void reSendRequest() {
+        loadData();
+    }
+
     private CompositeSubscription mutiSubscription;
     private HashMap<String,Integer> hasPatient=new HashMap<>();
     private int position=0;
@@ -170,10 +176,20 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
                         refreshView(mDatas);
                     }
                 });
+
+        Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        if(s==true)
+                            reSendRequest();
+                    }
+                });
         if (this.mutiSubscription == null) {
             mutiSubscription = new CompositeSubscription();
         }
         mutiSubscription.add(mSubscription);
+        mutiSubscription.add(mSubscriptionRequest);
     }
     @Override
     public void onDetach() {

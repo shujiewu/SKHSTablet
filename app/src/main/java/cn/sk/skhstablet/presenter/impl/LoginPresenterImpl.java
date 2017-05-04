@@ -30,7 +30,7 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
                 Log.e("10.40","4");
                 sendVerify();
                 fetchData();
-                fetchVerifyState();
+                //fetchVerifyState();
             }
         });
     }
@@ -43,18 +43,7 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
             }
         });
     }
-    public void fetchVerifyState()
-    {
-        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean s) {
-                        Log.e("login","succees1");
-                        mView.refreshView(s);
 
-                    }
-                });
-    }
     @Inject
     public LoginPresenterImpl()
     {

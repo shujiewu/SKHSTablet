@@ -292,6 +292,11 @@ PaperButton nextBt;
     }
 
     @Override
+    public void reSendRequest() {
+
+    }
+
+    @Override
     protected void initInject() {
 
     }

@@ -8,7 +8,10 @@ import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+
+import com.nineoldandroids.view.ViewHelper;
 
 import java.nio.ByteOrder;
 
@@ -41,6 +44,7 @@ import rx.functions.Func0;
 import rx.functions.Func1;
 
 public class LoginActivity extends BaseActivity {
+    //View viewFade;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +52,8 @@ public class LoginActivity extends BaseActivity {
         //透明状态栏
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         setupViewPager();
+        //viewFade = findViewById(R.id.view_fade);
+        //ViewHelper.setAlpha(viewFade, 0);
         /*new Thread(new Runnable() {
             @Override
             public void run() {

@@ -50,7 +50,7 @@ public class Callback<T> extends Subscriber<T> {
         ((BaseView) target).refreshView(data);
     }
     public void onfail() {
-        TcpUtils.reconnect((BaseView)target);
+        TcpUtils.reconnect();
         //if (!NetworkUtils.isAvailableByPing()) {
           /*  ToastUtils.showShortToast("你连接的网络有问题，请检查路由器");
             if (target != null) {
