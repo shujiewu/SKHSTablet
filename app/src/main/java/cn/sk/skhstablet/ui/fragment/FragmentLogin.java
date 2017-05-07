@@ -171,7 +171,9 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 startActivity(intent);
                 getActivity().overridePendingTransition(R.anim.fade,
                         R.anim.my_alpha_action);*/
+                registerFetchResponse();
                 loadData();
+
                 bt_login.setEnabled(false);
 /*
                 BmobUser.loginByAccount(getActivity(), phone, passwords, new LogInListener<MyUser>() {
@@ -239,17 +241,17 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
 
     @Override
     protected void loadData() {
-        if(mutiSubscription==null)
-        {
-            fetchVerifyState();
-        }
+        //if(mutiSubscription==null)
+       // {
+       //     fetchVerifyState();
+       // }
         mPresenter.fetchStateData();
     }
 
 
     private CompositeSubscription mutiSubscription;
 
-    public void fetchVerifyState()
+    public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
@@ -283,19 +285,9 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                             reSendRequest();
                     }
                 });
-        if (this.mutiSubscription == null) {
-            mutiSubscription = new CompositeSubscription();
-        }
-        mutiSubscription.add(mSubscription);
-        mutiSubscription.add(mSubscriptionRequest);
-        mutiSubscription.add(mSubscriptionRequestFail);
-    }
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (mutiSubscription != null &&  mutiSubscription.hasSubscriptions()) {
-            this. mutiSubscription.unsubscribe();
-        }
+        bindSubscription(mSubscription);
+        bindSubscription(mSubscriptionRequest);
+        bindSubscription(mSubscriptionRequestFail);
     }
 }
 	

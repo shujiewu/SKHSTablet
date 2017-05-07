@@ -33,6 +33,7 @@ import cn.sk.skhstablet.adapter.PatientListAdapter;
 import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
+import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.injector.component.fragment.DaggerMainActivtityComponent;
 import cn.sk.skhstablet.injector.module.activity.MainActivityModule;
 import cn.sk.skhstablet.presenter.IPatientListPresenter;
@@ -43,8 +44,13 @@ import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
 import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientList;
 import cn.sk.skhstablet.utlis.Utils;
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
-public class MainActivity extends BorderActivity implements IPatientListPresenter.View {
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
+
+public class MainActivity extends BorderActivity implements IPatientListPresenter.View,LifeSubscription {
     private RecyclerView mRecyclerView;
     final int COPY = 0;
     final int PASTE = 1;
@@ -55,7 +61,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     final static int MUTIMOITOR=6;
     final static int SINGLEMONITOR=7;
     final int STARTMONITOR=8;
-    public final int SAVEEdit=9;
+    public final int SAVE_EDIT=9;
     final  int LOG_OUT=10;
     public final int CLOSE_SINGLE=11;
     private List<Patient> mDatas;
@@ -308,18 +314,21 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 ft.commit();
                 fm.executePendingTransactions();
 
+
                 if(!newSingleMonitorID.equals(singleMonitorID))
                 {
                     singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.loadData(singleMonitorID);
+                    singleMonitorFragment.getChangeDevPara().clear();
                     isNewSingle=true;
-                    /*if(hasMenuItem(SAVEEdit)) {
-                        new Handler().post(new Runnable() {
-                            public void run() {
-                                removeRightTopItem(SAVEEdit);
-                            }
-                        });
-                    }*/
+                }
+                else
+                {
+                    if(singleMonitorFragment.getChangeDevPara().size()!=0&&!hasMenuItem(SAVE_EDIT))
+                    {
+                        TextItem textItem = new TextItem(this,SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
+                        addRightTopItem(textItem);
+                    }
                 }
                 /*if(hasMenuItem(SAVEEdit)) {
                     new Handler().post(new Runnable() {
@@ -374,7 +383,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                //patientListAdapter.getmDatas();
                 for(Patient patient :patientListAdapter.mDatas)
                 {
-                    patient.setIdcard("已选择");
+                    patient.setSelectStatus(PATIENT_SELECT_STATUS_TRUE);
                 }
                 patientListAdapter.notifyDataSetChanged();
 
@@ -406,7 +415,16 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
                 break;
             case STARTMONITOR:
+                for(Patient patient :patientListAdapter.mDatas)
+                {
+                    if(patient.getSelectStatus().equals(PATIENT_SELECT_STATUS_TRUE)||patient.getSelectStatus().equals(PATIENT_SELECT_STATUS_MONITOR))
+                    {
+                        patient.setSelectStatus(PATIENT_SELECT_STATUS_MONITOR);
+                    }
+                }
+                patientListAdapter.notifyDataSetChanged();
                 hidePatientList();
+                sentMonitorRequest();
                 //new Handler().post(new Runnable() {
                 //    public void run() {
                  //       removeTopItem(STARTMONITOR);
@@ -432,7 +450,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         })
                         .show();
                 break;
-            case SAVEEdit:
+            case SAVE_EDIT:
                 new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("提示")
                         .setContentText("确定修改参数？")
@@ -459,6 +477,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         .show();
                 break;
             case CANCEL_SINGLE_MON:
+                mPresenter.sendCancelSingleMonitorReq();
                 showFragment(FRAGMENT_MUTI);
         }
     }
@@ -493,5 +512,28 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     void loadData()
     {
         mPresenter.fetchPatientListData();
+    }
+    void sentMonitorRequest()
+    {
+        mPresenter.sendMutiMonitorRequest();
+    }
+
+
+
+    private CompositeSubscription mCompositeSubscription;
+    //用于添加rx的监听的在onDestroy中记得关闭不然会内存泄漏。
+    @Override
+    public void bindSubscription(Subscription subscription) {
+        if (this.mCompositeSubscription == null) {
+            this.mCompositeSubscription = new CompositeSubscription();
+        }
+        this.mCompositeSubscription.add(subscription);
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (this.mCompositeSubscription != null && mCompositeSubscription.hasSubscriptions()) {
+            this.mCompositeSubscription.unsubscribe();
+        }
     }
 }

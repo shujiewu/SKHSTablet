@@ -47,11 +47,12 @@ import static cn.sk.skhstablet.model.PatientDetailList.sportValue;
  */
 
 public class TcpUtils {
-    public static  <T> void invoke(BaseView lifecycle,Observable<T> observable, Action1<T> callback)
+    public static  <T> void invoke(LifeSubscription lifecycle,Observable<T> observable, Action1<T> callback)
     {
         Subscription subscription = observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback);
+        lifecycle.bindSubscription(subscription);
     }
     public static  <T> void invoke(Observable<T> observable, Callback<T> callback)
     {
@@ -59,7 +60,7 @@ public class TcpUtils {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback);
     }
-    public static <T> void invoke(BaseView lifecycle, Observable<T> observable, Callback<T> callback) {
+    public static <T> void invoke(LifeSubscription lifecycle, Observable<T> observable, Callback<T> callback) {
         Stateful target = null;
         target=(Stateful)lifecycle;
         callback.setTarget(target);
@@ -72,18 +73,18 @@ public class TcpUtils {
          * 如果放在请求前面太耗时了，如果放回掉提示的速度慢，要10秒钟请求超时后才提示。
          * 最后采取的方法是判断网络是否连接放在外面，网络是否可用放在回掉。
          */
-/*        if (!NetworkUtils.isConnected()) {
+        /*if (!NetworkUtils.isConnected()) {
             ToastUtils.showShortToast("网络连接已断开");
             if (target != null) {
-                target.setState(AppConstants.STATE_ERROR);
+                //target.setState(AppConstants.STATE_ERROR);
             }
             return;
-        }
-*/
+        }*/
+
         Subscription subscription = observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback);
-       // lifecycle.bindSubscription(subscription);
+        lifecycle.bindSubscription(subscription);
 
     }
     static Connection<AbstractProtocol,String> mConnection;
@@ -290,7 +291,12 @@ public class TcpUtils {
                         RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
                         break;
                     case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_REQUEST:
-                        RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er1", "1", "跑步机","10%   第一段", PatientDetailList.phyName,phyValue,sportName,sportValue));
+                        ExercisePhysiologicalDataResponse exercisePhysiologicalDataResponse=(ExercisePhysiologicalDataResponse)data;
+                        PatientDetail patientDetail1=new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue);
+                        patientDetail1.setId(String.valueOf(data.getDeviceId().getDeviceNumber()));
+                        //String id=String.valueOf(data.getDeviceId().getDeviceNumber());
+
+                        RxBus.getDefault().post(AppConstants.SINGLE_DATA,patientDetail1);
                         break;
                     case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST:
                         ExerciseEquipmentDataResponse exercisedata=(ExerciseEquipmentDataResponse)data;

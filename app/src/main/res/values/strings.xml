@@ -12,4 +12,10 @@
 
     <string name="qv_add">+</string>
     <string name="qv_remove">-</string>
+
+    <string name="patient_select_true">已选择</string>
+
+    <string name="patient_select_false">未选择</string>
+
+    <string name="patient_select_monitor">正在监控</string>
 </resources>

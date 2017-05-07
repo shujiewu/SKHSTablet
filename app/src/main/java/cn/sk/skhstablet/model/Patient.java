@@ -1,6 +1,10 @@
 package cn.sk.skhstablet.model;
 import java.io.Serializable;
 
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
+
 /**
  * Created by ldkobe on 2017/4/16.
  */
@@ -10,12 +14,24 @@ public class Patient implements Comparable<Patient>, Serializable{
     private String rfid;
     private String idcard;
     private String gender;
-    public Patient(String name, String gender,String rfid,String idcard)
+    private String selectStatus;
+
+
+
+    public String getSelectStatus() {
+        return selectStatus;
+    }
+
+    public void setSelectStatus(String selectStatus) {
+        this.selectStatus=selectStatus;
+    }
+
+    public Patient(String name, String gender, String rfid, String selectStatus)
     {
         this.name=name;
         this.gender=gender;
         this.rfid=rfid;
-        this.idcard=idcard;
+        this.selectStatus=selectStatus;
     }
     public String getGender() {
         return gender;

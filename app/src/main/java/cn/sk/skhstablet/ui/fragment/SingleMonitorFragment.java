@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,6 +61,11 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     TextView dev;
     TextView percent;
     private String singleMonitorID;
+    private HashMap<String,String> changeDevPara= new HashMap<>();
+
+    public HashMap<String, String> getChangeDevPara() {
+        return changeDevPara;
+    }
 
     public static SingleMonitorFragment newInstance(String singleMonitorID) {
         SingleMonitorFragment newFragment = new SingleMonitorFragment();
@@ -102,12 +109,19 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         rySportParaView.addItemDecoration(itemDecorator);
         devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
             @Override
-            public void SaveEdit(int position, String string) {
+            public void SaveEdit(int position, String devValue) {
+                //Log.e("testsava","1");
                 //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
-                if(!mainActivity.hasMenuItem(mainActivity.SAVEEdit)&&!mainActivity.isNewSingle)
+                String devName=devParaChangeAdapter.sportDevName.get(position);
+                if(devValue.equals(devParaChangeAdapter.sportDevValue.get(position))&&changeDevPara.containsKey(devName))
+                    changeDevPara.remove(devName);
+                else
                 {
-                    Log.e("testsava","1");
-                    TextItem textItem = new TextItem(mainActivity, mainActivity.SAVEEdit, "保存修改", Color.parseColor("#1E88E5"));
+                    changeDevPara.put(devName,devValue);
+                }
+                if(!mainActivity.hasMenuItem(mainActivity.SAVE_EDIT))
+                {
+                    TextItem textItem = new TextItem(mainActivity, mainActivity.SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
                     mainActivity.addRightTopItem(textItem);
                 }
             }
@@ -136,6 +150,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
         //loadData(singleMonitorID);
         Log.e("single ID1","121");
+        registerFetchResponse();
         return view;
     }
 
@@ -153,10 +168,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
 
     public void loadData(String ID) {
-        if(singleSubscription==null)
-        {
-            registerFetchResponse();
-        }
+        //if(==null)
+        //{
+
+        //}
 //        Log.e("single ID",ID);
         mPresenter.fetchExercisePlan();
         mPresenter.fetchPatientDetailData(ID);
@@ -165,15 +180,30 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     @Override
     public void refreshView(PatientDetail mData) {
 
-
-        patientDetail= mData;
+        if(patientDetail!=null&&patientDetail.getDev().equals(mData.getDev())&&patientDetail.getId().equals(mData.getId()))
+        {
+            devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
+            devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
+            //devParaChangeAdapter.notifyDataSetChanged();
+            int size=patientDetail.getSportDevName().size();
+            for(int i=0;i<size;i++)
+            {
+                 if(patientDetail.getSportDevName().get(i).equals(mData.getSportDevName().get(i))&&!patientDetail.getSportDevValue().get(i).equals(mData.getSportDevValue().get(i)))
+                      devParaChangeAdapter.notifyItemChanged(i);
+            }
+        }
+        else
+        {
+            patientDetail= mData;
+            devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
+            devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
+            devParaChangeAdapter.notifyDataSetChanged();
+        }
         patientParaAdapter.phyDevName=patientDetail.getPhyDevName();
         patientParaAdapter.phyDevValue=patientDetail.getPhyDevValue();
         patientParaAdapter.notifyDataSetChanged();
 
-        devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
-        devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
-        devParaChangeAdapter.notifyDataSetChanged();
+
 
         name.setText(patientDetail.getName());
         id.setText(patientDetail.getId());
@@ -198,7 +228,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         }
     }
 
-    private CompositeSubscription singleSubscription;
     public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_DATA,PatientDetail.class)
@@ -208,16 +237,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                         refreshView(s);
                     }
                 });
-        if (this.singleSubscription == null) {
-            singleSubscription = new CompositeSubscription();
-        }
-        singleSubscription.add(mSubscription);
-    }
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (singleSubscription != null &&  singleSubscription.hasSubscriptions()) {
-            this. singleSubscription.unsubscribe();
-        }
+        bindSubscription(mSubscription);
     }
 }

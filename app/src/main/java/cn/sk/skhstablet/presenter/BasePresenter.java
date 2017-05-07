@@ -44,10 +44,10 @@ public class BasePresenter<T extends BaseView> {
     }
 
     protected <T> void invoke(Observable<T> observable, Callback<T> callback) {
-        TcpUtils.invoke(mView, observable, callback);
+        TcpUtils.invoke((LifeSubscription)mView, observable, callback);
     }
     protected <T> void invoke(Observable<T> observable, Action1<T> callback) {
-        TcpUtils.invoke(mView, observable, callback);
+        TcpUtils.invoke((LifeSubscription)mView, observable, callback);
     }
     /**
      * 给子类检查返回集合是否为空

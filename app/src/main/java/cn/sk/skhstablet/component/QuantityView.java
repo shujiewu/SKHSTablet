@@ -72,7 +72,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         if (a.hasValue(R.styleable.QuantityView_qv_addButtonBackground)) {
             addButtonBackground = a.getDrawable(R.styleable.QuantityView_qv_addButtonBackground);
         }
-        addButtonTextColor = a.getColor(R.styleable.QuantityView_qv_addButtonTextColor, Color.BLACK);
+        addButtonTextColor = a.getColor(R.styleable.QuantityView_qv_addButtonTextColor, Color.WHITE);
 
         removeButtonText = getResources().getString(R.string.qv_remove);
         if (a.hasValue(R.styleable.QuantityView_qv_removeButtonText)) {
@@ -82,7 +82,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         if (a.hasValue(R.styleable.QuantityView_qv_removeButtonBackground)) {
             removeButtonBackground = a.getDrawable(R.styleable.QuantityView_qv_removeButtonBackground);
         }
-        removeButtonTextColor = a.getColor(R.styleable.QuantityView_qv_removeButtonTextColor, Color.BLACK);
+        removeButtonTextColor = a.getColor(R.styleable.QuantityView_qv_removeButtonTextColor, Color.WHITE);
 
         quantity = a.getInt(R.styleable.QuantityView_qv_quantity, 0);
         maxQuantity = a.getInt(R.styleable.QuantityView_qv_maxQuantity, Integer.MAX_VALUE);
@@ -138,6 +138,11 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         mTextViewQuantity.setOnClickListener(this);
     }
 
+    public TextView getmTextViewQuantity()
+    {
+        return mTextViewQuantity;
+    }
+
     @Override
     public void onClick(View v) {
         if (v == mButtonAdd) {
@@ -160,14 +165,14 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
             }
         } else if (v == mTextViewQuantity) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Change Quantity");
+            builder.setTitle("更改值");
 
             View inflate = LayoutInflater.from(getContext()).inflate(R.layout.qv_dialog_changequantity, null, false);
             final EditText et = (EditText) inflate.findViewById(R.id.qv_et_change_qty);
             et.setText(String.valueOf(quantity));
 
             builder.setView(inflate);
-            builder.setPositiveButton("Change", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("确定更改", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     String newQuantity = et.getText().toString();
@@ -176,7 +181,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
                         setQuantity(intNewQuantity);
                     }
                 }
-            }).setNegativeButton("Cancel", null);
+            }).setNegativeButton("取消", null);
             builder.show();
         }
     }

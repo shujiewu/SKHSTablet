@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
     @Override
     public void onBindViewHolder(DevParaChangeHolder holder, int position) {
         holder.bind(holder, sportDevName.get(position), sportDevValue.get(position));
-        holder.qvSportParaValue.setTag(position);
+        holder.qvSportParaValue.getmTextViewQuantity().setTag(position);
     }
 
     @Override
@@ -66,6 +67,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
             //tvParaValue2=(TextView) view.findViewById(R.id.paravalue2);
             //sbSportParaValue=(SeekBar)view.findViewById(R.id.changeSeekBarValue);
             qvSportParaValue=(QuantityView)view.findViewById(R.id.changeQVValue);
+
         }
         public void bind(final DevParaChangeHolder viewHolder, String paraName, String paraValue) {
             viewHolder.tvSportParaName.setText(paraName);
@@ -73,6 +75,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
             //viewHolder.sbSportParaValue.setMax(50);
            // viewHolder.sbSportParaValue.setProgress(Integer.valueOf(paraValue));
             viewHolder.qvSportParaValue.setQuantity(Integer.valueOf(paraValue));
+            viewHolder.qvSportParaValue.setMaxQuantity(50);
             if (!paraName.equals("坡度"))
             {
                 //viewHolder.tvSportParaValue.setFocusableInTouchMode(false);
@@ -116,17 +119,14 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                     {
                         if (mOnEditChangeListener != null) {
                             //注意这里使用getTag方法获取数据
-                            mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getTag(),s.toString());
+                            mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getmTextViewQuantity().getTag(),s.toString());
                         }
+                        Log.e("textchange","1");
                         //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
-                    }
-                    else
-                    {
-                        //viewHolder.sbSportParaValue.setProgress(0);
                     }
                 }
             };
-            //viewHolder.qvSportParaValue.addTextChangedListener(textWatcher);
+            viewHolder.qvSportParaValue.getmTextViewQuantity().addTextChangedListener(textWatcher);
         }
     }
 

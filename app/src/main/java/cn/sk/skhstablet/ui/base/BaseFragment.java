@@ -14,12 +14,14 @@ import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.BaseView;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.Stateful;
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by wyb on 2017/4/25.
  */
 
-public abstract class BaseFragment <P extends BasePresenter> extends Fragment implements Stateful {
+public abstract class BaseFragment <P extends BasePresenter> extends Fragment implements Stateful,LifeSubscription {
     @Inject
     protected P mPresenter;
 
@@ -124,5 +126,24 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
 
     @Override
     public void setState(int state) {
+    }
+
+
+
+    private CompositeSubscription mCompositeSubscription;
+    //用于添加rx的监听的在onDestroy中记得关闭不然会内存泄漏。
+    @Override
+    public void bindSubscription(Subscription subscription) {
+        if (this.mCompositeSubscription == null) {
+            this.mCompositeSubscription = new CompositeSubscription();
+        }
+        this.mCompositeSubscription.add(subscription);
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (this.mCompositeSubscription != null && mCompositeSubscription.hasSubscriptions()) {
+            this.mCompositeSubscription.unsubscribe();
+        }
     }
 }

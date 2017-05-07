@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.blankj.utilcode.utils.NetworkUtils;
+import com.blankj.utilcode.utils.ToastUtils;
 import com.nineoldandroids.view.ViewHelper;
 
 import java.nio.ByteOrder;

@@ -13,5 +13,7 @@ public interface IPatientListPresenter {
     }
     interface Presenter{
         void fetchPatientListData();
+        void sendMutiMonitorRequest();
+        void sendCancelSingleMonitorReq();
     }
 }

@@ -90,7 +90,6 @@
         <Button
             android:id="@+id/bt_login"
             android:layout_gravity="center_horizontal"
-
             android:layout_marginRight="40dp"
             android:layout_marginLeft="40dp"
             android:layout_marginTop="20dp"
@@ -100,7 +99,7 @@
             android:textColor="@color/white"
             android:text="登录"
             android:textSize="15sp"
-            android:background="@color/maincolor"
+            android:background="@drawable/selector_login_btn"
             >
         </Button>
 

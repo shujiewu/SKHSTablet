@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -105,6 +106,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         });*/
         initInject();
         recyclerView.setAdapter(mutiMonitorAdapter);
+        ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 
         mutiMonitorAdapter.setOnItemLongClickListener(new MutiMonitorAdapter.OnRecyclerViewItemLongClickListener(){
             @Override
@@ -121,6 +123,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
                 mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
             }
         });
+        registerFetchResponse();
         loadData();
 
 
@@ -138,10 +141,10 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
 
     @Override
     protected void loadData() {
-        if(mutiSubscription==null)
-        {
-            registerFetchResponse();
-        }
+        //if(mutiSubscription==null)
+        //{
+
+        //}
         mPresenter.fetchPatientDetailData();
     }
 
@@ -150,7 +153,10 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         mutiMonitorAdapter.patientDetailList=mDatas;
         mutiMonitorAdapter.notifyDataSetChanged();
     }
-
+    public void refreshView(PatientDetail mData,int position) {
+        mutiMonitorAdapter.patientDetailList.set(position,mData);
+        mutiMonitorAdapter.notifyItemChanged(position);
+    }
     @Override
     public void reSendRequest() {
         loadData();
@@ -159,6 +165,8 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
     private CompositeSubscription mutiSubscription;
     private HashMap<String,Integer> hasPatient=new HashMap<>();
     private int position=0;
+
+
     public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_DATA,PatientDetail.class)
@@ -167,13 +175,17 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
                     public void call(PatientDetail s) {
                         String id=s.getId();
                         if(hasPatient.containsKey(id))
+                        {
                             mDatas.set(hasPatient.get(id),s);
+                            refreshView(s,hasPatient.get(id));
+                        }
                         else
                         {
                             mDatas.add(s);
                             hasPatient.put(id,position++);
+                            refreshView(mDatas);
                         }
-                        refreshView(mDatas);
+
                     }
                 });
 
@@ -185,17 +197,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
                             reSendRequest();
                     }
                 });
-        if (this.mutiSubscription == null) {
-            mutiSubscription = new CompositeSubscription();
-        }
-        mutiSubscription.add(mSubscription);
-        mutiSubscription.add(mSubscriptionRequest);
-    }
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (mutiSubscription != null &&  mutiSubscription.hasSubscriptions()) {
-            this. mutiSubscription.unsubscribe();
-        }
+        bindSubscription(mSubscription);
+        bindSubscription(mSubscriptionRequest);
     }
 }

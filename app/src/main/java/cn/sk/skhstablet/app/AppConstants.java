@@ -18,9 +18,13 @@ public class AppConstants {
     public static  final int MUTI_DATA=2000;
     public static  final int SINGLE_DATA=3000;
 
-    public static  final  String url="172.21.19.1";
+    public static  final  String url="172.19.71.1";
     public static  final  int port=9999;
 
     public static final int RE_SEND_REQUEST=4000;
     public static final int RE_SEND_REQUEST_FAIL=5000;
+
+    public static final String PATIENT_SELECT_STATUS_FALSE="未选择";
+    public static final String PATIENT_SELECT_STATUS_TRUE="已选择";
+    public static final String PATIENT_SELECT_STATUS_MONITOR="正在监控";
 }

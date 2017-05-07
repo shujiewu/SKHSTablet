@@ -9,6 +9,7 @@ import com.blankj.utilcode.utils.ToastUtils;
 import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.tcp.Stateful;
 import cn.sk.skhstablet.presenter.BaseView;
+import cn.sk.skhstablet.ui.base.BaseFragment;
 import rx.Subscriber;
 
 /**
@@ -50,13 +51,18 @@ public class Callback<T> extends Subscriber<T> {
         ((BaseView) target).refreshView(data);
     }
     public void onfail() {
-        TcpUtils.reconnect();
-        //if (!NetworkUtils.isAvailableByPing()) {
-          /*  ToastUtils.showShortToast("你连接的网络有问题，请检查路由器");
+
+        if (!NetworkUtils.isConnected()) {
+            ToastUtils.showShortToast("你连接的网络有问题，请检查连接");
             if (target != null) {
-                target.setState(AppConstants.STATE_ERROR);
+                //target.setState(AppConstants.STATE_ERROR);
             }
-        */
+            return;
+        }
+        else
+        {
+            TcpUtils.reconnect();
+        }
        // }
         /*ToastUtils.showShortToast("程序员哥哥偷懒去了，快去举报他");
         if (target != null) {

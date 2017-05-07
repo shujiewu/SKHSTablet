@@ -17,6 +17,10 @@ import java.util.List;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.model.Patient;
 
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
+
 /**
  * Created by ldkobe on 2017/4/18.
  */
@@ -49,20 +53,20 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                if(mDatas.get(position).getIdcard().equals("未选择"))
+                if(mDatas.get(position).getSelectStatus().equals(PATIENT_SELECT_STATUS_FALSE))
                 {
-                    Log.e("1","1");
-
-                    mDatas.get(position).setIdcard("已选择");
-                    holder.idcard.setText("已选择");
-                    //    holder.idcard.setTextColor(Color.parseColor("#FFAD5B"));
+                    mDatas.get(position).setSelectStatus(PATIENT_SELECT_STATUS_TRUE);
+                    holder.tvSelectStatus.setText(PATIENT_SELECT_STATUS_TRUE);
                 }
-                else if(mDatas.get(position).getIdcard().equals("已选择"))
+                else if(mDatas.get(position).getSelectStatus().equals(PATIENT_SELECT_STATUS_TRUE))
                 {
-                    Log.e("2","2");
-                    mDatas.get(position).setIdcard("未选择");
-                    holder.idcard.setText("未选择");
-                    //    holder.idcard.setTextColor(Color.parseColor("#3F51B5"));
+                    mDatas.get(position).setSelectStatus(PATIENT_SELECT_STATUS_FALSE);
+                    holder.tvSelectStatus.setText(PATIENT_SELECT_STATUS_FALSE);
+                }
+                else if(mDatas.get(position).getSelectStatus().equals(PATIENT_SELECT_STATUS_MONITOR))
+                {
+                    mDatas.get(position).setSelectStatus(PATIENT_SELECT_STATUS_FALSE);
+                    holder.tvSelectStatus.setText(PATIENT_SELECT_STATUS_FALSE);
                 }
 
                 view.setPressed(true);
@@ -174,12 +178,12 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         TextView rfid;
         TextView idcard;
         TextView gender;
-
+        TextView tvSelectStatus;
         public PatientListHolder(View view) {
             super(view);
             name = (TextView) view.findViewById(R.id.name);
             rfid = (TextView) view.findViewById(R.id.rfid);
-            idcard = (TextView) view.findViewById(R.id.idcard);
+            tvSelectStatus = (TextView) view.findViewById(R.id.idcard);
             gender=(TextView) view.findViewById(R.id.gender);
             TextWatcher textWatcher = new TextWatcher() {
 
@@ -196,19 +200,21 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    if (s.toString().equals("未选择"))
-                        idcard.setTextColor(Color.parseColor("#3F51B5"));
-                    else if(s.toString().equals("已选择"))
-                        idcard.setTextColor(Color.parseColor("#FFAD5B"));
+                    if (s.toString().equals(PATIENT_SELECT_STATUS_FALSE))
+                        tvSelectStatus.setTextColor(Color.parseColor("#1E88E5"));
+                    else if(s.toString().equals(PATIENT_SELECT_STATUS_TRUE))
+                        tvSelectStatus.setTextColor(Color.parseColor("#FFAD5B"));
+                    else
+                        tvSelectStatus.setTextColor(Color.parseColor("#29c741"));
                 }
             };
-            idcard.addTextChangedListener(textWatcher);
+            tvSelectStatus.addTextChangedListener(textWatcher);
         }
 
         public void bind(PatientListHolder viewHolder, Patient patient) {
             viewHolder.name.setText(patient.getName());
             viewHolder.rfid.setText(patient.getRfid());
-            viewHolder.idcard.setText(patient.getIdcard());
+            viewHolder.tvSelectStatus.setText(patient.getSelectStatus());
             viewHolder.gender.setText(patient.getGender());
         }
     }

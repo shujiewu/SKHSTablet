@@ -34,7 +34,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/changeQVValue"
         android:layout_width="0dp"
-        android:layout_weight="0.5"
+        android:layout_weight="0.6"
         android:layout_height="match_parent"
         app:qv_removeButtonBackground="@color/maincolor"
         app:qv_addButtonBackground="@color/main_bg_color"

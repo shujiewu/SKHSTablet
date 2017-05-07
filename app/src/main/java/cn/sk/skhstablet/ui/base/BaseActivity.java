@@ -18,6 +18,9 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
+import com.blankj.utilcode.utils.NetworkUtils;
+import com.blankj.utilcode.utils.ToastUtils;
+
 import javax.inject.Inject;
 
 import cn.sk.skhstablet.component.LoadingPage;
@@ -44,6 +47,7 @@ public abstract class BaseActivity<T extends BasePresenter> extends AppCompatAct
         //initUI();
         //initInject();
         networkStateReceiver = new NetworkStateReceiver();
+
     }
 
     @Override
