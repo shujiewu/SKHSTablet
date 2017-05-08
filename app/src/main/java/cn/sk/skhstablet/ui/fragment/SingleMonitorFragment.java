@@ -80,7 +80,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         Bundle args = getArguments();
         if (args != null) {
             singleMonitorID = args.getString("singleMonitorID");
-            Log.e("single ID1",singleMonitorID);
+            //Log.e("single ID1",singleMonitorID);
         }
         Log.e("single ID1","1212");
     }

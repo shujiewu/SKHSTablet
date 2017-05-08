@@ -315,7 +315,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 fm.executePendingTransactions();
 
 
-                if(!newSingleMonitorID.equals(singleMonitorID))
+                if(newSingleMonitorID!=null&&!newSingleMonitorID.equals(singleMonitorID))
                 {
                     singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.loadData(singleMonitorID);

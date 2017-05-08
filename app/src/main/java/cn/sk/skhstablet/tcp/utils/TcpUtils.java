@@ -126,6 +126,7 @@ public class TcpUtils {
                         })
                         .channelOption(ChannelOption.SO_KEEPALIVE, true)
                         .channelOption(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000) //服务器掉线还要等五秒，自己掉线直接重连
+                        //.readTimeOut(5, TimeUnit.SECONDS) //5秒未读到数据
                         .createConnectionRequest()
 
                         .subscribe(new Observer<Connection<AbstractProtocol, String>>() {
@@ -303,8 +304,12 @@ public class TcpUtils {
                         PatientDetail patientDetail=new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue);
                         patientDetail.setId(String.valueOf(exercisedata.getPatientId()));
                         patientDetail.setPercent(String.valueOf(exercisedata.getExercisePlanCompletionRate()));
-                        RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
-                        RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "2", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
+                        //for(int i=0;i<8;i++)
+                        //{
+                         //   patientDetail.setId(String.valueOf(i));
+                            RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
+                       // }
+                        // RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "2", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                         break;
                 }
 
