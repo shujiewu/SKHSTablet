@@ -67,9 +67,14 @@ PaperButton nextBt;
     }
 
     @Override
+    protected int getLayoutId() {
+        return 0;
+    }
+
+    @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initView();
+        initView(view);
         TextListener();
     }
 
@@ -147,7 +152,8 @@ PaperButton nextBt;
 
     }
 
-    private void initView() {
+    @Override
+    protected void initView(View view)  {
         //发送验证码点击事件
  /*       sendsmscode.setOnClickListener(new View.OnClickListener() {
             @Override

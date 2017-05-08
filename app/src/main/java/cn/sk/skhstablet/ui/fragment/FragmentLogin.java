@@ -22,6 +22,7 @@ import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import cn.sk.skhstablet.app.AppConstants;
+//import cn.sk.skhstablet.injector.component.fragment.DaggerLoginComponent;
 import cn.sk.skhstablet.injector.component.fragment.DaggerLoginComponent;
 import cn.sk.skhstablet.presenter.ILoginPresenter;
 import cn.sk.skhstablet.presenter.impl.LoginPresenterImpl;
@@ -74,19 +75,27 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         return x.view().inject(this,inflater,container);
     }
 
-
+    @Override
+    protected int getLayoutId() {
+        return 0;
+    }
 
     @Override
+    protected void initView(View view)  {
+
+    }
+
+
+   @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         initInject();
         if (mPresenter!=null){
-            mPresenter.setView(this);}
+            mPresenter.setView(this);
+        }
         initLogin();
         textListener();
-
-
     }
 
     private void textListener() {
@@ -171,7 +180,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 startActivity(intent);
                 getActivity().overridePendingTransition(R.anim.fade,
                         R.anim.my_alpha_action);*/
-                registerFetchResponse();
+                mPresenter.registerFetchResponse();
                 loadData();
 
                 bt_login.setEnabled(false);
@@ -251,7 +260,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
 
     private CompositeSubscription mutiSubscription;
 
-    public void registerFetchResponse()
+    /*public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
@@ -288,6 +297,12 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         bindSubscription(mSubscription);
         bindSubscription(mSubscriptionRequest);
         bindSubscription(mSubscriptionRequestFail);
+    }*/
+
+    @Override
+    public void setLoginDisable() {
+        bt_login.setEnabled(true);
+        login_progress.setVisibility(View.INVISIBLE);
     }
 }
 	

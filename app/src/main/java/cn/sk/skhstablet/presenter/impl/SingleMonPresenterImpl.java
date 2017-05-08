@@ -6,11 +6,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
+import cn.sk.skhstablet.rx.RxBus;
+import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
+import cn.sk.skhstablet.ui.base.BaseFragment;
+import rx.Subscription;
 import rx.functions.Action1;
 
 /**
@@ -35,6 +40,19 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动4分钟", "第二段：以1米每秒的速度运动4分钟")));
         mView.refreshExercisePlan(armTypes,arms);
     }
+
+    @Override
+    public void registerFetchResponse() {
+        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_DATA,PatientDetail.class)
+                .subscribe(new Action1<PatientDetail>() {
+                    @Override
+                    public void call(PatientDetail s) {
+                        mView.refreshView(s);
+                    }
+                });
+        ((LifeSubscription)mView).bindSubscription(mSubscription);
+    }
+
     public void sendRequest(String ID)
     {
         invoke(TcpUtils.send(ID), new Action1<Void>() {

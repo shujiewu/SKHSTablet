@@ -5,6 +5,7 @@ import android.app.Application;
 import com.blankj.utilcode.utils.Utils;
 
 import cn.sk.skhstablet.injector.component.AppComponent;
+//import cn.sk.skhstablet.injector.component.DaggerAppComponent;
 import cn.sk.skhstablet.injector.component.DaggerAppComponent;
 import cn.sk.skhstablet.injector.module.AppModule;
 

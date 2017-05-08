@@ -36,8 +36,6 @@
         android:layout_width="0dp"
         android:layout_weight="0.6"
         android:layout_height="match_parent"
-        app:qv_removeButtonBackground="@color/maincolor"
-        app:qv_addButtonBackground="@color/main_bg_color"
         app:qv_quantity="10" >
     </cn.sk.skhstablet.component.QuantityView>
 />

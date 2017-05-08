@@ -6,8 +6,10 @@ package cn.sk.skhstablet.presenter;
 
 public interface ILoginPresenter {
     interface View extends BaseView<Boolean>{
+        void setLoginDisable();
     }
     interface Presenter{
         void fetchStateData();
+        void registerFetchResponse();
     }
 }

@@ -308,6 +308,7 @@ public class TcpUtils {
                         //{
                          //   patientDetail.setId(String.valueOf(i));
                             RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
+
                        // }
                         // RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "2", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                         break;

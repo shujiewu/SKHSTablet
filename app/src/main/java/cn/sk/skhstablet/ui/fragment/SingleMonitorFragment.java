@@ -20,6 +20,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import cn.sk.skhstablet.app.AppConstants;
+//import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
 import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.SingleMonitorModule;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
@@ -35,6 +36,7 @@ import cn.sk.skhstablet.component.TracksItemDecorator;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.ui.base.BaseFragment;
+
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -82,11 +84,11 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             singleMonitorID = args.getString("singleMonitorID");
             //Log.e("single ID1",singleMonitorID);
         }
-        Log.e("single ID1","1212");
+        //Log.e("single ID1","1212");
     }
-    View view;
+    //View view;
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    /*public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         view = inflater.inflate(R.layout.fragment_single_monitor, container,false);
@@ -149,10 +151,9 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
       //  mainActivity.addRightTopItem(textItem);
 
         //loadData(singleMonitorID);
-        Log.e("single ID1","121");
-        registerFetchResponse();
+        mPresenter.registerFetchResponse();
         return view;
-    }
+    }*/
 
     @Override
     protected void initInject() {
@@ -168,11 +169,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
 
     public void loadData(String ID) {
-        //if(==null)
-        //{
-
-        //}
-//        Log.e("single ID",ID);
         mPresenter.fetchExercisePlan();
         mPresenter.fetchPatientDetailData(ID);
     }
@@ -228,7 +224,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         }
     }
 
-    public void registerFetchResponse()
+    /*public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_DATA,PatientDetail.class)
                 .subscribe(new Action1<PatientDetail>() {
@@ -238,5 +234,61 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                     }
                 });
         bindSubscription(mSubscription);
+    }*/
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.fragment_single_monitor;
+    }
+
+    @Override
+    protected void initView(View view)  {
+        initInject();
+        if (mPresenter!=null){
+            mPresenter.setView(this);}
+
+        mainActivity=(MainActivity) getActivity();
+        name = (TextView) view.findViewById(R.id.sname);
+        id = (TextView) view.findViewById(R.id.sid);
+        dev = (TextView) view.findViewById(R.id.sdev);
+        percent=(TextView) view.findViewById(R.id.spercent);
+
+        rySportParaView = (RecyclerView) view.findViewById(R.id.sry_sport_para);
+        rySportParaView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rySportParaView.setAdapter(devParaChangeAdapter);
+        TracksItemDecorator itemDecorator = new TracksItemDecorator(10);
+        rySportParaView.addItemDecoration(itemDecorator);
+        devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
+                                                         @Override
+                                                         public void SaveEdit(int position, String devValue) {
+                                                             //Log.e("testsava","1");
+                                                             //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
+                                                             String devName=devParaChangeAdapter.sportDevName.get(position);
+                                                             if(devValue.equals(devParaChangeAdapter.sportDevValue.get(position))&&changeDevPara.containsKey(devName))
+                                                                 changeDevPara.remove(devName);
+                                                             else
+                                                             {
+                                                                 changeDevPara.put(devName,devValue);
+                                                             }
+                                                             if(!mainActivity.hasMenuItem(mainActivity.SAVE_EDIT))
+                                                             {
+                                                                 TextItem textItem = new TextItem(mainActivity, mainActivity.SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
+                                                                 mainActivity.addRightTopItem(textItem);
+                                                             }
+                                                         }
+                                                     }
+        );
+
+
+
+        ryPhyParaView=(RecyclerView)view.findViewById(R.id.sry_phy_para);
+        itemDecorator = new TracksItemDecorator(10);
+        ryPhyParaView.addItemDecoration(itemDecorator);
+        ryPhyParaView.setLayoutManager(new GridLayoutManager(getActivity(),2));
+        ryPhyParaView.setAdapter(patientParaAdapter);
+
+        elvExPlan = (ExpandableListView) view.findViewById(R.id.elv_exercise_plan);
+        elvExPlan.setAdapter(exercisePlanAdapter);
+        mPresenter.registerFetchResponse();
     }
 }

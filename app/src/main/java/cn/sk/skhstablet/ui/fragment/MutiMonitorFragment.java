@@ -23,6 +23,8 @@ import javax.inject.Inject;
 //mport cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 import cn.sk.skhstablet.app.AppConstants;
+//import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
+import cn.sk.skhstablet.component.LoadingPage;
 import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.MutiMonitorModule;
 import cn.sk.skhstablet.presenter.IMutiMonPresenter;
@@ -47,63 +49,19 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
 
     @Inject
     MutiMonitorAdapter mutiMonitorAdapter;
-    private List<PatientDetail> mDatas=new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
     View view;
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    /*public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //mDatas= PatientDetailList.PATIENTS;
-        view=inflater.inflate(R.layout.fragment_muti_monitor,container,false);
+        view=inflater.inflate(R.layout.basefragment_state_loading,container,false);
+        return view;
+       view=inflater.inflate(R.layout.fragment_muti_monitor,container,false);
         recyclerView = (RecyclerView) view.findViewById(R.id.ry_muti_monitor);
-      //  recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),1));
-       // recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL,false));
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
-        /*{
-            @Override
-            public void onMeasure(RecyclerView.Recycler recycler, RecyclerView.State state, int widthSpec, int heightSpec) {
-                super.onMeasure(recycler, state, widthSpec, heightSpec);
-                int measuredWidth = recyclerView.getMeasuredWidth();
-                int measuredHeight = recyclerView.getMeasuredHeight();
-                Log.e("menseh", String.valueOf(measuredHeight));
-                Log.e("mensw", String.valueOf(measuredWidth ));
-                int myMeasureHeight = 0;
-                int count = state.getItemCount();
-                Log.e("mensw", String.valueOf(count));
-           /*     for (int i = 0; i < count; i++) {
-                    View view = recycler.getViewForPosition(i);
-                    if (view != null) {
-                        /*if (myMeasureHeight < measuredHeight && i % 2 == 0) {
-                            RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
-                            int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
-                                    getPaddingLeft() + getPaddingRight(), p.width);
-                            int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
-                                    getPaddingTop() + getPaddingBottom(), p.height);
-                            view.measure(childWidthSpec, childHeightSpec);
-                            myMeasureHeight += view.getMeasuredHeight() + p.bottomMargin + p.topMargin;
-                        }
-                        RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) view.getLayoutParams();
-                        int childWidthSpec = ViewGroup.getChildMeasureSpec(widthSpec,
-                                getPaddingLeft() + getPaddingRight(), p.width);
-                        int childHeightSpec = ViewGroup.getChildMeasureSpec(heightSpec,
-                                getPaddingTop() + getPaddingBottom(), p.height);
-                        view.measure(childWidthSpec, childHeightSpec);
-                        myMeasureHeight += view.getMeasuredHeight() + p.bottomMargin + p.topMargin;
-                        recycler.recycleView(view);
-                    }
-                }
-                  //DisplayMetrics  dm = new DisplayMetrics();
-                  //getWindowManager().getDefaultDisplay().getMetrics(dm);
-                   int screenHeight = getActivity().getWindowManager().getDefaultDisplay().getHeight();
-                Log.e("mese",String.valueOf(screenHeight));
-//                    Log.i("Height", "" + Math.min(measuredHeight, myMeasureHeight));
-                //myMeasureHeight=
-                setMeasuredDimension(measuredWidth,screenHeight);
-            }
-
-        });*/
         initInject();
         recyclerView.setAdapter(mutiMonitorAdapter);
         ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
@@ -113,22 +71,69 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
             public void onItemLongClick(View view , String data){
                 //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
                 MainActivity mainActivity=(MainActivity) getActivity();
-                //   view.setPressed(true);
-                //    view.postDelayed(() -> {
                 view.setPressed(false);
-
-                //callback.onClick(holder.getAdapterPosition());
-                //    }, 200);
                 mainActivity.newSingleMonitorID=data;
                 mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
             }
         });
-        registerFetchResponse();
+        mPresenter.registerFetchResponse();
         loadData();
-
-
         return view;
+    }*/
+    /*@Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        //return container;
+        if (mLoadingPage == null) {
+            mLoadingPage = new LoadingPage(getContext(),container,inflater) {
+                @Override
+                protected void initView() {
+                    MutiMonitorFragment.this.contentView = this.contentView;
+                        //bind = ButterKnife.bind(BaseFragment.this, contentView);
+                    MutiMonitorFragment.this.initView(this.contentView);
+                }
+
+                @Override
+                protected void loadData() {
+                    MutiMonitorFragment.this.loadData();
+                }
+
+                @Override
+                protected int getLayoutId() {
+                    return MutiMonitorFragment.this.getLayoutId();
+                }
+            };
+        }
+        loadBaseData();
+        this.setState(AppConstants.STATE_SUCCESS);
+        return mLoadingPage;
+    }*/
+    @Override
+    protected int getLayoutId() {
+        return R.layout.fragment_muti_monitor;
     }
+
+    @Override
+    protected void initView(View view) {
+        recyclerView = (RecyclerView) view.findViewById(R.id.ry_muti_monitor);
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
+        initInject();
+        recyclerView.setAdapter(mutiMonitorAdapter);
+        ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+
+        mutiMonitorAdapter.setOnItemLongClickListener(new MutiMonitorAdapter.OnRecyclerViewItemLongClickListener(){
+            @Override
+            public void onItemLongClick(View view , String data){
+                //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
+                MainActivity mainActivity=(MainActivity) getActivity();
+                view.setPressed(false);
+                mainActivity.newSingleMonitorID=data;
+                mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
+            }
+        });
+        mPresenter.registerFetchResponse();
+        //loadData();
+    }
+
 
     @Override
     protected void initInject() {
@@ -141,18 +146,15 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
 
     @Override
     protected void loadData() {
-        //if(mutiSubscription==null)
-        //{
-
-        //}
         mPresenter.fetchPatientDetailData();
     }
 
     @Override
     public void refreshView(List<PatientDetail> mData) {
-        mutiMonitorAdapter.patientDetailList=mDatas;
+        mutiMonitorAdapter.patientDetailList=mData;
         mutiMonitorAdapter.notifyDataSetChanged();
     }
+    @Override
     public void refreshView(PatientDetail mData,int position) {
         mutiMonitorAdapter.patientDetailList.set(position,mData);
         mutiMonitorAdapter.notifyItemChanged(position);
@@ -162,8 +164,9 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         loadData();
     }
 
-    private CompositeSubscription mutiSubscription;
-    private HashMap<String,Integer> hasPatient=new HashMap<>();
+    //private CompositeSubscription mutiSubscription;
+
+    /*private HashMap<String,Integer> hasPatient=new HashMap<>();
     private int position=0;
 
 
@@ -199,5 +202,5 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
                 });
         bindSubscription(mSubscription);
         bindSubscription(mSubscriptionRequest);
-    }
+    }*/
 }

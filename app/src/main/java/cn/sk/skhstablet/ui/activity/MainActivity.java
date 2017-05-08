@@ -30,11 +30,13 @@ import javax.inject.Inject;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.PatientListAdapter;
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
-import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.injector.component.fragment.DaggerMainActivtityComponent;
+import cn.sk.skhstablet.tcp.LifeSubscription;
+//import cn.sk.skhstablet.injector.component.fragment.DaggerMainActivtityComponent;
 import cn.sk.skhstablet.injector.module.activity.MainActivityModule;
 import cn.sk.skhstablet.presenter.IPatientListPresenter;
 import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
@@ -49,6 +51,7 @@ import rx.subscriptions.CompositeSubscription;
 
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
+import static cn.sk.skhstablet.app.AppConstants.STATE_LOADING;
 
 public class MainActivity extends BorderActivity implements IPatientListPresenter.View,LifeSubscription {
     private RecyclerView mRecyclerView;
@@ -306,6 +309,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 if (singleMonitorFragment==null){
                     singleMonitorFragment=SingleMonitorFragment.newInstance(newSingleMonitorID);
                     Log.e("TestA", "view == 2");
+
                     ft.add(R.id.contentView,singleMonitorFragment);
 
                 }else {
@@ -317,6 +321,9 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
                 if(newSingleMonitorID!=null&&!newSingleMonitorID.equals(singleMonitorID))
                 {
+                    //singleMonitorFragment.setState(STATE_LOADING);
+                    if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+                        singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
                     singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.loadData(singleMonitorID);
                     singleMonitorFragment.getChangeDevPara().clear();
@@ -424,7 +431,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 }
                 patientListAdapter.notifyDataSetChanged();
                 hidePatientList();
-                sentMonitorRequest();
+                sendMonitorRequest();
                 //new Handler().post(new Runnable() {
                 //    public void run() {
                  //       removeTopItem(STARTMONITOR);
@@ -513,9 +520,13 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     {
         mPresenter.fetchPatientListData();
     }
-    void sentMonitorRequest()
+    void sendMonitorRequest()
     {
+        mutiMonitorFragment.setState(STATE_LOADING);
         mPresenter.sendMutiMonitorRequest();
+
+        if(mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+            mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
     }
 
 

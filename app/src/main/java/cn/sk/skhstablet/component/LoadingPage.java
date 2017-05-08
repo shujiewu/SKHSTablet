@@ -5,6 +5,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -31,11 +32,10 @@ public abstract class LoadingPage extends FrameLayout {
     private ImageView img;
 
     public int state = AppConstants.STATE_UNKNOWN;
-
     private Context mContext;
-
     public LoadingPage(Context context) {
-        this(context,null);
+        this(context,null,0);
+        init();//初始化4种界面
     }
 
     public LoadingPage(Context context, AttributeSet attrs) {
@@ -45,11 +45,12 @@ public abstract class LoadingPage extends FrameLayout {
     public LoadingPage(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mContext = context;
-        init();//初始化4种界面
+        this.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
 
     private void init() {
+
         this.setBackgroundColor(getResources().getColor(R.color.colorPageBg));
         //把loadingView添加到frameLayout上
         if (loadingView == null) {
@@ -67,12 +68,13 @@ public abstract class LoadingPage extends FrameLayout {
             errorView = createErrorView();
             this.addView(errorView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         }
+
         showPage();//根据状态显示界面
     }
 
 
     private View createLoadingView() {
-        loadingView = LayoutInflater.from(mContext).inflate(R.layout.basefragment_state_loading, null);
+        loadingView = LayoutInflater.from(mContext).inflate(R.layout.basefragment_state_loading,null);
         img = (ImageView) loadingView.getRootView().findViewById(R.id.img_progress);
         // 加载动画 这边也可以直接用progressbar 可以看看topnews页下拉刷新就是只用用progressbar控制动画
         mAnimationDrawable = (AnimationDrawable) img.getDrawable();
@@ -141,7 +143,7 @@ public abstract class LoadingPage extends FrameLayout {
 
         if (state == STATE_SUCCESS) {
             if (contentView == null) {
-                contentView = LayoutInflater.from(mContext).inflate(getLayoutId(), null);
+                contentView = LayoutInflater.from(mContext).inflate(getLayoutId(),null);
                 addView(contentView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
                 initView();
             }

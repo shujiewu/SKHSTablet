@@ -3,12 +3,15 @@ package cn.sk.skhstablet.ui.base;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import javax.inject.Inject;
 
+
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.component.LoadingPage;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.BaseView;
@@ -34,17 +37,19 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
     public LoadingPage mLoadingPage;
 
     protected View contentView;
+
     //private Unbinder bind;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        /*if (mLoadingPage == null) {
+        //return container;
+        if (mLoadingPage == null) {
             mLoadingPage = new LoadingPage(getContext()) {
                 @Override
                 protected void initView() {
                     if (isFirst) {
                         BaseFragment.this.contentView = this.contentView;
                         //bind = ButterKnife.bind(BaseFragment.this, contentView);
-                        //BaseFragment.this.initView();
+                        BaseFragment.this.initView(this.contentView);
                         isFirst = false;
                     }
                 }
@@ -54,7 +59,7 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
                     BaseFragment.this.loadData();
                 }
 
-                /*@Override
+                @Override
                 protected int getLayoutId() {
                     return BaseFragment.this.getLayoutId();
                 }
@@ -62,11 +67,21 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
         }
         isPrepared = true;
         loadBaseData();
-        return mLoadingPage;*/
-        //initInject();
-        return container;
+        //this.setState(AppConstants.STATE_EMPTY);
+        return mLoadingPage;
+    }
+
+    @Override
+    public void setState(int state) {
+        mLoadingPage.state = state;
+        mLoadingPage.showPage();
+    }
+
+    public int getState() {
+        return mLoadingPage.state;
     }
     public void loadBaseData() {
+        //有一个为false就返回
         if (!mIsVisible || !isPrepared || !isFirst) {
             return;
         }
@@ -95,12 +110,12 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
      * 在 onActivityCreated 之后第一次显示加载数据，只加载一次
      */
     protected void onVisible() {
-       /* if (isFirst) {
+        if (isFirst) {
             initInject();
             if (mPresenter!=null){
-                mPresenter.setView(this);}
+                mPresenter.setLifeSubscription(this);}
         }
-        loadBaseData();//根据获取的数据来调用showView()切换界面*/
+        loadBaseData();//根据获取的数据来调用showView()切换界面
     }
 
     /**
@@ -109,13 +124,13 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
      *
      * @return
      */
-    //protected abstract int getLayoutId();
+    protected abstract int getLayoutId();
     /**
      * 3
      * 子类关于View的操作(如setAdapter)都必须在这里面，会因为页面状态不为成功，而binding还没创建就引用而导致空指针。
      * loadData()和initView只执行一次，如果有一些请求需要二次的不要放到loadData()里面。
      */
-    //protected abstract void initView();
+    protected abstract void initView(View view);
 
     public void showSnackar(View view ,String string){
         Snackbar.make(view, string, Snackbar.LENGTH_LONG)
@@ -124,9 +139,13 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
     protected abstract void initInject();
     protected abstract void loadData();
 
-    @Override
-    public void setState(int state) {
-    }
+
+
+
+
+
+
+
 
 
 
@@ -142,6 +161,9 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
     @Override
     public void onDetach() {
         super.onDetach();
+        //if (bind != null) {
+       //     bind.unbind();
+       // }
         if (this.mCompositeSubscription != null && mCompositeSubscription.hasSubscriptions()) {
             this.mCompositeSubscription.unsubscribe();
         }

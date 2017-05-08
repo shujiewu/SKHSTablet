@@ -15,5 +15,6 @@ public interface ISingleMonPresenter {
     interface Presenter{
         void fetchPatientDetailData(String ID);
         void fetchExercisePlan();
+        void registerFetchResponse();
     }
 }

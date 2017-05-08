@@ -3,6 +3,7 @@ package cn.sk.skhstablet.presenter.impl;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.IMutiMonPresenter;
 import cn.sk.skhstablet.rx.RxBus;
+import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.Callback;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import rx.Observable;
@@ -31,14 +33,52 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
         sendRequest();
     }
 
+    private List<PatientDetail> mDatas=new ArrayList<>();
+    private HashMap<String,Integer> hasPatient=new HashMap<>();
+    private int position=0;
+    @Override
+    public void registerFetchResponse() {
+        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_DATA,PatientDetail.class)
+                .subscribe(new Action1<PatientDetail>() {
+                    @Override
+                    public void call(PatientDetail s) {
+                        String id=s.getId();
+                        if(hasPatient.containsKey(id))
+                        {
+                            mDatas.set(hasPatient.get(id),s);
+                            mView.refreshView(s,hasPatient.get(id));
+                        }
+                        else
+                        {
+                            mDatas.add(s);
+                            hasPatient.put(id,position++);
+                            mView.refreshView(mDatas);
+                        }
+
+                    }
+                });
+
+        Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        if(s==true)
+                            mView.reSendRequest();
+                    }
+                });
+        ((LifeSubscription)mView).bindSubscription(mSubscription);
+        ((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
+    }
+
     public void sendRequest()
     {
-        invoke(TcpUtils.send("hello worldx!"), new Action1<Void>() {
+        /*invoke(TcpUtils.send("hello worldx!"), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
                 System.out.println("send success!");
             }
-        });
+        });*/
+
     }
     List<PatientDetail> mData=new ArrayList<>();
     /*public void registerFetchResponse()
