@@ -28,4 +28,20 @@ public class CommandTypeConstant {
 	/** 获取体外反博病人列表响应 **/
 	public static final byte ECP_PATIENT_LIST_RESPONSE = (byte) 0x45;
 	public static final byte LOGIN_SUCCESS = (byte) 0x10;
+
+
+
+	public static final byte SINGLE_MONITOR_REQUEST=(byte)0xD2;
+	public static final byte MUTI_MONITOR_REQUEST=(byte)0xD1;
+	public static final byte PATIENT_LIST_REQUEST=(byte)0xD3;
+
+	public static final byte LOGIN_REQUEST=(byte)0xD6;
+	public static final byte LOGOUT_REQUEST=(byte)0xD7;
+	public static final byte CHANGE_KEY_REQUEST=(byte)0xD8;
+
+	public static final byte DEV_NAME_REQUEST=(byte)0xD9;
+	public static final byte MONITOR_DEV_FORM_REQUEST=(byte)0xDC;
+	public static final byte SPORT_DEV_FORM_REQUEST=(byte)0xDD;
+
+
 }

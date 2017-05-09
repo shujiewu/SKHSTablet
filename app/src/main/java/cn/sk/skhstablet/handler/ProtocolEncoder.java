@@ -28,18 +28,18 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		encodeVersion(msg.getVersion(), out);
 		out.writeByte(msg.getCommand());
 		encodeDeviceId(msg.getDeviceId(), out);
-		AbstractProtocol response = null;
+		AbstractProtocol request = null;
 		/*if (msg instanceof AbstractProtocol) {
 			response = (AbstractProtocol) msg;
 			out.writeByte(response.getStatus());
 		}*/
 		switch (msg.getCommand()) {
 		case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
-			encodeExercisePhysiologicalDataResponse((ExercisePhysiologicalDataResponse) response, out);
+			encodeExercisePhysiologicalDataResponse((ExercisePhysiologicalDataResponse) request, out);
 			break;
 		}
 		case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
-			encodeExerciseEquipmentDataResponse((ExerciseEquipmentDataResponse) response, out);
+			encodeExerciseEquipmentDataResponse((ExerciseEquipmentDataResponse)request, out);
 			break;
 		}
 		}

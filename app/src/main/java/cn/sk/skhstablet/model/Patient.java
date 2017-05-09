@@ -10,10 +10,10 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
  */
 
 public class Patient implements Comparable<Patient>, Serializable{
-    private String name;
+
     private String rfid;
     private String idcard;
-    private String gender;
+
     private String selectStatus;
 
 
@@ -68,4 +68,15 @@ public class Patient implements Comparable<Patient>, Serializable{
     public int compareTo(Patient patient) {
         return name.compareTo(patient.name);
     }
+
+
+    private String name;
+    private String gender;
+    private String hospitalNumber;
+    private String patientID;
+    private byte devType;
+    private long deviceNumber;
+    private byte sportState;
+    private byte connectState;
+    private byte monConnectState;
 }
