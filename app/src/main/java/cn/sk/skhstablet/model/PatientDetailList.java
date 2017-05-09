@@ -9,8 +9,8 @@ import java.util.List;
  */
 
 public class PatientDetailList {
-    public static List<String> phyName=new ArrayList<String>(Arrays.asList("HR","SpO2","NIBR","RESP","test1","test2","test3"));
-    public static List<String> phyValue=new ArrayList<String>(Arrays.asList("60","99","80/130","30","100","200","300"));
+    public static List<String> phyName=new ArrayList<String>(Arrays.asList("HR","SpO2","NIBR","RESP"));
+    public static List<String> phyValue=new ArrayList<String>(Arrays.asList("60","99","80/130","30"));
 
     public static List<String> sportName=new ArrayList<String>(Arrays.asList("时间","距离","卡路里","速度","坡度"));
     public static List<String> sportValue=new ArrayList<String>(Arrays.asList("13","40","30","5","6"));

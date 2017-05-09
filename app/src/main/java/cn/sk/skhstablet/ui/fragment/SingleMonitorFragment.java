@@ -285,6 +285,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         itemDecorator = new TracksItemDecorator(10);
         ryPhyParaView.addItemDecoration(itemDecorator);
         ryPhyParaView.setLayoutManager(new GridLayoutManager(getActivity(),2));
+        patientParaAdapter.setPageState(AppConstants.SINGLE_DATA);
         ryPhyParaView.setAdapter(patientParaAdapter);
 
         elvExPlan = (ExpandableListView) view.findViewById(R.id.elv_exercise_plan);

@@ -48,19 +48,53 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin"
-            android:paddingBottom="10dp"
             android:textSize="12sp"
             android:textColor="@android:color/darker_gray"
             />
-
-        <TextView
-            android:id="@+id/idcard"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:layout_marginLeft="@dimen/margin"
-            android:textColor="@color/colorPrimary"
-            />
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="4dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:text="生理仪    "
+        android:layout_marginLeft="@dimen/margin"
+        android:textColor="@android:color/white"
+        />
+    <TextView
+        android:id="@+id/tvPhyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:text="在线"
+        android:layout_marginLeft="@dimen/margin"
+        android:textColor="@android:color/holo_green_light"
+        />
+</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="运动设备"
+                android:layout_marginLeft="@dimen/margin"
+                android:textColor="@android:color/white"
+                />
+            <TextView
+                android:id="@+id/tvSportState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="跑步机"
+                android:layout_marginLeft="@dimen/margin"
+                android:textColor="@android:color/holo_green_light"
+                />
+        </LinearLayout>
 
     </LinearLayout>
     <LinearLayout
@@ -68,15 +102,24 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_centerVertical="true"
-        android:layout_weight="0.1"
+        android:layout_weight="0.2"
         >
         <TextView
             android:id="@+id/status"
             android:layout_width="10dp"
             android:layout_height="10dp"
             android:layout_marginLeft="@dimen/margin"
-            android:layout_marginTop="@dimen/margin"
+            android:layout_marginTop="4dp"
             android:background="@drawable/status_green"
+            />
+        <TextView
+            android:id="@+id/idcard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:layout_marginTop="14dp"
+            android:layout_marginLeft="4dp"
+            android:textColor="@color/colorPrimary"
             />
     </LinearLayout>
 

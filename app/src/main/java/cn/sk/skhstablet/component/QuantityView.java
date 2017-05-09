@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -89,7 +90,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         minQuantity = a.getInt(R.styleable.QuantityView_qv_minQuantity, 0);
 
         quantityPadding = (int) a.getDimension(R.styleable.QuantityView_qv_quantityPadding, pxFromDp(24));
-        quantityTextColor = a.getColor(R.styleable.QuantityView_qv_quantityTextColor, Color.BLACK);
+        quantityTextColor = a.getColor(R.styleable.QuantityView_qv_quantityTextColor, getResources().getColor(R.color.maincolor));
         quantityBackground = ContextCompat.getDrawable(getContext(), R.drawable.qv_bg_selector);
         if (a.hasValue(R.styleable.QuantityView_qv_quantityBackground)) {
             quantityBackground = a.getDrawable(R.styleable.QuantityView_qv_quantityBackground);
@@ -122,6 +123,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
 
         mTextViewQuantity = new TextView(getContext());
         mTextViewQuantity.setGravity(Gravity.CENTER);
+        mTextViewQuantity.setTextSize(20);
         setQuantityTextColor(quantityTextColor);
         setQuantity(quantity);
         setQuantityBackground(quantityBackground);
@@ -129,9 +131,9 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
 
         setOrientation(HORIZONTAL);
 
-        addView(mButtonRemove, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        addView(mTextViewQuantity, LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-        addView(mButtonAdd, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        addView(mButtonRemove, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
+        addView(mTextViewQuantity,new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,(float)1.5));
+        addView(mButtonAdd, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
 
         mButtonAdd.setOnClickListener(this);
         mButtonRemove.setOnClickListener(this);

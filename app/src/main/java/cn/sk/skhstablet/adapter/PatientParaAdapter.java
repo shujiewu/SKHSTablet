@@ -9,6 +9,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import cn.sk.skhstablet.R;
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.model.PatientDetail;
 
 /**
@@ -18,7 +19,13 @@ import cn.sk.skhstablet.model.PatientDetail;
 public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.PatientParaHolder> {
     public List<String> phyDevName;
     public List<String> phyDevValue;
-    public PatientParaAdapter(List<String> phyDevName,List<String> phyDevValue)
+    private int pageState= AppConstants.MUTI_DATA;
+
+    public void setPageState(int pageState) {
+        this.pageState = pageState;
+    }
+
+    public PatientParaAdapter(List<String> phyDevName, List<String> phyDevValue)
     {
         this.phyDevName=phyDevName;
         this.phyDevValue=phyDevValue;
@@ -50,6 +57,12 @@ public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.
             tvParaName1 = (TextView) view.findViewById(R.id.paraname1);
             //tvParaName2 = (TextView) view.findViewById(R.id.paraname2);
             tvParaValue1 = (TextView) view.findViewById(R.id.paravalue1);
+            if(pageState==AppConstants.SINGLE_DATA)
+            {
+                tvParaName1.setTextSize(18);
+                tvParaValue1.setTextSize(22);
+            }
+
             //tvParaValue2=(TextView) view.findViewById(R.id.paravalue2);
         }
         public void bind(PatientParaHolder viewHolder, String paraName,String paraValue) {

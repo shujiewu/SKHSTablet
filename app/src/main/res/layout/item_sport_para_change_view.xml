@@ -7,7 +7,7 @@
             android:id="@+id/changeParaSportName"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="@android:color/darker_gray"
             android:layout_weight="0.2"
             android:gravity="center"
@@ -23,8 +23,8 @@
         android:id="@+id/changeParaSportValue"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:textSize="18sp"
-        android:layout_weight="0.3"
+        android:textSize="20sp"
+        android:layout_weight="0.1"
         android:textColor="@color/maincolor"
         android:gravity="center"
         android:background="@null"
@@ -34,8 +34,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/changeQVValue"
         android:layout_width="0dp"
-        android:layout_weight="0.6"
+        android:layout_weight="0.9"
         android:layout_height="match_parent"
+        android:paddingLeft="40dp"
+        android:paddingRight="60dp"
         app:qv_quantity="10" >
     </cn.sk.skhstablet.component.QuantityView>
 />

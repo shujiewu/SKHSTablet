@@ -42,7 +42,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.15"
-                            android:gravity="center"
+                            android:gravity="left"
                             android:textSize="18sp"
                             android:text="姓名"/>
                         <TextView
@@ -76,66 +76,111 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_marginTop="5dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp">
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.15"
-                            android:gravity="center"
+                            android:layout_weight="0.3"
+                            android:gravity="left"
                             android:textSize="18sp"
-                            android:text="ID"/>
+                            android:text="住院号"/>
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.35"
+                            android:layout_weight="0.7"
                             android:gravity="center"
                             android:id="@+id/sid"
                             android:textSize="20sp"
                             android:text="1212"/>
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.5"
+                            android:layout_weight="0.3"
+                            android:gravity="left"
+                            android:textSize="18sp"
+                            android:text="设备编号"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.7"
+                            android:gravity="center"
+                            android:id="@+id/sid2"
+                            android:textSize="20sp"
+                            android:text="1212"/>
+
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.3"
+                            android:gravity="left"
+                            android:textSize="18sp"
+                            android:text="医嘱完成"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.7"
                             android:gravity="center"
                             android:id="@+id/spercent"
                             android:textSize="20sp"
                             android:text="10%"/>
                     </LinearLayout>
+
+
+
+
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="right"
                         android:layout_marginTop="20dp"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp">
+                        android:layout_marginLeft="30dp"
+                        android:layout_marginRight="30dp">
                         <cn.sk.skhstablet.component.PaperButton
                             android:id="@+id/bt_start"
-                            widget:paper_corner_radius="5dp"
+                            widget:paper_corner_radius="19dp"
                             android:layout_gravity="center_horizontal"
                             android:layout_width="0dp"
                             android:layout_weight="0.5"
-                            android:layout_height="40dp"
+                            android:layout_height="35dp"
                             android:gravity="center_vertical|center"
                             widget:paper_text="启动"
-                            widget:paper_text_size="18sp"
+                            widget:paper_text_size="16sp"
                             widget:paper_color="@color/maincolor"
                             widget:paper_text_color="@color/white"
-                            android:layout_marginRight="10dp"
+                            android:layout_marginRight="20dp"
                             >
                         </cn.sk.skhstablet.component.PaperButton>
                         <cn.sk.skhstablet.component.PaperButton
                             android:id="@+id/bt_stop"
-                            widget:paper_corner_radius="5dp"
-                            android:layout_marginLeft="10dp"
+                            widget:paper_corner_radius="19dp"
+                            android:layout_marginLeft="20dp"
                             android:layout_gravity="center_horizontal"
                             android:layout_width="0dp"
                             android:layout_weight="0.5"
-                            android:layout_height="40dp"
+                            android:layout_height="35dp"
                             android:gravity="center_vertical|center"
                             widget:paper_text="停止"
-                            widget:paper_text_size="18sp"
+                            widget:paper_text_size="16sp"
                             widget:paper_color="@color/red"
                             widget:paper_text_color="@color/white"
                             >
