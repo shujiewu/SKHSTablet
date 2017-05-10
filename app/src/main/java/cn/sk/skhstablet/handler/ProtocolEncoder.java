@@ -12,6 +12,15 @@ import cn.sk.skhstablet.protocol.DeviceId;
 import cn.sk.skhstablet.protocol.Version;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
+import cn.sk.skhstablet.protocol.up.ChangeKeyRequest;
+import cn.sk.skhstablet.protocol.up.DevNameRequest;
+import cn.sk.skhstablet.protocol.up.LoginRequest;
+import cn.sk.skhstablet.protocol.up.LogoutRequest;
+import cn.sk.skhstablet.protocol.up.MonitorDevFormRequest;
+import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
+import cn.sk.skhstablet.protocol.up.PatientListRequest;
+import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
+import cn.sk.skhstablet.protocol.up.SportDevFormRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -118,6 +127,61 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		cause.printStackTrace();
+	}
+
+	private void encodeLoginRequest(LoginRequest request,ByteBuf out)
+	{
+		out.writeIntLE(request.getUserID());
+		out.writeBytes(request.getUserKey());
+	}
+	private void encodeLogoutRequest(LogoutRequest request,ByteBuf out)
+	{
+		out.writeIntLE(request.getUserID());
+	}
+	private void encodeChangeKeyRequest(ChangeKeyRequest request,ByteBuf out)
+	{
+		out.writeIntLE(request.getUserID());
+		out.writeBytes(request.getUserOldKey());
+		out.writeBytes(request.getUserNewKey());
+	}
+	private void encodePatientListRequest(PatientListRequest request,ByteBuf out)
+	{
+		out.writeByte(request.getDeviceType());
+		out.writeIntLE(request.getUserID());
+		out.writeByte(request.getRequestID());
+	}
+	private void encodeMutiMonitorRequest(MutiMonitorRequest request,ByteBuf out)
+	{
+		out.writeByte(request.getDeviceType());
+		out.writeIntLE(request.getUserID());
+		out.writeByte(request.getRequestID());
+		out.writeShortLE(request.getPatientNumber());
+		for (Integer patientID:request.getPatientID())
+		{
+			out.writeIntLE(patientID);
+		}
+	}
+
+	private void encodeSingleMonitorRequest(SingleMonitorRequest request, ByteBuf out)
+	{
+		out.writeByte(request.getDeviceType());
+		out.writeIntLE(request.getUserID());
+		out.writeByte(request.getRequestID());
+		out.writeShortLE(request.getPatientNumber());
+		out.writeIntLE(request.getPatientID());
+	}
+
+	private void encodeDevNameRequest(DevNameRequest request, ByteBuf out)
+	{
+		out.writeIntLE(request.getUserID());
+	}
+	private void encodeSportDevFormRequest(SportDevFormRequest request, ByteBuf out)
+	{
+		out.writeIntLE(request.getUserID());
+	}
+	private void encodeMonitorDevFormRequest(MonitorDevFormRequest request, ByteBuf out)
+	{
+		out.writeIntLE(request.getUserID());
 	}
 
 }

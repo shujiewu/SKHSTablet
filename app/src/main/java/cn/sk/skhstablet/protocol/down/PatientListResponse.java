@@ -10,11 +10,43 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class PatientListResponse extends AbstractProtocol {
-    protected PatientListResponse(byte command) {
+    public PatientListResponse(byte command) {
         super(command);
     }
     private byte deviceType;
     private int userID;
     private short patientNumber;
     private List<Patient> patientList;
+
+    public void setDeviceType(byte deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public byte getDeviceType() {
+        return deviceType;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public List<Patient> getPatientList() {
+        return patientList;
+    }
+
+    public short getPatientNumber() {
+        return patientNumber;
+    }
+
+    public void setPatientList(List<Patient> patientList) {
+        this.patientList = patientList;
+    }
+
+    public void setPatientNumber(short patientNumber) {
+        this.patientNumber = patientNumber;
+    }
 }

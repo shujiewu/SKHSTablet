@@ -18,7 +18,7 @@ public class AppConstants {
     public static  final int MUTI_DATA=2000;
     public static  final int SINGLE_DATA=3000;
 
-    public static  final  String url="113.251.243.37";
+    public static  final  String url="10.250.110.4";
     public static  final  int port=9999;
 
     public static final int RE_SEND_REQUEST=4000;

@@ -12,4 +12,12 @@ public class DevNameRequest extends AbstractProtocol {
     }
 
     private int userID;
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
 }

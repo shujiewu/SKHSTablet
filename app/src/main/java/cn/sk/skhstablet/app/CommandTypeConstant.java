@@ -43,5 +43,10 @@ public class CommandTypeConstant {
 	public static final byte MONITOR_DEV_FORM_REQUEST=(byte)0xDC;
 	public static final byte SPORT_DEV_FORM_REQUEST=(byte)0xDD;
 
+	public static final byte LOGIN_ACK_RESPONSE=(byte)0xE6;
+	public static final byte LOGOUT_ACK_RESPONSE=(byte)0xE7;
+	public static final byte CHANGE_KEY_ACK_RESPONSE=(byte)0xE8;
 
+	public static final byte PATIENT_LIST_DATA_RESPONSE=(byte)0xE4;
+	public static final byte PATIENT_LIST_UPDATE_RESPONSE=(byte)0xE5;
 }

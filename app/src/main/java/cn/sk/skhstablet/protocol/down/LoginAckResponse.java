@@ -7,10 +7,26 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class LoginAckResponse extends AbstractProtocol {
-    protected LoginAckResponse(byte command) {
+    public LoginAckResponse(byte command) {
         super(command);
     }
 
     private int userID;
     private byte state;
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public byte getState() {
+        return state;
+    }
+
+    public void setState(byte state) {
+        this.state = state;
+    }
 }

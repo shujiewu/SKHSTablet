@@ -73,10 +73,67 @@ public class Patient implements Comparable<Patient>, Serializable{
     private String name;
     private String gender;
     private String hospitalNumber;
-    private String patientID;
+    private int patientID;
     private byte devType;
     private long deviceNumber;
     private byte sportState;
     private byte connectState;
     private byte monConnectState;
+    public Patient(){}
+
+    public byte getConnectState() {
+        return connectState;
+    }
+
+    public byte getDevType() {
+        return devType;
+    }
+
+    public byte getMonConnectState() {
+        return monConnectState;
+    }
+
+    public byte getSportState() {
+        return sportState;
+    }
+
+    public long getDeviceNumber() {
+        return deviceNumber;
+    }
+
+    public String getHospitalNumber() {
+        return hospitalNumber;
+    }
+
+    public int getPatientID() {
+        return patientID;
+    }
+
+    public void setConnectState(byte connectState) {
+        this.connectState = connectState;
+    }
+
+    public void setDeviceNumber(long deviceNumber) {
+        this.deviceNumber = deviceNumber;
+    }
+
+    public void setDevType(byte devType) {
+        this.devType = devType;
+    }
+
+    public void setHospitalNumber(String hospitalNumber) {
+        this.hospitalNumber = hospitalNumber;
+    }
+
+    public void setMonConnectState(byte monConnectState) {
+        this.monConnectState = monConnectState;
+    }
+
+    public void setPatientID(int patientID) {
+        this.patientID = patientID;
+    }
+
+    public void setSportState(byte sportState) {
+        this.sportState = sportState;
+    }
 }

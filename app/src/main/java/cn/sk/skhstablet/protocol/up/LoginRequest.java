@@ -13,4 +13,20 @@ public class LoginRequest extends AbstractProtocol {
 
     private int userID;
     private byte[] userKey;
+
+    public byte[] getUserKey() {
+        return userKey;
+    }
+
+    public int getUserID() {
+        return userID;
+    }
+
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public void setUserKey(byte[] userKey) {
+        this.userKey = userKey;
+    }
 }

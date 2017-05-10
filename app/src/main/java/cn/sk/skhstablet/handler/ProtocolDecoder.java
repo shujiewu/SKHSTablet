@@ -1,19 +1,33 @@
 package cn.sk.skhstablet.handler;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.domain.ECG;
+import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
 import cn.sk.skhstablet.protocol.DeviceId;
+import cn.sk.skhstablet.protocol.MonitorDevForm;
+import cn.sk.skhstablet.protocol.SportDevForm;
 import cn.sk.skhstablet.protocol.Version;
+import cn.sk.skhstablet.protocol.down.DevNameResponse;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
+import cn.sk.skhstablet.protocol.down.LoginAckResponse;
+import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
+import cn.sk.skhstablet.protocol.down.PatientListResponse;
+import cn.sk.skhstablet.protocol.down.PushAckResponse;
+import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
+
+import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE;
 
 @Sharable
 public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
@@ -93,5 +107,170 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		reqBuf.readBytes(data);
 		request.setEquipmentData(data);
 		return request;
+	}
+
+	private AbstractProtocol decodeLoginAckResponse(ByteBuf resBuf,byte commandType)
+	{
+		LoginAckResponse response=new LoginAckResponse(commandType);
+		response.setUserID(resBuf.readIntLE());
+		response.setState(resBuf.readByte());
+		return response;
+	}
+
+	private AbstractProtocol decodePushAckResponse(ByteBuf resBuf,byte commandType)
+	{
+		PushAckResponse response=new PushAckResponse(commandType);
+		response.setDeviceType(resBuf.readByte());
+		response.setUserID(resBuf.readIntLE());
+		response.setRequestID(resBuf.readByte());
+		response.setState(resBuf.readByte());
+		return response;
+	}
+
+	private AbstractProtocol decodePatientListResponse(ByteBuf resBuf,byte commandType)
+	{
+		PatientListResponse response=new PatientListResponse(commandType);
+		response.setDeviceType(resBuf.readByte());
+		response.setUserID(resBuf.readIntLE());
+		response.setPatientNumber(resBuf.readShortLE());
+		int number=response.getPatientNumber();
+		List<Patient> patientList=new ArrayList<>();
+		for(short i=0;i<number;i++)
+		{
+			Patient patient=new Patient();
+
+			patient.setPatientID(resBuf.readIntLE());
+
+			if(commandType==PATIENT_LIST_DATA_RESPONSE)
+			{
+				byte gender=resBuf.readByte();
+				if(gender==0x00)
+					patient.setGender("男");
+				else
+					patient.setGender("女");
+
+				byte req[]=new byte[64];
+				resBuf.readBytes(req);
+				patient.setName(toUtf8(req));
+				patient.setHospitalNumber(String.valueOf(resBuf.readLongLE()));
+			}
+
+			patient.setDevType(resBuf.readByte());
+			patient.setDeviceNumber(resBuf.readLongLE());
+			patient.setSportState(resBuf.readByte());
+			patient.setConnectState(resBuf.readByte());
+			patient.setMonConnectState(resBuf.readByte());
+			patientList.add(patient);
+		}
+		response.setPatientList(patientList);
+		return response;
+	}
+
+	private AbstractProtocol decodeDevNameResponse(ByteBuf resBuf,byte commandType)
+	{
+		DevNameResponse response=new DevNameResponse(commandType);
+		response.setUserID(resBuf.readIntLE());
+		response.setDevNumber(resBuf.readByte());
+
+		byte number=response.getDevNumber();
+		HashMap<Byte,String> devName=new HashMap<>();
+		for(byte i=0;i<number;i++)
+		{
+			byte devType=resBuf.readByte();
+			byte req[]=new byte[64];
+			resBuf.readBytes(req);
+			String name=toUtf8(req);
+
+			devName.put(devType,name);
+		}
+		response.setDevName(devName);
+
+		return response;
+	}
+
+
+	private AbstractProtocol decodeMonitorDevFormResponse(ByteBuf resBuf,byte commandType)
+	{
+		MonitorDevFormResponse response=new MonitorDevFormResponse(commandType);
+		response.setUserID(resBuf.readIntLE());
+		response.setDevNumber(resBuf.readByte());
+
+		byte number=response.getDevNumber();
+		HashMap<Byte,List<MonitorDevForm>> devData=new HashMap<>();
+		for(byte i=0;i<number;i++)
+		{
+			byte devType=resBuf.readByte();
+			//not have length
+			byte paraNumber=resBuf.readByte();
+			List<MonitorDevForm> monitorDevForms=new ArrayList<>();
+			for(byte j=0;j<paraNumber;j++)
+			{
+				MonitorDevForm monitorDevForm=new MonitorDevForm();
+				monitorDevForm.setLength(resBuf.readByte());
+				byte req[]=new byte[64];
+				resBuf.readBytes(req);
+				String name=toUtf8(req);
+				resBuf.readBytes(req);
+				String unit=toUtf8(req);
+				monitorDevForm.setName(name);
+				monitorDevForm.setUnit(unit);
+				monitorDevForms.add(monitorDevForm);
+			}
+			devData.put(devType,monitorDevForms);
+		}
+		response.setDevData(devData);
+		return response;
+	}
+	private AbstractProtocol decodeSportDevFormResponse(ByteBuf resBuf,byte commandType)
+	{
+		SportDevFormResponse response=new SportDevFormResponse(commandType);
+		response.setUserID(resBuf.readIntLE());
+		response.setDevNumber(resBuf.readByte());
+
+		byte number=response.getDevNumber();
+		HashMap<Byte,List<SportDevForm>> devData=new HashMap<>();
+		for(byte i=0;i<number;i++)
+		{
+			byte devType=resBuf.readByte();
+			//not have length
+			byte paraNumber=resBuf.readByte();
+			List<SportDevForm> sportDevForms=new ArrayList<>();
+			for(byte j=0;j<paraNumber;j++)
+			{
+				SportDevForm sportDevForm=new SportDevForm();
+				sportDevForm.setLength(resBuf.readByte());
+				byte req[]=new byte[64];   //64不知道够不，这里直接覆盖写，不知道是否可行
+				resBuf.readBytes(req);
+				String name=toUtf8(req);
+				resBuf.readBytes(req);
+				String unit=toUtf8(req);
+				sportDevForm.setName(name);
+				sportDevForm.setUnit(unit);
+
+				sportDevForm.setIsAdjust(resBuf.readByte());
+				if(sportDevForm.getIsAdjust()==0x00) //ketiaojie
+				{
+					sportDevForm.setMax(resBuf.readByte());
+					sportDevForm.setMin(resBuf.readByte());
+					sportDevForm.setPrecision(resBuf.readByte());
+					sportDevForm.setAdjustCode(resBuf.readByte());
+				}
+				sportDevForms.add(sportDevForm);
+			}
+			devData.put(devType,sportDevForms);
+		}
+		response.setDevData(devData);
+
+		return response;
+	}
+	public static String toUtf8(byte str[]) {
+		String result = null;
+		try {
+			result = new String(str, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
 	}
 }
