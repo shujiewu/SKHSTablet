@@ -67,7 +67,7 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
         }
         isPrepared = true;
         loadBaseData();
-        //this.setState(AppConstants.STATE_EMPTY);
+        this.setState(AppConstants.STATE_EMPTY);
         return mLoadingPage;
     }
 

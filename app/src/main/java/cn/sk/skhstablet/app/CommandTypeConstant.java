@@ -27,9 +27,11 @@ public class CommandTypeConstant {
 	public static final byte ECP_PATIENT_LIST_REQUEST = (byte) 0xC5;
 	/** 获取体外反博病人列表响应 **/
 	public static final byte ECP_PATIENT_LIST_RESPONSE = (byte) 0x45;
+
+
 	public static final byte LOGIN_SUCCESS = (byte) 0x10;
-
-
+	public static final byte SUCCESS = (byte) 0x00;
+	public static final byte FAIL = (byte) 0x11;
 
 	public static final byte SINGLE_MONITOR_REQUEST=(byte)0xD2;
 	public static final byte MUTI_MONITOR_REQUEST=(byte)0xD1;
@@ -49,4 +51,10 @@ public class CommandTypeConstant {
 
 	public static final byte PATIENT_LIST_DATA_RESPONSE=(byte)0xE4;
 	public static final byte PATIENT_LIST_UPDATE_RESPONSE=(byte)0xE5;
+	public static final byte DEV_NAEM_RESPONSE=(byte)0xE9;
+	public static final byte MUTI_MONITOR_RESPONSE=(byte)0xE1;
+	public static final byte SINGLE_MONITOR_RESPONSE=(byte)0xE2;
+	public static final byte PATIENT_LIST_RESPONSE=(byte)0xE3;
+	public static final byte MONITOR_DEV_FORM_RESPONSE=(byte)0xEC;
+	public static final byte SPORT_DEV_FORM_RESPONSE=(byte)0xED;
 }

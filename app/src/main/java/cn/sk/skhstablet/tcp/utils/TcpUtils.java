@@ -16,8 +16,14 @@ import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BaseView;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
+import cn.sk.skhstablet.protocol.down.DevNameResponse;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
+import cn.sk.skhstablet.protocol.down.LoginAckResponse;
+import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
+import cn.sk.skhstablet.protocol.down.PatientListResponse;
+import cn.sk.skhstablet.protocol.down.PushAckResponse;
+import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.Stateful;
@@ -38,6 +44,9 @@ import rx.functions.Action1;
 import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
+import static cn.sk.skhstablet.app.CommandTypeConstant.MUTI_MONITOR_RESPONSE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.model.PatientDetailList.phyValue;
 import static cn.sk.skhstablet.model.PatientDetailList.sportName;
 import static cn.sk.skhstablet.model.PatientDetailList.sportValue;
@@ -274,6 +283,10 @@ public class TcpUtils {
                 if(data==null)
                     return;
                 byte dataType=0;
+                byte state;
+                byte reqID;
+                byte devType;
+                int userID;
                 switch (data.getCommand())
                 {
                     case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_REQUEST: {
@@ -284,6 +297,116 @@ public class TcpUtils {
                         dataType=(byte)((ExerciseEquipmentDataResponse)data).getDeviceId().getDeviceType();
                         break;
                     }
+                    case CommandTypeConstant.DOCTOR_ADVICE_RESPONSE:
+                        break;
+
+
+                    case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:
+                    case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:  //完成注册
+                        userID=((PatientListResponse)data).getUserID();
+                        devType=((PatientListResponse)data).getDeviceType();
+                        if(userID!=AppConstants.USER_ID||devType!=AppConstants.DEV_TYPE)
+                            return;
+                        AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
+                        RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Boolean(true));//通知数据改变
+                        break;
+                        /*userID=((PatientListResponse)data).getUserID();
+                        devType=((PatientListResponse)data).getDeviceType();
+                        if(userID!=AppConstants.USER_ID||devType!=AppConstants.DEV_TYPE)
+                            return;
+                        AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
+                        RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Boolean(true));//通知数据改变
+                        break;*/
+
+                    //多人监控，单人监控和病人列表请求的响应
+                    case CommandTypeConstant.SINGLE_MONITOR_RESPONSE:
+                        userID=((PushAckResponse)data).getUserID();
+                        reqID=((PushAckResponse)data).getRequestID();
+                        devType=((PushAckResponse)data).getDeviceType();
+                        state=((PushAckResponse)data).getState();
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.SINGLE_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                            return;
+                        if(state==SUCCESS)
+                            RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Boolean(true));
+                        else
+                            RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Boolean(false));
+                        break;
+                    case CommandTypeConstant.MUTI_MONITOR_RESPONSE:
+                        userID=((PushAckResponse)data).getUserID();
+                        reqID=((PushAckResponse)data).getRequestID();
+                        devType=((PushAckResponse)data).getDeviceType();
+                        state=((PushAckResponse)data).getState();
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.MUTI_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                            return;
+                        if(state==SUCCESS)
+                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Boolean(true));
+                        else
+                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Boolean(false));
+                        break;
+                    case CommandTypeConstant.PATIENT_LIST_RESPONSE:
+                        userID=((PushAckResponse)data).getUserID();
+                        reqID=((PushAckResponse)data).getRequestID();
+                        devType=((PushAckResponse)data).getDeviceType();
+                        state=((PushAckResponse)data).getState();
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PATIENT_LIST_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                            return;
+                        if(state==SUCCESS)
+                            RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(true));
+                        else
+                            RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(false));
+                        break;
+
+                    //修改密码，登录，注册的响应
+                    case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:
+                        userID=((LoginAckResponse)data).getUserID();
+                        if(userID!=AppConstants.USER_ID)
+                            return;
+                        state=((LoginAckResponse)data).getState();
+                        if(state==SUCCESS)
+                            RxBus.getDefault().post(AppConstants.CHANGE_KEY_STATE,new Boolean(true));
+                        else
+                            RxBus.getDefault().post(AppConstants.CHANGE_KEY_STATE,new Boolean(false));
+                        break;
+                    case CommandTypeConstant.LOGIN_ACK_RESPONSE:
+                        userID=((LoginAckResponse)data).getUserID();
+                        if(userID!=AppConstants.USER_ID)
+                            return;
+                        state=((LoginAckResponse)data).getState();
+                        if(state==SUCCESS)
+                            RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
+                        else
+                            RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(false));
+                        break;
+                    case CommandTypeConstant.LOGOUT_ACK_RESPONSE:
+                        userID=((LoginAckResponse)data).getUserID();
+                        if(userID!=AppConstants.USER_ID)
+                            return;
+                        state=((LoginAckResponse)data).getState();
+                        if(state==SUCCESS)
+                            RxBus.getDefault().post(AppConstants.LOGOUT_STATE,new Boolean(true));
+                        else
+                            RxBus.getDefault().post(AppConstants.LOGOUT_STATE,new Boolean(false));
+                        break;
+
+                    //格式名称对照表响应
+                    case CommandTypeConstant.DEV_NAEM_RESPONSE:
+                        userID=((DevNameResponse)data).getUserID();
+                        if(userID!=AppConstants.USER_ID)
+                            return;
+                        AppConstants.DEV_NAME=((DevNameResponse)data).getDevName();
+                        break;
+                    case CommandTypeConstant.SPORT_DEV_FORM_RESPONSE:
+                        userID=((DevNameResponse)data).getUserID();
+                        if(userID!=AppConstants.USER_ID)
+                            return;
+                        AppConstants.SPORT_DEV_FORM=((SportDevFormResponse)data).getDevData();
+                        break;
+                    case CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE:
+                        userID=((DevNameResponse)data).getUserID();
+                        if(userID!=AppConstants.USER_ID)
+                            return;
+                        AppConstants.MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
+                        break;
                 }
 
                 switch (dataType)
@@ -313,48 +436,6 @@ public class TcpUtils {
                         // RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "2", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                         break;
                 }
-
-
-
-                //RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
-                /*if(data.equals("echo=> hello world!"))
-                {
-                    RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
-                    Log.e("login","succees");
-                }
-                else if(data.equals("echo=> hello worldx!"))
-                {
-                  //  List<PatientDetail> mData = PatientDetailList.PATIENTS;
-                  //  mData.get(0).setName(data);
-                    //try {
-                        //Thread.sleep(5000);
-                        //data.setName(String.valueOf(i));
-                    //    PatientDetailList.PATIENTS.get(0).setName(data);
-                    //    PatientDetailList.PATIENTS.get(1).setName(data);
-                    Log.e("third",data);
-                    RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                    RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                }
-                else if(data.equals("echo=> 张三"))
-                {
-                    Log.e("third",data);
-                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                }
-                else if(data.equals("echo=> 李四"))
-                {
-                    Log.e("third",data);
-                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("李四", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                }
-                else if(data.equals("echo=> 张er1"))
-                {
-                    Log.e("third",data);
-                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                }
-                else if(data.equals("echo=> 张er2"))
-                {
-                    Log.e("third",data);
-                    RxBus.getDefault().post(AppConstants.SINGLE_DATA, new PatientDetail("张er2", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                }*/
             }
         });
     }

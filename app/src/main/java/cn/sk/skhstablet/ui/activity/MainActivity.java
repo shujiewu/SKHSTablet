@@ -67,7 +67,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public final int SAVE_EDIT=9;
     final  int LOG_OUT=10;
     public final int CLOSE_SINGLE=11;
-    private List<Patient> mDatas;
+    //private List<Patient> mDatas;
     public  final int CANCEL_SINGLE_MON=12;
     @Inject
     public PatientListAdapter patientListAdapter;
@@ -83,7 +83,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDatas=new ArrayList<>();
+        //mDatas=new ArrayList<>();
         initInject();
         if (mPresenter!=null){
             mPresenter.setView(this);}
@@ -173,7 +173,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                final List<Patient> filteredModelList = filter(mDatas, newText);
+                final List<Patient> filteredModelList = filter(mPresenter.mDatas, newText);
 
                 //reset
                 patientListAdapter.setFilter(filteredModelList);
@@ -506,10 +506,19 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
     @Override
     public void refreshView(List<Patient> mData) {
-        mDatas=mData;
-        patientListAdapter.mDatas= mDatas;
+        //mDatas=mData;
+        patientListAdapter.mDatas= mData;
         patientListAdapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void refreshView(Patient mData, int position)
+    {
+        patientListAdapter.mDatas.set(position,mData);
+        patientListAdapter.notifyItemChanged(position);
+    }
+
+
 
     @Override
     public void reSendRequest() {
@@ -529,7 +538,17 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
     }
 
+    @Override
+    public void setMutiPageState(int state) {
+        if(state==AppConstants.STATE_SUCCESS&&mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+            mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+    }
 
+    @Override
+    public void setSinglePageState(int state) {
+        if(state==AppConstants.STATE_SUCCESS&&singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+            singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+    }
 
     private CompositeSubscription mCompositeSubscription;
     //用于添加rx的监听的在onDestroy中记得关闭不然会内存泄漏。
@@ -547,4 +566,5 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             this.mCompositeSubscription.unsubscribe();
         }
     }
+
 }

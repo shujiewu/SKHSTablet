@@ -1,5 +1,12 @@
 package cn.sk.skhstablet.app;
 
+import java.util.HashMap;
+import java.util.List;
+
+import cn.sk.skhstablet.model.Patient;
+import cn.sk.skhstablet.protocol.MonitorDevForm;
+import cn.sk.skhstablet.protocol.SportDevForm;
+
 /**
  * Created by ldkobe on 2017/3/21.
  */
@@ -15,10 +22,17 @@ public class AppConstants {
 
     public static  final int WECHA_SEARCH = 1000;
     public static  final int LOGIN_STATE=1001;
-    public static  final int MUTI_DATA=2000;
-    public static  final int SINGLE_DATA=3000;
+    public static  final int LOGOUT_STATE=1002;
+    public static  final int CHANGE_KEY_STATE=1003;
 
-    public static  final  String url="10.250.110.4";
+    public static  final int MUTI_DATA=2000;
+    public static  final int MUTI_REQ_STATE=2001;
+    public static  final int SINGLE_REQ_STATE=3001;
+    public static  final int SINGLE_DATA=3000;
+    public static  final int PATIENT_LIST_REQ_STATE=6001;
+    public static  final int PATIENT_LIST_DATA_STATE=6002;
+
+    public static  final  String url="113.251.243.80";
     public static  final  int port=9999;
 
     public static final int RE_SEND_REQUEST=4000;
@@ -27,4 +41,17 @@ public class AppConstants {
     public static final String PATIENT_SELECT_STATUS_FALSE="未选择";
     public static final String PATIENT_SELECT_STATUS_TRUE="已选择";
     public static final String PATIENT_SELECT_STATUS_MONITOR="正在监控";
+
+    public static int USER_ID;
+    public static final byte DEV_TYPE=0x11;
+    public static byte SINGLE_REQ_ID;
+    public static byte MUTI_REQ_ID;
+    public static byte PATIENT_LIST_REQ_ID;
+
+    public static HashMap<Byte,String> DEV_NAME;
+    public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM;
+    public static HashMap<Byte,List<MonitorDevForm>> MON_DEV_FORM;
+
+
+    public static List<Patient> PATIENT_LIST_DATA;
 }
