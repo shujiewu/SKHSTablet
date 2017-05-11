@@ -84,6 +84,28 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
             }
         });
     }
+    public void sendFormatRequest()
+    {
+        invoke(TcpUtils.send("devname"), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send success!");
+            }
+        });
+        invoke(TcpUtils.send("sportdevform"), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send success!");
+            }
+        });
+        invoke(TcpUtils.send("monitordevform"), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send success!");
+            }
+        });
+    }
+
 
     @Inject
     public LoginPresenterImpl()

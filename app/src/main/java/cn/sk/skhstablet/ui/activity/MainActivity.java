@@ -321,8 +321,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
                 if(newSingleMonitorID!=null&&!newSingleMonitorID.equals(singleMonitorID))
                 {
-                    //singleMonitorFragment.setState(STATE_LOADING);
-                    if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+                    singleMonitorFragment.setState(STATE_LOADING);
+                    if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)///shanchu
                         singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
                     singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.loadData(singleMonitorID);
@@ -527,7 +527,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
     void loadData()
     {
-        mPresenter.fetchPatientListData();
+        mPresenter.sentPatientListRequest();
     }
     void sendMonitorRequest()
     {
@@ -548,6 +548,11 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public void setSinglePageState(int state) {
         if(state==AppConstants.STATE_SUCCESS&&singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
             singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+    }
+
+    @Override
+    public void logoutSuccess(boolean b) {
+        //退出
     }
 
     private CompositeSubscription mCompositeSubscription;

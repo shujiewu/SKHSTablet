@@ -111,7 +111,7 @@ public class ExercisePlanAdapter extends BaseExpandableListAdapter {
                 LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
         TextView textView = getTextView(context);
         textView.setText(getChild(groupPosition, childPosition).toString());
-        textView.setTextSize(16);
+        textView.setTextSize(14);
         ll.addView(textView,param);
         return ll;
     }

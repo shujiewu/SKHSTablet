@@ -13,11 +13,13 @@ public interface IPatientListPresenter {
         void refreshView(Patient mData,int position);
         void setMutiPageState(int state);
         void setSinglePageState(int state);
+        void logoutSuccess(boolean b);
     }
     interface Presenter{
-        void fetchPatientListData();
+        void sentPatientListRequest();
         void sendMutiMonitorRequest();
         void sendCancelSingleMonitorReq();
+        void sendLogoutRequest();
         void registerFetchResponse();
     }
 }

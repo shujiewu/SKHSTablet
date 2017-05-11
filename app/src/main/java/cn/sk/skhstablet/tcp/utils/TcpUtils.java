@@ -351,7 +351,7 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PATIENT_LIST_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
                         if(state==SUCCESS)
-                            RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(true));
+                            RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(true)); //暂时感觉不到有用
                         else
                             RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(false));
                         break;

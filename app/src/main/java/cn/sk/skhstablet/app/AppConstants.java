@@ -32,7 +32,7 @@ public class AppConstants {
     public static  final int PATIENT_LIST_REQ_STATE=6001;
     public static  final int PATIENT_LIST_DATA_STATE=6002;
 
-    public static  final  String url="113.251.243.80";
+    public static  final  String url="10.250.110.4";
     public static  final  int port=9999;
 
     public static final int RE_SEND_REQUEST=4000;

@@ -27,7 +27,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
     public List<Patient> mDatas=new ArrayList<>();
     private int position=0;
     @Override
-    public void fetchPatientListData() {
+    public void sentPatientListRequest() {
         mDatas= PatientList.PATIENTS;
         mView.refreshView(mDatas);
 
@@ -47,6 +47,16 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
     @Override
     public void sendCancelSingleMonitorReq() {
         invoke(TcpUtils.send("CancelSingleMonitorReq"), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send success!");
+            }
+        });
+    }
+
+    @Override
+    public void sendLogoutRequest() {
+        invoke(TcpUtils.send("logoutrequest"), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
                 System.out.println("send success!");
@@ -86,7 +96,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         mView.refreshView(mDatas);
                     }
                 });
-        Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Boolean.class)
+        /*Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean b) {
@@ -102,9 +112,21 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                             mView.setSinglePageState(AppConstants.STATE_SUCCESS);
                     }
                 });
-        ((LifeSubscription)mView).bindSubscription(listSubscription);
         ((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
-        ((LifeSubscription)mView).bindSubscription(singlePageSubscription);
+        ((LifeSubscription)mView).bindSubscription(singlePageSubscription);*/
+
+        ((LifeSubscription)mView).bindSubscription(listSubscription);
+
+        Subscription logoutSubscription = RxBus.getDefault().toObservable(AppConstants.LOGOUT_STATE,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean b) {
+                        if(b)
+                            mView.logoutSuccess(b);
+                    }
+                });
+        ((LifeSubscription)mView).bindSubscription(logoutSubscription);
+
     }
 
     @Inject

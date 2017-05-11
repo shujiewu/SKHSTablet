@@ -66,8 +66,26 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                             mView.reSendRequest();
                     }
                 });
+
+
+        Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean b) {
+                        if(b==true)
+                        {
+                            mView.setPageState(AppConstants.STATE_SUCCESS);
+                            mDatas.clear();
+                            hasPatient.clear();
+                        }
+
+                    }
+                });
+        ((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
+
         ((LifeSubscription)mView).bindSubscription(mSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
+
     }
 
     public void sendRequest()

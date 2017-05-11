@@ -8,6 +8,7 @@ public interface IChangekeyPresenter {
     interface View extends BaseView<Boolean>{
     }
     interface Presenter{
-        void fetchStateData();
+        void sendRequest();
+        void registerFetchResponse();
     }
 }

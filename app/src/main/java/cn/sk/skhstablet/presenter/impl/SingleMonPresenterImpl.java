@@ -24,7 +24,7 @@ import rx.functions.Action1;
 
 public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.View> implements ISingleMonPresenter.Presenter {
     @Override
-    public void fetchPatientDetailData(String ID) {
+    public void sendPatientDetailRequest(String ID) {
        // PatientDetail patientDetail= PatientDetailList.PATIENTS.get(0);
        // mView.refreshView(patientDetail);
         sendRequest(ID);
@@ -50,6 +50,17 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                         mView.refreshView(s);
                     }
                 });
+
+
+        Subscription singlePageSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_REQ_STATE,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean b) {
+                        if(b==true)
+                            mView.setPageState(AppConstants.STATE_SUCCESS);
+                    }
+                });
+        ((LifeSubscription)mView).bindSubscription(singlePageSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscription);
     }
 

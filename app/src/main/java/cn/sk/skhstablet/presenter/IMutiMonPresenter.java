@@ -11,6 +11,7 @@ import cn.sk.skhstablet.model.PatientDetail;
 public interface IMutiMonPresenter {
     interface View extends BaseView<List<PatientDetail>>{
         void refreshView(PatientDetail mData,int position);
+        void setPageState(int state);
     }
     interface Presenter{
         void fetchPatientDetailData();

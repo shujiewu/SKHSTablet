@@ -170,7 +170,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     public void loadData(String ID) {
         mPresenter.fetchExercisePlan();
-        mPresenter.fetchPatientDetailData(ID);
+        mPresenter.sendPatientDetailRequest(ID);
     }
 
     @Override
@@ -222,6 +222,12 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             elvExPlan.collapseGroup(i);
             elvExPlan.expandGroup(i);
         }
+    }
+
+    @Override
+    public void setPageState(int state) {
+        if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
+            this.setState(AppConstants.STATE_SUCCESS);
     }
 
     /*public void registerFetchResponse()

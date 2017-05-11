@@ -159,6 +159,13 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         mutiMonitorAdapter.patientDetailList.set(position,mData);
         mutiMonitorAdapter.notifyItemChanged(position);
     }
+
+    @Override
+    public void setPageState(int state) {
+        if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
+            this.setState(AppConstants.STATE_SUCCESS);
+    }
+
     @Override
     public void reSendRequest() {
         loadData();
