@@ -7,7 +7,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class LogoutRequest extends AbstractProtocol {
-    protected LogoutRequest(byte command) {
+    public LogoutRequest(byte command) {
         super(command);
     }
     private int userID;

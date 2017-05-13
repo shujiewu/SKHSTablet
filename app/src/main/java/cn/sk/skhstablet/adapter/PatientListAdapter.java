@@ -1,5 +1,6 @@
 package cn.sk.skhstablet.adapter;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.sk.skhstablet.R;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.model.Patient;
 
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
@@ -33,11 +35,12 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     {
         mDatas=datas;
     }
-
+    public Context context;
     @Override
     public PatientListHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         View view =  LayoutInflater.from(parent.getContext()).inflate(R.layout.item_patient_view, parent, false);
+        context=parent.getContext();
         return new PatientListHolder(view);
     }
 
@@ -49,7 +52,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     public void onBindViewHolder(final PatientListHolder holder, final int position)
     {
         holder.bind(holder, mDatas.get(position));
-        holder.itemView.setTag( mDatas.get(position).getName());
+        holder.itemView.setTag( mDatas.get(position).getPatientID());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -175,16 +178,23 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     {
 
         TextView name;
-        TextView rfid;
-        TextView idcard;
+        //TextView rfid;
+        //TextView idcard;
+        TextView tvHospitalNumber;
         TextView gender;
         TextView tvSelectStatus;
+        TextView tvPhyState;
+        TextView tvSportState;
+        TextView status;
         public PatientListHolder(View view) {
             super(view);
             name = (TextView) view.findViewById(R.id.name);
-            rfid = (TextView) view.findViewById(R.id.rfid);
-            tvSelectStatus = (TextView) view.findViewById(R.id.idcard);
+            tvHospitalNumber = (TextView) view.findViewById(R.id.hospitalNumber);
+            tvSelectStatus = (TextView) view.findViewById(R.id.selectState);
+            tvPhyState=(TextView) view.findViewById(R.id.tvPhyState);
+            tvSportState=(TextView) view.findViewById(R.id.tvSportState);
             gender=(TextView) view.findViewById(R.id.gender);
+            status=(TextView) view.findViewById(R.id.status);
             TextWatcher textWatcher = new TextWatcher() {
 
                 @Override
@@ -213,8 +223,37 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
         public void bind(PatientListHolder viewHolder, Patient patient) {
             viewHolder.name.setText(patient.getName());
-            viewHolder.rfid.setText(patient.getRfid());
             viewHolder.tvSelectStatus.setText(patient.getSelectStatus());
+            viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
+            if(patient.getSportState()== CommandTypeConstant.SPORT_NOMAL)
+                viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_green));
+            else if(patient.getSportState()== CommandTypeConstant.SPORT_WARNING)
+                viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_orange));
+            else
+                viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_grey));
+
+            if(patient.getMonConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_ONLINE)
+            {
+                viewHolder.tvPhyState.setTextColor(context.getResources().getColor(R.color.textgreen));
+                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.patient_online));
+            }
+            else
+            {
+                viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.patient_offline));
+            }
+
+            if(patient.getConnectState()== CommandTypeConstant.SPORT_DEV_CONNECT_ONLINE)
+            {
+                viewHolder.tvSportState.setTextColor(context.getResources().getColor(R.color.textgreen));
+                viewHolder.tvSportState.setText(patient.getDev());
+            }
+            else
+            {
+                viewHolder.tvSportState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                viewHolder.tvSportState.setText(context.getResources().getString(R.string.patient_offline));
+            }
+
             viewHolder.gender.setText(patient.getGender());
         }
     }

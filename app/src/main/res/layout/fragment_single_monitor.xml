@@ -90,7 +90,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="0.7"
                             android:gravity="center"
-                            android:id="@+id/sid"
+                            android:id="@+id/shospitalNumber"
                             android:textSize="20sp"
                             android:text="1212"/>
 
@@ -114,7 +114,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="0.7"
                             android:gravity="center"
-                            android:id="@+id/sid2"
+                            android:id="@+id/sdevNumber"
                             android:textSize="20sp"
                             android:text="1212"/>
 

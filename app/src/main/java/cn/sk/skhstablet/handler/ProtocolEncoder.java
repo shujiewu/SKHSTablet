@@ -34,10 +34,14 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		out.writeBytes(msg.getStart());
 		int startIndex = out.writerIndex();
 		out.writeShortLE(1);
-		encodeVersion(msg.getVersion(), out);
+		Version version=new Version();
+		version.majorVersionNumber=1;
+		version.secondVersionNumber=2;
+		version.reviseVersionNumber=3;
+		encodeVersion(version, out);
 		out.writeByte(msg.getCommand());
-		encodeDeviceId(msg.getDeviceId(), out);
-		AbstractProtocol request = null;
+		//encodeDeviceId(msg.getDeviceId(), out);
+		AbstractProtocol request = (AbstractProtocol) msg;
 		/*if (msg instanceof AbstractProtocol) {
 			response = (AbstractProtocol) msg;
 			out.writeByte(response.getStatus());
@@ -51,6 +55,45 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 			encodeExerciseEquipmentDataResponse((ExerciseEquipmentDataResponse)request, out);
 			break;
 		}
+
+			case CommandTypeConstant.LOGIN_REQUEST: {
+				encodeLoginRequest((LoginRequest)request, out);
+				break;
+			}
+
+			case CommandTypeConstant.CHANGE_KEY_REQUEST:{
+                encodeChangeKeyRequest((ChangeKeyRequest) request,out);
+                break;
+			}
+            case CommandTypeConstant.LOGOUT_REQUEST:{
+                encodeLogoutRequest((LogoutRequest) request, out);
+                break;
+            }
+
+            case CommandTypeConstant.DEV_NAME_REQUEST:{
+                encodeDevNameRequest((DevNameRequest) request,out);
+                break;
+            }
+            case CommandTypeConstant.SPORT_DEV_FORM_REQUEST:{
+                encodeSportDevFormRequest((SportDevFormRequest) request, out);
+                break;
+            }
+            case CommandTypeConstant.MONITOR_DEV_FORM_REQUEST:{
+                encodeMonitorDevFormRequest((MonitorDevFormRequest) request, out);
+            }
+
+            case CommandTypeConstant.PATIENT_LIST_REQUEST:{
+                encodePatientListRequest((PatientListRequest) request, out);
+                break;
+            }
+            case CommandTypeConstant.SINGLE_MONITOR_REQUEST:{
+                encodeSingleMonitorRequest((SingleMonitorRequest) request,out);
+                break;
+            }
+			case CommandTypeConstant.MUTI_MONITOR_REQUEST: {
+				encodeMutiMonitorRequest((MutiMonitorRequest)request, out);
+				break;
+			}
 		}
 		out.writeShortLE(0);
 		out.setShortLE(startIndex, out.writerIndex() - startIndex - 2);

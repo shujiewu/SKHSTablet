@@ -33,6 +33,7 @@ import cn.sk.skhstablet.component.EditTextWithDel;
 import cn.sk.skhstablet.component.PaperButton;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import cn.sk.skhstablet.utlis.CheckUtils;
+import cn.sk.skhstablet.utlis.Tools;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -140,7 +141,8 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
             }
         });
     }
-
+    private String UserID;
+    private String Key;
     private void initLogin() {
         SharedPreferences userinfo = getActivity().getSharedPreferences("userinfo", 0);
         userphone.setText(userinfo.getString("username",null));
@@ -148,8 +150,8 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         bt_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final   String phone = userphone.getText().toString();
-                final String passwords = userpass.getText().toString();
+                final   String userID = userphone.getText().toString();
+                final String key = userpass.getText().toString();
                 final  View view= v;
 
                 /*if (TextUtils.isEmpty(phone)){
@@ -181,6 +183,8 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 getActivity().overridePendingTransition(R.anim.fade,
                         R.anim.my_alpha_action);*/
                 mPresenter.registerFetchResponse();
+                UserID=userID;
+                Key=key;
                 loadData();
 
                 bt_login.setEnabled(false);
@@ -227,6 +231,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     public void refreshView(Boolean mData) {
         if(mData==true)
         {
+            mPresenter.sendFormatRequest();
             login_progress.setVisibility(View.GONE);
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
@@ -234,12 +239,18 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                     R.anim.my_alpha_action);
             getActivity().finish();
         }
+        else
+        {
+            login_progress.setVisibility(View.GONE);
+            rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+            codeicon.setAnimation(Tools.shakeAnimation(2));
+        }
         //userphone.setText(mData);
     }
 
     @Override
     public void reSendRequest() {
-        mPresenter.sendVerify();
+        mPresenter.sendVerify(UserID,Key);
     }
 
     @Override
@@ -250,55 +261,8 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
 
     @Override
     protected void loadData() {
-        //if(mutiSubscription==null)
-       // {
-       //     fetchVerifyState();
-       // }
-        mPresenter.fetchStateData();
+        mPresenter.fetchStateData(UserID,Key);
     }
-
-
-    private CompositeSubscription mutiSubscription;
-
-    /*public void registerFetchResponse()
-    {
-        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean s) {
-                        Log.e("login","succees1");
-                        refreshView(s);
-
-                    }
-                });
-        Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean s) {
-                        if(s==true)
-                            reSendRequest();
-                        else
-                        {
-                            bt_login.setEnabled(true);
-                            login_progress.setVisibility(View.INVISIBLE);
-                        }
-
-
-                    }
-                });
-        Subscription mSubscriptionRequestFail = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST_FAIL,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean s) {
-                        if(s==true)
-                            reSendRequest();
-                    }
-                });
-        bindSubscription(mSubscription);
-        bindSubscription(mSubscriptionRequest);
-        bindSubscription(mSubscriptionRequestFail);
-    }*/
-
     @Override
     public void setLoginDisable() {
         bt_login.setEnabled(true);

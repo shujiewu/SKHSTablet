@@ -17,7 +17,7 @@ public interface IPatientListPresenter {
     }
     interface Presenter{
         void sentPatientListRequest();
-        void sendMutiMonitorRequest();
+        void sendMutiMonitorRequest(List<Integer> patientID);
         void sendCancelSingleMonitorReq();
         void sendLogoutRequest();
         void registerFetchResponse();

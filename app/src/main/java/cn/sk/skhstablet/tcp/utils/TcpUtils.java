@@ -6,16 +6,21 @@ import com.blankj.utilcode.utils.NetworkUtils;
 import com.blankj.utilcode.utils.ToastUtils;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.handler.CUSUMHandler;
 import cn.sk.skhstablet.handler.ProtocolDecoder;
+import cn.sk.skhstablet.handler.ProtocolEncoder;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BaseView;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
+import cn.sk.skhstablet.protocol.DeviceId;
+import cn.sk.skhstablet.protocol.MonitorDevForm;
 import cn.sk.skhstablet.protocol.down.DevNameResponse;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
@@ -44,7 +49,11 @@ import rx.functions.Action1;
 import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 
+import static cn.sk.skhstablet.app.AppConstants.DEV_NAME;
+import static cn.sk.skhstablet.app.AppConstants.MON_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.CommandTypeConstant.MUTI_MONITOR_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.model.PatientDetailList.phyValue;
@@ -96,14 +105,14 @@ public class TcpUtils {
         lifecycle.bindSubscription(subscription);
 
     }
-    static Connection<AbstractProtocol,String> mConnection;
+    static Connection<AbstractProtocol,AbstractProtocol> mConnection;
 
     public static Observable<Boolean> connect(final String url, final int port) {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {
                 TcpClient.newClient(url, port)
-                        .<String,AbstractProtocol>addChannelHandlerLast("linebase",
+                        .<AbstractProtocol,AbstractProtocol>addChannelHandlerLast("linebase",
                                 new Func0<ChannelHandler>() {
                                     @Override
                                     public ChannelHandler call() {
@@ -111,25 +120,25 @@ public class TcpUtils {
                                                 4, 2, 0, 0, true);
                                     }
                                 })
-                        .<String,AbstractProtocol>addChannelHandlerLast("checksum",
+                        .<AbstractProtocol,AbstractProtocol>addChannelHandlerLast("checksum",
                                 new Func0<ChannelHandler>() {
                                     @Override
                                     public ChannelHandler call() {
                                         return   new CUSUMHandler();
                                     }
                                 })
-                        .<String,AbstractProtocol>addChannelHandlerLast("decoder",
+                        .<AbstractProtocol,AbstractProtocol>addChannelHandlerLast("decoder",
                         new Func0<ChannelHandler>() {
                             @Override
                             public ChannelHandler call() {
                                 return new ProtocolDecoder();
                             }
                         })
-                        .<String,AbstractProtocol>addChannelHandlerLast("encoder",
+                        .<AbstractProtocol,AbstractProtocol>addChannelHandlerLast("encoder",
                         new Func0<ChannelHandler>() {
                             @Override
                             public ChannelHandler call() {
-                                return new StringEncoder();
+                                return new ProtocolEncoder();
                             }
 
                         })
@@ -138,7 +147,7 @@ public class TcpUtils {
                         //.readTimeOut(5, TimeUnit.SECONDS) //5秒未读到数据
                         .createConnectionRequest()
 
-                        .subscribe(new Observer<Connection<AbstractProtocol, String>>() {
+                        .subscribe(new Observer<Connection<AbstractProtocol, AbstractProtocol>>() {
                             @Override
                             public void onCompleted() {
                                 subscriber.onCompleted();Log.e("r","rc2");
@@ -152,7 +161,7 @@ public class TcpUtils {
                              }
 
                             @Override
-                            public void onNext(Connection<AbstractProtocol, String> connection) {
+                            public void onNext(Connection<AbstractProtocol, AbstractProtocol> connection) {
                                 mConnection = connection;
                                 subscriber.onNext(true);
                                 Log.e("10.40","1");
@@ -161,7 +170,7 @@ public class TcpUtils {
             }
         });
     }
-    public  static void re(String url,int port)
+   /* public  static void re(String url,int port)
     {
         TcpClient.newClient(url, port)
                 .<String,AbstractProtocol>addChannelHandlerLast("linebase",
@@ -216,7 +225,7 @@ public class TcpUtils {
                         Log.e("20.40","1");
                     }
                 });
-    }
+    }*/
     public static Observable<AbstractProtocol> receive() {
         if (mConnection != null) {
             return mConnection.getInput();
@@ -224,11 +233,15 @@ public class TcpUtils {
         return null;
     }
 
-    public static Observable<Void> send(String s) {
+    /*public static Observable<Void> send(String s) {
+        Log.e("10.40","5");
+        return mConnection.write(Observable.just(s));
+    }*/
+
+    public static Observable<Void> send(AbstractProtocol s) {
         Log.e("10.40","5");
         return mConnection.write(Observable.just(s));
     }
-
 
     private static int spacingTime =2;
     /**
@@ -267,7 +280,11 @@ public class TcpUtils {
             }
         }));
     }
-
+    public static byte[] subBytes(byte[] src, int begin, int count) {
+        byte[] bs = new byte[count];
+        System.arraycopy(src, begin, bs, 0, count);
+        return bs;
+    }
     public static void fetchData()
     {
         Log.e("error", "refetch");
@@ -294,7 +311,40 @@ public class TcpUtils {
                         break;
                     }
                     case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST: {
-                        dataType=(byte)((ExerciseEquipmentDataResponse)data).getDeviceId().getDeviceType();
+                        ///dataType=(byte)((ExerciseEquipmentDataResponse)data).getDeviceId().getDeviceType();
+                        ExerciseEquipmentDataResponse response=(ExerciseEquipmentDataResponse)data;
+                        PatientDetail patientDetail=new PatientDetail();
+                        patientDetail.setPatientID(response.getPatientId());
+                        patientDetail.setName(PATIENT_LIST_NAME_FORM.get(response.getPatientId()));
+                        patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(response.getPatientId()));
+                        DeviceId deviceId=response.getDeviceId();
+                        patientDetail.setDev(DEV_NAME.get(deviceId.deviceType));
+                        patientDetail.setDevType(deviceId.deviceType);
+                        patientDetail.setDeviceNumber(deviceId.deviceNumber);
+                        patientDetail.setPercent(String.valueOf(response.getExercisePlanCompletionRate()));
+                        byte[]physiologicalData=response.getPhysiologicalData();
+                        int size=physiologicalData[0];
+                        List<String> sportDevName=new ArrayList<String>();  //指的是参数名称，而不是设备名称
+                        List<String> phyDevName=new ArrayList<String>();
+                        List<String> sportDevValue=new ArrayList<String>();
+                        List<String> phyDevValue=new ArrayList<String>();
+                        for(int i=0,j=1;i<size;i++)
+                        {
+                            //phyDevName.set(i,MON_DEV_FORM.get(physiologicalData[j]));
+                            List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(physiologicalData[j]);
+                            int paraValue=0;
+                            int paraLength;
+                            j++;
+                            for(int k=0;k<monitorDevForms.size();k++)
+                            {
+                                paraLength=monitorDevForms.get(k).getLength();
+                                //取出值
+                                //paraValue=subBytes(physiologicalData,j,paraLength);
+                                phyDevName.set(k,monitorDevForms.get(k).getName());
+                                phyDevValue.set(k,String.valueOf(paraValue)+monitorDevForms.get(k).getUnit());
+                            }
+                        }
+                        RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
                         break;
                     }
                     case CommandTypeConstant.DOCTOR_ADVICE_RESPONSE:
@@ -308,6 +358,18 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID||devType!=AppConstants.DEV_TYPE)
                             return;
                         AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
+                        int size=AppConstants.PATIENT_LIST_DATA.size();
+                        if(size>1)//新数据
+                        {
+                            for(int i=0;i<size;i++)
+                            {
+                                if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
+                                {
+                                    PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
+                                    PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
+                                }
+                            }
+                        }
                         RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Boolean(true));//通知数据改变
                         break;
                         /*userID=((PatientListResponse)data).getUserID();
@@ -327,7 +389,10 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID||reqID!=AppConstants.SINGLE_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
                         if(state==SUCCESS)
+                        {
                             RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Boolean(true));
+                            AppConstants.SINGLE_REQ_ID++;
+                        }
                         else
                             RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Boolean(false));
                         break;
@@ -339,7 +404,10 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID||reqID!=AppConstants.MUTI_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
                         if(state==SUCCESS)
+                        {
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Boolean(true));
+                            AppConstants.MUTI_REQ_ID++;
+                        }
                         else
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Boolean(false));
                         break;
@@ -351,7 +419,10 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PATIENT_LIST_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
                         if(state==SUCCESS)
+                        {
                             RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(true)); //暂时感觉不到有用
+                            AppConstants.PATIENT_LIST_REQ_ID++;
+                        }
                         else
                             RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(false));
                         break;
@@ -405,7 +476,7 @@ public class TcpUtils {
                         userID=((DevNameResponse)data).getUserID();
                         if(userID!=AppConstants.USER_ID)
                             return;
-                        AppConstants.MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
+                        MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
                         break;
                 }
 

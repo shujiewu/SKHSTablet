@@ -7,7 +7,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class LoginRequest extends AbstractProtocol {
-    protected LoginRequest(byte command) {
+    public LoginRequest(byte command) {
         super(command);
     }
 

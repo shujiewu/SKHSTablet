@@ -9,7 +9,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class SingleMonitorRequest extends AbstractProtocol {
-    protected SingleMonitorRequest(byte command) {
+    public SingleMonitorRequest(byte command) {
         super(command);
     }
     private byte deviceType;

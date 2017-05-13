@@ -11,7 +11,7 @@ public class PatientDetail {
     private String id;
     private String dev;
     private String percent;
-    private List<String> sportDevName;
+    private List<String> sportDevName;  //指的是参数名称，而不是设备名称
     private List<String> phyDevName;
     private List<String> sportDevValue;
     private List<String> phyDevValue;
@@ -76,7 +76,7 @@ public class PatientDetail {
     }
 
     public String getPercent() {
-        return percent;
+        return percent+"%";
     }
 
     public void setDev(String dev) {
@@ -91,5 +91,33 @@ public class PatientDetail {
         this.percent = percent;
     }
 
-
+    public PatientDetail(){}
+    private String hospitalNumber;
+    private int patientID;
+    private byte devType;
+    private long deviceNumber;
+    public void setPatientID(int patientID) {
+        this.patientID = patientID;
+    }
+    public int getPatientID() {
+        return patientID;
+    }
+    public void setDevType(byte devType) {
+        this.devType = devType;
+    }
+    public void setDeviceNumber(long deviceNumber) {
+        this.deviceNumber = deviceNumber;
+    }
+    public void setHospitalNumber(String hospitalNumber) {
+        this.hospitalNumber = hospitalNumber;
+    }
+    public long getDeviceNumber() {
+        return deviceNumber;
+    }
+    public String getHospitalNumber() {
+        return hospitalNumber;
+    }
+    public byte getDevType() {
+        return devType;
+    }
 }

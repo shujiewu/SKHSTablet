@@ -1,5 +1,6 @@
 package cn.sk.skhstablet.app;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class AppConstants {
     public static  final int PATIENT_LIST_REQ_STATE=6001;
     public static  final int PATIENT_LIST_DATA_STATE=6002;
 
-    public static  final  String url="10.250.110.4";
+    public static  final  String url="113.251.244.234";
     public static  final  int port=9999;
 
     public static final int RE_SEND_REQUEST=4000;
@@ -44,14 +45,16 @@ public class AppConstants {
 
     public static int USER_ID;
     public static final byte DEV_TYPE=0x11;
-    public static byte SINGLE_REQ_ID;
-    public static byte MUTI_REQ_ID;
-    public static byte PATIENT_LIST_REQ_ID;
+    public static byte SINGLE_REQ_ID=0;
+    public static byte MUTI_REQ_ID=0;
+    public static byte PATIENT_LIST_REQ_ID=0;
 
-    public static HashMap<Byte,String> DEV_NAME;
-    public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM;
-    public static HashMap<Byte,List<MonitorDevForm>> MON_DEV_FORM;
+    public static HashMap<Byte,String> DEV_NAME=new HashMap<>();
+    public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM=new HashMap<>();
+    public static HashMap<Byte,List<MonitorDevForm>> MON_DEV_FORM=new HashMap<>();
 
 
-    public static List<Patient> PATIENT_LIST_DATA;
+    public static List<Patient> PATIENT_LIST_DATA=new ArrayList<>();
+    public static HashMap<Integer,String> PATIENT_LIST_NAME_FORM=new HashMap<>();
+    public static HashMap<Integer,String> PATIENT_LIST_NUMBER_FORM=new HashMap<>();
 }

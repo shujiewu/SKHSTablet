@@ -9,7 +9,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class MutiMonitorRequest extends AbstractProtocol {
-    protected MutiMonitorRequest(byte command) {
+    public MutiMonitorRequest(byte command) {
         super(command);
     }
 

@@ -3,8 +3,11 @@ package cn.sk.skhstablet.presenter.impl;
 import javax.inject.Inject;
 
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.IChangekeyPresenter;
+import cn.sk.skhstablet.protocol.AbstractProtocol;
+import cn.sk.skhstablet.protocol.up.ChangeKeyRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
@@ -19,8 +22,28 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
 
 
     @Override
-    public void sendRequest() {
-        invoke(TcpUtils.send("changekey"), new Action1<Void>() {
+    public void sendRequest(String oldKey,String newKey) {
+        ChangeKeyRequest request=new ChangeKeyRequest(CommandTypeConstant.CHANGE_KEY_REQUEST);
+
+        byte [] old=new byte[16];
+        byte [] change=new byte[16];
+        int i;
+        for(i=0;i<oldKey.length();i++)
+        {
+            old[i]=(byte) oldKey.charAt(i);
+        }
+        if(i!=16)
+            old[i]='#';
+        for(i=0;i<newKey.length();i++)
+        {
+            change[i]=(byte) newKey.charAt(i);
+        }
+        if(i!=16)
+            change[i]='#';
+        request.setUserID(AppConstants.USER_ID);
+        request.setUserOldKey(old);
+        request.setUserNewKey(change);
+        invoke(TcpUtils.send(request), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
                 System.out.println("send success!");

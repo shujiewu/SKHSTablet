@@ -79,6 +79,17 @@ public class Patient implements Comparable<Patient>, Serializable{
     private byte sportState;
     private byte connectState;
     private byte monConnectState;
+
+    private String dev;
+
+    public String getDev() {
+        return dev;
+    }
+
+    public void setDev(String dev) {
+        this.dev = dev;
+    }
+
     public Patient(){}
 
     public byte getConnectState() {

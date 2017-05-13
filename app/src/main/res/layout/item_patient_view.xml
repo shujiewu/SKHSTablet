@@ -44,7 +44,7 @@
         >
 
         <TextView
-            android:id="@+id/rfid"
+            android:id="@+id/hospitalNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin"
@@ -113,7 +113,7 @@
             android:background="@drawable/status_green"
             />
         <TextView
-            android:id="@+id/idcard"
+            android:id="@+id/selectState"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"

@@ -7,7 +7,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class PatientListRequest extends AbstractProtocol {
-    protected PatientListRequest(byte command) {
+    public PatientListRequest(byte command) {
         super(command);
     }
 

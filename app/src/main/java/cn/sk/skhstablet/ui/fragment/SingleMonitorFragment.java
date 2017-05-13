@@ -59,9 +59,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     private MainActivity mainActivity;
     private ExpandableListView elvExPlan;
     TextView name;
-    TextView id;
     TextView dev;
     TextView percent;
+    TextView tvHospitalNumber;
+    TextView tvDevNumber;
     private String singleMonitorID;
     private HashMap<String,String> changeDevPara= new HashMap<>();
 
@@ -202,10 +203,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
 
         name.setText(patientDetail.getName());
-        id.setText(patientDetail.getId());
         dev.setText(patientDetail.getDev());
         percent.setText(patientDetail.getPercent());
-
+        tvDevNumber.setText(String.valueOf(patientDetail.getDeviceNumber()));
+        tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
     }
 
     @Override
@@ -254,8 +255,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             mPresenter.setView(this);}
 
         mainActivity=(MainActivity) getActivity();
+
         name = (TextView) view.findViewById(R.id.sname);
-        id = (TextView) view.findViewById(R.id.sid);
+        tvHospitalNumber = (TextView) view.findViewById(R.id.shospitalNumber);
+        tvDevNumber=(TextView) view.findViewById(R.id.sdevNumber);
         dev = (TextView) view.findViewById(R.id.sdev);
         percent=(TextView) view.findViewById(R.id.spercent);
 
@@ -265,24 +268,24 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         TracksItemDecorator itemDecorator = new TracksItemDecorator(10);
         rySportParaView.addItemDecoration(itemDecorator);
         devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
-                                                         @Override
-                                                         public void SaveEdit(int position, String devValue) {
-                                                             //Log.e("testsava","1");
-                                                             //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
-                                                             String devName=devParaChangeAdapter.sportDevName.get(position);
-                                                             if(devValue.equals(devParaChangeAdapter.sportDevValue.get(position))&&changeDevPara.containsKey(devName))
-                                                                 changeDevPara.remove(devName);
-                                                             else
-                                                             {
-                                                                 changeDevPara.put(devName,devValue);
-                                                             }
-                                                             if(!mainActivity.hasMenuItem(mainActivity.SAVE_EDIT))
-                                                             {
-                                                                 TextItem textItem = new TextItem(mainActivity, mainActivity.SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
-                                                                 mainActivity.addRightTopItem(textItem);
-                                                             }
-                                                         }
-                                                     }
+            @Override
+            public void SaveEdit(int position, String devValue) {
+                   //Log.e("testsava","1");
+                   //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
+                   String devName=devParaChangeAdapter.sportDevName.get(position);
+                   if(devValue.equals(devParaChangeAdapter.sportDevValue.get(position))&&changeDevPara.containsKey(devName))
+                       changeDevPara.remove(devName);
+                   else
+                   {
+                       changeDevPara.put(devName,devValue);
+                   }
+                   if(!mainActivity.hasMenuItem(mainActivity.SAVE_EDIT))
+                   {
+                       TextItem textItem = new TextItem(mainActivity, mainActivity.SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
+                       mainActivity.addRightTopItem(textItem);
+                   }
+               }
+           }
         );
 
 

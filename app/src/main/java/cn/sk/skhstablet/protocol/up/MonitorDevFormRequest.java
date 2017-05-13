@@ -7,7 +7,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class MonitorDevFormRequest extends AbstractProtocol {
-    protected MonitorDevFormRequest(byte command) {
+    public MonitorDevFormRequest(byte command) {
         super(command);
     }
 

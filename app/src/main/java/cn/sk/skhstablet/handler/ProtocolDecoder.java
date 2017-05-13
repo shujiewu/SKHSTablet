@@ -21,6 +21,7 @@ import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
 import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
 import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
+import cn.sk.skhstablet.protocol.up.LoginRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -42,7 +43,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		Version version = decodeVersion(reqBuf);
 		System.out.println(version.reviseVersionNumber);
 		byte commandType = reqBuf.readByte();
-		DeviceId deviceId = decodeDeviceId(reqBuf);
+		//DeviceId deviceId = decodeDeviceId(reqBuf);
 		System.out.println(commandType);
 		// System.out.println("request type:" + commandType);
 		switch (commandType) {
@@ -55,9 +56,59 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			request = decodeExerciseEquipmentDataRequest(reqBuf);
 			break;
 		}
+			case CommandTypeConstant.LOGIN_ACK_RESPONSE: {
+				request=decodeLoginAckResponse(reqBuf,CommandTypeConstant.LOGIN_ACK_RESPONSE);
+				break;
+			}
+            case CommandTypeConstant.LOGOUT_ACK_RESPONSE:{
+                request=decodeLoginAckResponse(reqBuf,CommandTypeConstant.LOGOUT_ACK_RESPONSE);
+                break;
+            }
+            case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:{
+                request=decodeLoginAckResponse(reqBuf,CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE);
+                break;
+            }
+
+            case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:{
+                request=decodePatientListDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE);
+                break;
+            }
+            case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:{
+                request=decodePatientListDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE);
+                break;
+            }
+
+
+            case CommandTypeConstant.DEV_NAEM_RESPONSE:{
+                request=decodeDevNameResponse(reqBuf,CommandTypeConstant.DEV_NAEM_RESPONSE);
+                break;
+            }
+            case CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE:{
+                request=decodeMonitorDevFormResponse(reqBuf,CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE);
+                break;
+            }
+            case CommandTypeConstant.SPORT_DEV_FORM_RESPONSE:{
+                request=decodeSportDevFormResponse(reqBuf,CommandTypeConstant.SPORT_DEV_FORM_RESPONSE);
+                break;
+            }
+
+
+            case CommandTypeConstant.SINGLE_MONITOR_RESPONSE: {
+                request=decodePushAckResponse(reqBuf,CommandTypeConstant.SINGLE_MONITOR_RESPONSE);
+                break;
+            }
+            case CommandTypeConstant.PATIENT_LIST_RESPONSE:{
+                request=decodePushAckResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_RESPONSE);
+                break;
+            }
+
+			case CommandTypeConstant.MUTI_MONITOR_RESPONSE: {
+				request=decodePushAckResponse(reqBuf,CommandTypeConstant.MUTI_MONITOR_RESPONSE);
+				break;
+			}
 		}
 		request.setVersion(version);
-		request.setDeviceId(deviceId);
+		//request.setDeviceId(deviceId);
 		out.add(request);
 	}
 	private ExercisePhysiologicalDataResponse decodeExercisePhysiologicalDATARequest(ByteBuf reqBuf) {
@@ -127,7 +178,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		return response;
 	}
 
-	private AbstractProtocol decodePatientListResponse(ByteBuf resBuf,byte commandType)
+	private AbstractProtocol decodePatientListDataResponse(ByteBuf resBuf,byte commandType)
 	{
 		PatientListResponse response=new PatientListResponse(commandType);
 		response.setDeviceType(resBuf.readByte());

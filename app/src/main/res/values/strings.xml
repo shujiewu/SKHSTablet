@@ -18,4 +18,7 @@
     <string name="patient_select_false">未选择</string>
 
     <string name="patient_select_monitor">正在监控</string>
+
+    <string name="patient_online">在线</string>
+    <string name="patient_offline">离线</string>
 </resources>

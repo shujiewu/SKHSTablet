@@ -7,13 +7,20 @@ import java.util.List;
 import javax.inject.Inject;
 
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientList;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.IPatientListPresenter;
+import cn.sk.skhstablet.protocol.up.LoginRequest;
+import cn.sk.skhstablet.protocol.up.LogoutRequest;
+import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
+import cn.sk.skhstablet.protocol.up.PatientListRequest;
+import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
+import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
 import rx.Subscription;
 import rx.functions.Action1;
 
@@ -32,21 +39,43 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         mView.refreshView(mDatas);
 
         //在这里写发送
+        PatientListRequest patientListRequest=new PatientListRequest(CommandTypeConstant.PATIENT_LIST_REQUEST);
+        patientListRequest.setUserID(AppConstants.USER_ID);
+        patientListRequest.setDeviceType(AppConstants.DEV_TYPE);
+        patientListRequest.setRequestID(AppConstants.PATIENT_LIST_REQ_ID);
+        invoke(TcpUtils.send(patientListRequest), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send patientListRequest!");
+            }
+        });
     }
 
     @Override
-    public void sendMutiMonitorRequest() {
-        invoke(TcpUtils.send("sendMutiMonitorRequest"), new Action1<Void>() {
+    public void sendMutiMonitorRequest(List<Integer> patientID) {
+        MutiMonitorRequest mutiMonitorRequest=new MutiMonitorRequest(CommandTypeConstant.MUTI_MONITOR_REQUEST);
+        mutiMonitorRequest.setUserID(AppConstants.USER_ID);
+        mutiMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
+        mutiMonitorRequest.setRequestID(AppConstants.MUTI_REQ_ID);
+        mutiMonitorRequest.setPatientNumber((short) patientID.size());
+        mutiMonitorRequest.setPatientID(patientID);
+        invoke(TcpUtils.send(mutiMonitorRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
-                System.out.println("send success!");
+                System.out.println("send mutiMonitorRequest!");
             }
         });
     }
 
     @Override
     public void sendCancelSingleMonitorReq() {
-        invoke(TcpUtils.send("CancelSingleMonitorReq"), new Action1<Void>() {
+        SingleMonitorRequest singleMonitorRequest=new SingleMonitorRequest(CommandTypeConstant.SINGLE_MONITOR_REQUEST);
+        singleMonitorRequest.setUserID(AppConstants.USER_ID);
+        singleMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
+        singleMonitorRequest.setRequestID(AppConstants.SINGLE_REQ_ID);
+        singleMonitorRequest.setPatientNumber((short) 1);
+        singleMonitorRequest.setPatientID(0);
+        invoke(TcpUtils.send(singleMonitorRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
                 System.out.println("send success!");
@@ -56,7 +85,9 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
 
     @Override
     public void sendLogoutRequest() {
-        invoke(TcpUtils.send("logoutrequest"), new Action1<Void>() {
+        LogoutRequest logoutRequest=new LogoutRequest(CommandTypeConstant.LOGOUT_REQUEST);
+        logoutRequest.setUserID(AppConstants.USER_ID);
+        invoke(TcpUtils.send(logoutRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
                 System.out.println("send success!");

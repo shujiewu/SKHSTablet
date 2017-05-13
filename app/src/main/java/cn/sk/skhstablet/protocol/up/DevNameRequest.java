@@ -7,7 +7,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class DevNameRequest extends AbstractProtocol {
-    protected DevNameRequest(byte command) {
+    public DevNameRequest(byte command) {
         super(command);
     }
 

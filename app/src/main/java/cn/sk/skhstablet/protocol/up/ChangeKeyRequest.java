@@ -7,7 +7,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class ChangeKeyRequest extends AbstractProtocol {
-    protected ChangeKeyRequest(byte command) {
+    public ChangeKeyRequest(byte command) {
         super(command);
     }
 

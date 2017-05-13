@@ -57,4 +57,14 @@ public class CommandTypeConstant {
 	public static final byte PATIENT_LIST_RESPONSE=(byte)0xE3;
 	public static final byte MONITOR_DEV_FORM_RESPONSE=(byte)0xEC;
 	public static final byte SPORT_DEV_FORM_RESPONSE=(byte)0xED;
+
+	//连接状态
+	public static final byte SPORT_DEV_CONNECT_ONLINE=(byte)0x00;  //已打卡
+	public static final byte SPORT_DEV_CONNECT_OFFLINE=(byte)0x01; //未打卡
+	public static final byte PHY_DEV_CONNECT_ONLINE=(byte)0x00;     //生理仪在线
+	public static final byte PHY_DEV_CONNECT_OFFLINE=(byte)0x01;    //生理仪离线
+	//运动状态
+	public static final byte SPORT_NOMAL=(byte)0x00;                  //正常运动
+	public static final byte SPORT_WARNING=(byte)0x01;				//预警运动
+	public static final byte SPORT_NONE=(byte)0x02;					//未运动
 }

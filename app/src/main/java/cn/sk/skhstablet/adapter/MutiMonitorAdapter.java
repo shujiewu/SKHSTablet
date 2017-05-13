@@ -55,7 +55,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     @Override
     public void onBindViewHolder(MutiMonitorHolder holder, int position) {
         holder.bind(holder, patientDetailList.get(position));
-        holder.itemView.setTag(patientDetailList.get(position).getName());
+        holder.itemView.setTag(patientDetailList.get(position).getPatientID());
 
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -88,9 +88,11 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     {
 
         TextView name;
-        TextView id;
+        //TextView id;
         TextView dev;
         TextView percent;
+        TextView tvHospitalNumber;
+        TextView tvDevNumber;
         RecyclerView recyclerPhyParaView;
 
         RecyclerView recyclerSportParaView;
@@ -98,9 +100,11 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         public MutiMonitorHolder(Context context,View view) {
             super(view);
             name = (TextView) view.findViewById(R.id.mname);
-            id = (TextView) view.findViewById(R.id.mid);
             dev = (TextView) view.findViewById(R.id.mdev);
             percent=(TextView) view.findViewById(R.id.mpercent);
+            tvDevNumber = (TextView) view.findViewById(R.id.mdevNumber);
+            tvHospitalNumber = (TextView) view.findViewById(R.id.mhospitalNumber);
+
             recyclerPhyParaView=(RecyclerView)view.findViewById(R.id.ry_phy_para);
             recyclerSportParaView=(RecyclerView)view.findViewById(R.id.ry_sport_para);
             this.context=context;
@@ -108,9 +112,11 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
 
         public void bind(MutiMonitorHolder viewHolder, PatientDetail patient) {
             viewHolder.name.setText(patient.getName());
-            viewHolder.id.setText(patient.getId());
             viewHolder.dev.setText(patient.getDev());
             viewHolder.percent.setText(patient.getPercent());
+            viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
+            viewHolder. tvDevNumber.setText(String.valueOf(patient.getDeviceNumber()));
+
 
             recyclerPhyParaView.setLayoutManager(new GridLayoutManager(context,2));
             ViewGroup.LayoutParams layoutParams = recyclerPhyParaView.getLayoutParams();

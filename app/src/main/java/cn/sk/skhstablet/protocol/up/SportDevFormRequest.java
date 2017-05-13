@@ -7,7 +7,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
  */
 
 public class SportDevFormRequest extends AbstractProtocol {
-    protected SportDevFormRequest(byte command) {
+    public SportDevFormRequest(byte command) {
         super(command);
     }
 

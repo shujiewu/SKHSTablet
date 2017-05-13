@@ -532,10 +532,13 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     void sendMonitorRequest()
     {
         mutiMonitorFragment.setState(STATE_LOADING);
-        mPresenter.sendMutiMonitorRequest();
+        List<Integer> patientID=new ArrayList<>();
+        patientID.add(0,0);
+        patientID.add(1,1);
+        mPresenter.sendMutiMonitorRequest(patientID);
 
-        if(mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
-            mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+        //if(mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+        //    mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
     }
 
     @Override

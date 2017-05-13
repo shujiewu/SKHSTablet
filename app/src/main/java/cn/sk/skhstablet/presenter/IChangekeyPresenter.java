@@ -8,7 +8,7 @@ public interface IChangekeyPresenter {
     interface View extends BaseView<Boolean>{
     }
     interface Presenter{
-        void sendRequest();
+        void sendRequest(String oldKey,String newKey);
         void registerFetchResponse();
     }
 }
