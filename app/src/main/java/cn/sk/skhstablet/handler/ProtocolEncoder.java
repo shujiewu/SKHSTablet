@@ -1,5 +1,6 @@
 package cn.sk.skhstablet.handler;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,9 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 			response = (AbstractProtocol) msg;
 			out.writeByte(response.getStatus());
 		}*/
+		out.writeByte(msg.getDeviceType());
+		out.writeIntLE(msg.getUserID());
+		out.writeByte(msg.getRequestID());
 		switch (msg.getCommand()) {
 		case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
 			encodeExercisePhysiologicalDataResponse((ExercisePhysiologicalDataResponse) request, out);
@@ -103,7 +107,17 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		// System.out.println("response length:" + (out.writerIndex() -
 		// startIndex - 2));
 	}
-
+	private byte[] toBytes(String str)
+	{
+		byte[] srtbyte = null;
+		try {
+			srtbyte = str.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return srtbyte;
+	}
 	/**
 	 * 计算累加和
 	 **/
@@ -174,12 +188,17 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 
 	private void encodeLoginRequest(LoginRequest request,ByteBuf out)
 	{
-		out.writeIntLE(request.getUserID());
-		out.writeBytes(request.getUserKey());
+		byte[] name=toBytes(request.getLoginName());
+		out.writeByte(name.length);
+		out.writeBytes(name);
+		byte[] key=toBytes(request.getLoginKey());
+
+		out.writeByte(key.length);
+		out.writeBytes(key);
 	}
 	private void encodeLogoutRequest(LogoutRequest request,ByteBuf out)
 	{
-		out.writeIntLE(request.getUserID());
+		//out.writeIntLE(request.getUserID());
 	}
 	private void encodeChangeKeyRequest(ChangeKeyRequest request,ByteBuf out)
 	{
@@ -189,9 +208,9 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 	}
 	private void encodePatientListRequest(PatientListRequest request,ByteBuf out)
 	{
-		out.writeByte(request.getDeviceType());
-		out.writeIntLE(request.getUserID());
-		out.writeByte(request.getRequestID());
+		//out.writeByte(request.getDeviceType());
+		//out.writeIntLE(request.getUserID());
+		//out.writeByte(request.getRequestID());
 	}
 	private void encodeMutiMonitorRequest(MutiMonitorRequest request,ByteBuf out)
 	{

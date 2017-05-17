@@ -231,7 +231,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     public void refreshView(Boolean mData) {
         if(mData==true)
         {
-            mPresenter.sendFormatRequest();
+            //mPresenter.sendFormatRequest();
             login_progress.setVisibility(View.GONE);
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
@@ -244,6 +244,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
             login_progress.setVisibility(View.GONE);
             rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
             codeicon.setAnimation(Tools.shakeAnimation(2));
+            bt_login.setEnabled(true);
         }
         //userphone.setText(mData);
     }

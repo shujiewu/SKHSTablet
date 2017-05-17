@@ -28,7 +28,13 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.LOGIN_SUCCESS;
 import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_SUCCESS;
+import static cn.sk.skhstablet.app.CommandTypeConstant.PHY_CONN_ONLINE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.SPORT_DEV_CONNECT_OFFLINE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 
 @Sharable
 public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
@@ -41,10 +47,11 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		reqBuf.readUnsignedShortLE();
 		AbstractProtocol request = null;
 		Version version = decodeVersion(reqBuf);
-		System.out.println(version.reviseVersionNumber);
+		//System.out.println(version.reviseVersionNumber);
 		byte commandType = reqBuf.readByte();
 		//DeviceId deviceId = decodeDeviceId(reqBuf);
-		System.out.println(commandType);
+		//System.out.println(commandType);
+
 		// System.out.println("request type:" + commandType);
 		switch (commandType) {
 
@@ -61,7 +68,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				break;
 			}
             case CommandTypeConstant.LOGOUT_ACK_RESPONSE:{
-                request=decodeLoginAckResponse(reqBuf,CommandTypeConstant.LOGOUT_ACK_RESPONSE);
+                request=decodeLogoutAckResponse(reqBuf,CommandTypeConstant.LOGOUT_ACK_RESPONSE);
                 break;
             }
             case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:{
@@ -163,11 +170,39 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 	private AbstractProtocol decodeLoginAckResponse(ByteBuf resBuf,byte commandType)
 	{
 		LoginAckResponse response=new LoginAckResponse(commandType);
+		//response.setUserID(resBuf.readIntLE());
+
+		response.setDeviceType(resBuf.readByte());
 		response.setUserID(resBuf.readIntLE());
+		response.setRequestID(resBuf.readByte());
+
+
 		response.setState(resBuf.readByte());
+		if(response.getState()==LOGIN_SUCCESS)
+		{
+			response.setUserID(resBuf.readIntLE());
+			byte length=resBuf.readByte();
+			response.setUserNameLength(length);
+			byte[] name=new byte[length];
+			resBuf.readBytes(name);
+			response.setUserName(toUtf8(name));
+		}
 		return response;
 	}
+	private AbstractProtocol decodeLogoutAckResponse(ByteBuf resBuf,byte commandType)
+	{
+		LoginAckResponse response=new LoginAckResponse(commandType);
+		//response.setUserID(resBuf.readIntLE());
 
+		response.setState(resBuf.readByte());
+		//response.setUserID(resBuf.readIntLE());
+		//byte length=resBuf.readByte();
+		//response.setUserNameLength(length);
+		//byte[] name=new byte[length];
+		//resBuf.readBytes(name);
+		//response.setUserName(toUtf8(name));
+		return response;
+	}
 	private AbstractProtocol decodePushAckResponse(ByteBuf resBuf,byte commandType)
 	{
 		PushAckResponse response=new PushAckResponse(commandType);
@@ -183,15 +218,21 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		PatientListResponse response=new PatientListResponse(commandType);
 		response.setDeviceType(resBuf.readByte());
 		response.setUserID(resBuf.readIntLE());
+		response.setRequestID(resBuf.readByte());
+		response.setState(resBuf.readByte());
+		if(response.getState()!=PATIENT_LIST_SUCCESS)
+			return response;
+
 		response.setPatientNumber(resBuf.readShortLE());
 		int number=response.getPatientNumber();
 		List<Patient> patientList=new ArrayList<>();
+		System.out.println(String.valueOf(number)+"数量");
 		for(short i=0;i<number;i++)
 		{
 			Patient patient=new Patient();
 
 			patient.setPatientID(resBuf.readIntLE());
-
+			System.out.println(patient.getPatientID()+"病人id");
 			if(commandType==PATIENT_LIST_DATA_RESPONSE)
 			{
 				byte gender=resBuf.readByte();
@@ -200,17 +241,38 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				else
 					patient.setGender("女");
 
-				byte req[]=new byte[64];
+				short nameLength=resBuf.readUnsignedByte();
+				byte req[]=new byte[nameLength];
 				resBuf.readBytes(req);
 				patient.setName(toUtf8(req));
-				patient.setHospitalNumber(String.valueOf(resBuf.readLongLE()));
-			}
+				System.out.println(patient.getName()+"姓名");
 
-			patient.setDevType(resBuf.readByte());
-			patient.setDeviceNumber(resBuf.readLongLE());
+				short hospitalLength=resBuf.readUnsignedByte();
+				System.out.println(String.valueOf(hospitalLength)+"hoslength");
+				byte res[]=new byte[hospitalLength];
+				resBuf.readBytes(res);
+				patient.setHospitalNumber(toUtf8(res));
+				System.out.println(patient.getHospitalNumber());
+
+			}
+			patient.setPhyConnectState(resBuf.readByte());
+			if(patient.getPhyConnectState()==PHY_CONN_ONLINE)
+			{
+				patient.setMonConnectState(resBuf.readByte());
+				System.out.println(1);
+			}
 			patient.setSportState(resBuf.readByte());
-			patient.setConnectState(resBuf.readByte());
-			patient.setMonConnectState(resBuf.readByte());
+			if(patient.getSportState()!=SPORT_DEV_CONNECT_OFFLINE)
+			{
+				System.out.println(2);
+				patient.setDeviceNumber(resBuf.readLongLE());
+				patient.setDevType(resBuf.readByte());
+				patient.setDev("跑步机");
+				patient.setConnectState(resBuf.readByte());
+				patient.setSportPlanID(resBuf.readIntLE());
+				patient.setSportPlanSegment(resBuf.readByte());
+			}
+			patient.setSelectStatus(PATIENT_SELECT_STATUS_FALSE);
 			patientList.add(patient);
 		}
 		response.setPatientList(patientList);

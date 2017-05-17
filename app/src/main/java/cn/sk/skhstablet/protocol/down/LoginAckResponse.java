@@ -11,16 +11,16 @@ public class LoginAckResponse extends AbstractProtocol {
         super(command);
     }
 
-    private int userID;
+    //private int userID;
     private byte state;
 
-    public void setUserID(int userID) {
+   /* public void setUserID(int userID) {
         this.userID = userID;
     }
 
     public int getUserID() {
-        return userID;
-    }
+       return userID;
+    }*/
 
     public byte getState() {
         return state;
@@ -28,5 +28,24 @@ public class LoginAckResponse extends AbstractProtocol {
 
     public void setState(byte state) {
         this.state = state;
+    }
+
+    private byte userNameLength;
+    private String userName;
+
+    public byte getUserNameLength() {
+        return userNameLength;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setUserNameLength(byte userNameLength) {
+        this.userNameLength = userNameLength;
     }
 }

@@ -80,20 +80,25 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
         ((LifeSubscription)mView). bindSubscription(mSubscriptionRequestFail);
     }
 
-    public void sendVerify(String userID, String key)
+    public void sendVerify(String loginName, String key)
     {
         LoginRequest request=new LoginRequest(CommandTypeConstant.LOGIN_REQUEST);
-        request.setUserID(Integer.parseInt(userID));
+        request.setUserID(0);
+        request.setDeviceType((byte) 0x01);
+        request.setRequestID(AppConstants.LOGIN_REQ_ID);
         AppConstants.USER_ID=request.getUserID();
-        byte [] password=new byte[16];
+        /*byte [] password=new byte[16];
         int i;
         for(i=0;i<key.length();i++)
         {
             password[i]=(byte) key.charAt(i);
         }
         if(i!=16)
-            password[i]='#';
-        request.setUserKey(password);
+            password[i]='#';*/
+        request.setLoginKeyLength((byte) key.length());
+        request.setLoginNameLength((byte) loginName.length());
+        request.setLoginName(loginName);
+        request.setLoginKey(key);
         invoke(TcpUtils.send(request), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {

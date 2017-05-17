@@ -13,12 +13,12 @@ public class PatientListResponse extends AbstractProtocol {
     public PatientListResponse(byte command) {
         super(command);
     }
-    private byte deviceType;
-    private int userID;
-    private short patientNumber;
+    //private byte deviceType;
+    //private int userID;
+    private int patientNumber;
     private List<Patient> patientList;
 
-    public void setDeviceType(byte deviceType) {
+    /*public void setDeviceType(byte deviceType) {
         this.deviceType = deviceType;
     }
 
@@ -32,13 +32,13 @@ public class PatientListResponse extends AbstractProtocol {
 
     public int getUserID() {
         return userID;
-    }
+    }*/
 
     public List<Patient> getPatientList() {
         return patientList;
     }
 
-    public short getPatientNumber() {
+    public int getPatientNumber() {
         return patientNumber;
     }
 
@@ -46,7 +46,17 @@ public class PatientListResponse extends AbstractProtocol {
         this.patientList = patientList;
     }
 
-    public void setPatientNumber(short patientNumber) {
+    public void setPatientNumber(int patientNumber) {
         this.patientNumber = patientNumber;
+    }
+
+    private byte state;
+
+    public byte getState() {
+        return state;
+    }
+
+    public void setState(byte state) {
+        this.state = state;
     }
 }

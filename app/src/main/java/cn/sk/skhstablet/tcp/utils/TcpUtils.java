@@ -439,12 +439,18 @@ public class TcpUtils {
                             RxBus.getDefault().post(AppConstants.CHANGE_KEY_STATE,new Boolean(false));
                         break;
                     case CommandTypeConstant.LOGIN_ACK_RESPONSE:
-                        userID=((LoginAckResponse)data).getUserID();
-                        if(userID!=AppConstants.USER_ID)
-                            return;
+                        //userID=((LoginAckResponse)data).getUserID();
+                        //if(userID!=AppConstants.USER_ID)
+                        //    return;
                         state=((LoginAckResponse)data).getState();
                         if(state==SUCCESS)
+                        {
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
+                            String userName=((LoginAckResponse)data).getUserName();
+                            System.out.println(userName);
+                            AppConstants.LOGIN_REQ_ID++;
+                            AppConstants.USER_ID=((LoginAckResponse)data).getUserID();
+                        }
                         else
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(false));
                         break;
@@ -480,7 +486,7 @@ public class TcpUtils {
                         break;
                 }
 
-                switch (dataType)
+                /*switch (dataType)
                 {
                     case CommandTypeConstant.LOGIN_SUCCESS:
                         RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
@@ -506,7 +512,7 @@ public class TcpUtils {
                        // }
                         // RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "2", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
                         break;
-                }
+                }*/
             }
         });
     }

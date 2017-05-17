@@ -12,7 +12,7 @@ public class CUSUMHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		ByteBuf buf = (ByteBuf) msg;
-		System.out.println(ByteBufUtil.hexDump(buf));
+		//System.out.println(ByteBufUtil.hexDump(buf));
 		// int length = buf.getShortLE(4);
 		long start = System.currentTimeMillis();
 		int sumIndex = buf.writerIndex() - 2;

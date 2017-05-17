@@ -33,8 +33,8 @@ public class AppConstants {
     public static  final int PATIENT_LIST_REQ_STATE=6001;
     public static  final int PATIENT_LIST_DATA_STATE=6002;
 
-    public static  final  String url="113.251.244.234";
-    public static  final  int port=9999;
+    public static  final  String url="10.250.110.19";
+    public static  final  int port=10000;
 
     public static final int RE_SEND_REQUEST=4000;
     public static final int RE_SEND_REQUEST_FAIL=5000;
@@ -44,10 +44,11 @@ public class AppConstants {
     public static final String PATIENT_SELECT_STATUS_MONITOR="正在监控";
 
     public static int USER_ID;
-    public static final byte DEV_TYPE=0x11;
+    public static final byte DEV_TYPE=0x01;
     public static byte SINGLE_REQ_ID=0;
     public static byte MUTI_REQ_ID=0;
     public static byte PATIENT_LIST_REQ_ID=0;
+    public static byte LOGIN_REQ_ID=0;
 
     public static HashMap<Byte,String> DEV_NAME=new HashMap<>();
     public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM=new HashMap<>();

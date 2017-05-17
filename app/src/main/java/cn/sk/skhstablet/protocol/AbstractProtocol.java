@@ -71,4 +71,33 @@ public abstract class AbstractProtocol {
 		this.version = version;
 	}
 
+
+	protected byte deviceType;
+	protected int userID;
+	protected byte requestID;
+
+	public void setUserID(int userID) {
+		this.userID = userID;
+	}
+
+	public int getUserID() {
+		return userID;
+	}
+
+	public byte getDeviceType() {
+		return deviceType;
+	}
+
+	public byte getRequestID() {
+		return requestID;
+	}
+
+	public void setDeviceType(byte deviceType) {
+		this.deviceType = deviceType;
+	}
+
+	public void setRequestID(byte requestID) {
+		this.requestID = requestID;
+	}
+
 }

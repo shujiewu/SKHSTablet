@@ -144,8 +144,11 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
 
+
+        mPresenter.registerFetchResponse();
         initSearchView();
         loadData();
+        //System.out.println(16.75);
 
     }
     private void initSearchView()
@@ -441,7 +444,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 showFragment(FRAGMENT_MUTI);
                 break;
             case LOG_OUT:
-                Alerter.create(this)
+                /*Alerter.create(this)
                         .setTitle("病人预警")
                         .setText("赵六血压超过上限！")
                         .setBackgroundColor(R.color.yal_ms_colorPrimary)
@@ -455,7 +458,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                                 mRecyclerView.getLayoutManager().scrollToPosition(3);
                             }
                         })
-                        .show();
+                        .show();*/
+                mPresenter.sendLogoutRequest();
                 break;
             case SAVE_EDIT:
                 new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
@@ -556,6 +560,10 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     @Override
     public void logoutSuccess(boolean b) {
         //退出
+        if(b)
+            System.out.println("退出");
+        else
+            System.out.println("未知错误");
     }
 
     private CompositeSubscription mCompositeSubscription;

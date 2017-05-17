@@ -79,8 +79,10 @@ public class Patient implements Comparable<Patient>, Serializable{
     private byte sportState;
     private byte connectState;
     private byte monConnectState;
-
+    private byte phyConnectState;
     private String dev;
+    private int sportPlanID;
+    private byte sportPlanSegment;
 
     public String getDev() {
         return dev;
@@ -146,5 +148,28 @@ public class Patient implements Comparable<Patient>, Serializable{
 
     public void setSportState(byte sportState) {
         this.sportState = sportState;
+    }
+
+    public byte getPhyConnectState() {
+        return phyConnectState;
+    }
+    public void setPhyConnectState(byte phyConnectState) {
+        this.phyConnectState = phyConnectState;
+    }
+
+    public byte getSportPlanSegment() {
+        return sportPlanSegment;
+    }
+
+    public int getSportPlanID() {
+        return sportPlanID;
+    }
+
+    public void setSportPlanID(int sportPlanID) {
+        this.sportPlanID = sportPlanID;
+    }
+
+    public void setSportPlanSegment(byte sportPlanSegment) {
+        this.sportPlanSegment = sportPlanSegment;
     }
 }

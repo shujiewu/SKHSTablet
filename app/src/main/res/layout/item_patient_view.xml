@@ -68,7 +68,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
-        android:text="在线"
         android:layout_marginLeft="@dimen/margin"
         android:textColor="@android:color/holo_green_light"
         />
@@ -90,7 +89,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
-                android:text="跑步机"
                 android:layout_marginLeft="@dimen/margin"
                 android:textColor="@android:color/holo_green_light"
                 />

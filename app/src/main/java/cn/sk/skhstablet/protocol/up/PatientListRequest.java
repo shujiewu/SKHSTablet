@@ -11,7 +11,7 @@ public class PatientListRequest extends AbstractProtocol {
         super(command);
     }
 
-    private byte deviceType;
+    /*private byte deviceType;
     private int userID;
     private byte requestID;
 
@@ -37,5 +37,5 @@ public class PatientListRequest extends AbstractProtocol {
 
     public void setRequestID(byte requestID) {
         this.requestID = requestID;
-    }
+    }*/
 }

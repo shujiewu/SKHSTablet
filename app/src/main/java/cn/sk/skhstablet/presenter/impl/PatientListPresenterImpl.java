@@ -35,14 +35,15 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
     private int position=0;
     @Override
     public void sentPatientListRequest() {
-        mDatas= PatientList.PATIENTS;
-        mView.refreshView(mDatas);
+        //mDatas= PatientList.PATIENTS;
+        //mView.refreshView(mDatas);
 
         //在这里写发送
         PatientListRequest patientListRequest=new PatientListRequest(CommandTypeConstant.PATIENT_LIST_REQUEST);
         patientListRequest.setUserID(AppConstants.USER_ID);
         patientListRequest.setDeviceType(AppConstants.DEV_TYPE);
         patientListRequest.setRequestID(AppConstants.PATIENT_LIST_REQ_ID);
+        //System.out.println("send patientListRequest!");
         invoke(TcpUtils.send(patientListRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
