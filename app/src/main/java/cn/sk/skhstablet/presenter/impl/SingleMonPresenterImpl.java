@@ -54,12 +54,19 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                 });
 
 
-        Subscription singlePageSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_REQ_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
+        Subscription singlePageSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_REQ_STATE,Byte.class)
+                .subscribe(new Action1<Byte>() {
                     @Override
-                    public void call(Boolean b) {
-                        if(b==true)
+                    public void call(Byte b) {
+                        if(b== CommandTypeConstant.SUCCESS)
                             mView.setPageState(AppConstants.STATE_SUCCESS);
+                        else if(b==CommandTypeConstant.NONE_FAIL)
+                        {
+                            System.out.println("单人获取未知错误");
+                        }
+                        else {
+                            System.out.println("未登录");
+                        }
                     }
                 });
         ((LifeSubscription)mView).bindSubscription(singlePageSubscription);

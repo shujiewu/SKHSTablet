@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BasePresenter;
@@ -68,17 +69,23 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 });
 
 
-        Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
+        Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Byte.class)
+                .subscribe(new Action1<Byte>() {
                     @Override
-                    public void call(Boolean b) {
-                        if(b==true)
+                    public void call(Byte b) {
+                        if(b== CommandTypeConstant.SUCCESS)
                         {
                             mView.setPageState(AppConstants.STATE_SUCCESS);
                             mDatas.clear();
                             hasPatient.clear();
                         }
-
+                        else if(b==CommandTypeConstant.NONE_FAIL)
+                        {
+                            System.out.println("多人列表获取未知错误");
+                        }
+                        else {
+                            System.out.println("未登录");
+                        }
                     }
                 });
         ((LifeSubscription)mView).bindSubscription(mutiPageSubscription);

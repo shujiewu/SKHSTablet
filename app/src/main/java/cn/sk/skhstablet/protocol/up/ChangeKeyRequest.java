@@ -11,31 +11,31 @@ public class ChangeKeyRequest extends AbstractProtocol {
         super(command);
     }
 
-    private int userID;
-    private byte[] userOldKey;
-    private byte[] userNewKey;
+    private String loginName;
+    private String userOldKey;
+    private String userNewKey;
 
-    public int getUserID() {
-        return userID;
+    public String getLoginName() {
+        return loginName;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
+    public void setLoginName(String loginName) {
+        this.loginName = loginName;
     }
 
-    public byte[] getUserNewKey() {
+    public String getUserNewKey() {
         return userNewKey;
     }
 
-    public byte[] getUserOldKey() {
+    public String getUserOldKey() {
         return userOldKey;
     }
 
-    public void setUserNewKey(byte[] userNewKey) {
+    public void setUserNewKey(String userNewKey) {
         this.userNewKey = userNewKey;
     }
 
-    public void setUserOldKey(byte[] userOldKey) {
+    public void setUserOldKey(String userOldKey) {
         this.userOldKey = userOldKey;
     }
 }

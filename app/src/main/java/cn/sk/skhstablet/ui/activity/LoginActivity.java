@@ -19,6 +19,7 @@ import java.nio.ByteOrder;
 
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.TabViewPagerAdapter;
+import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.handler.ProtocolDecoder;
 import cn.sk.skhstablet.handler.ProtocolEncoder;
@@ -26,6 +27,8 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
 import cn.sk.skhstablet.protocol.DeviceId;
 import cn.sk.skhstablet.protocol.Version;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
+import cn.sk.skhstablet.tcp.utils.Callback;
+import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import cn.sk.skhstablet.ui.fragment.FragmentChangeKey;
 import cn.sk.skhstablet.ui.fragment.FragmentLogin;
 import cn.sk.skhstablet.ui.base.BaseActivity;
@@ -45,6 +48,9 @@ import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
 
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.invoke;
+
 public class LoginActivity extends BaseActivity {
     //View viewFade;
     @Override
@@ -62,6 +68,16 @@ public class LoginActivity extends BaseActivity {
                 rxNettyServerTest();
             }
         }).start();*/
+
+        invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
+            @Override
+            public void onResponse(Boolean data) {
+                //Log.e("10.40","4");
+                fetchData();
+
+                //fetchVerifyState();
+            }
+        });
     }
     public void rxNettyServerTest() {
         TcpServer<String,AbstractProtocol> server;

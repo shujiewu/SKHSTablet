@@ -352,25 +352,31 @@ public class TcpUtils {
 
 
                     case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:
+                    case CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE:
                     case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:  //完成注册
                         userID=((PatientListResponse)data).getUserID();
                         devType=((PatientListResponse)data).getDeviceType();
-                        if(userID!=AppConstants.USER_ID||devType!=AppConstants.DEV_TYPE)
+                        reqID=((PatientListResponse)data).getRequestID();
+                        state=((PatientListResponse)data).getState();
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PATIENT_LIST_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
-                        AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
-                        int size=AppConstants.PATIENT_LIST_DATA.size();
-                        if(size>1)//新数据
+                        if(state==CommandTypeConstant.PATIENT_LIST_SUCCESS)
                         {
-                            for(int i=0;i<size;i++)
+                            AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
+                            int size=AppConstants.PATIENT_LIST_DATA.size();
+                            if(size>1)//新数据
                             {
-                                if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
+                                for(int i=0;i<size;i++)
                                 {
-                                    PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
-                                    PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
+                                    if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
+                                    {
+                                        PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
+                                        PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
+                                    }
                                 }
                             }
                         }
-                        RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Boolean(true));//通知数据改变
+                        RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Byte(state));//通知数据改变
                         break;
                         /*userID=((PatientListResponse)data).getUserID();
                         devType=((PatientListResponse)data).getDeviceType();
@@ -390,11 +396,11 @@ public class TcpUtils {
                             return;
                         if(state==SUCCESS)
                         {
-                            RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Boolean(true));
+                            RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Byte(state));
                             AppConstants.SINGLE_REQ_ID++;
                         }
                         else
-                            RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Boolean(false));
+                            RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Byte(state));
                         break;
                     case CommandTypeConstant.MUTI_MONITOR_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
@@ -405,13 +411,13 @@ public class TcpUtils {
                             return;
                         if(state==SUCCESS)
                         {
-                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Boolean(true));
+                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
                             AppConstants.MUTI_REQ_ID++;
                         }
                         else
-                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Boolean(false));
+                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
                         break;
-                    case CommandTypeConstant.PATIENT_LIST_RESPONSE:
+                    /*case CommandTypeConstant.PATIENT_LIST_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
                         reqID=((PushAckResponse)data).getRequestID();
                         devType=((PushAckResponse)data).getDeviceType();
@@ -425,7 +431,7 @@ public class TcpUtils {
                         }
                         else
                             RxBus.getDefault().post(AppConstants.PATIENT_LIST_REQ_STATE,new Boolean(false));
-                        break;
+                        break;*/
 
                     //修改密码，登录，注册的响应
                     case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:
@@ -445,20 +451,23 @@ public class TcpUtils {
                         state=((LoginAckResponse)data).getState();
                         if(state==SUCCESS)
                         {
-                            RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
+
                             String userName=((LoginAckResponse)data).getUserName();
                             System.out.println(userName);
                             AppConstants.LOGIN_REQ_ID++;
                             AppConstants.USER_ID=((LoginAckResponse)data).getUserID();
+                            RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
                         }
                         else
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(false));
                         break;
                     case CommandTypeConstant.LOGOUT_ACK_RESPONSE:
                         userID=((LoginAckResponse)data).getUserID();
-                        if(userID!=AppConstants.USER_ID)
-                            return;
+                        reqID=((LoginAckResponse)data).getRequestID();
+                        devType=((LoginAckResponse)data).getDeviceType();
                         state=((LoginAckResponse)data).getState();
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.LOGOUT_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                            return;
                         if(state==SUCCESS)
                             RxBus.getDefault().post(AppConstants.LOGOUT_STATE,new Boolean(true));
                         else
@@ -466,7 +475,7 @@ public class TcpUtils {
                         break;
 
                     //格式名称对照表响应
-                    case CommandTypeConstant.DEV_NAEM_RESPONSE:
+                    /*case CommandTypeConstant.DEV_NAEM_RESPONSE:
                         userID=((DevNameResponse)data).getUserID();
                         if(userID!=AppConstants.USER_ID)
                             return;
@@ -483,7 +492,7 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID)
                             return;
                         MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
-                        break;
+                        break;*/
                 }
 
                 /*switch (dataType)

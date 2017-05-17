@@ -74,16 +74,17 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
                 break;
             }
 
-            case CommandTypeConstant.DEV_NAME_REQUEST:{
+            /*case CommandTypeConstant.DEV_NAME_REQUEST:{
                 encodeDevNameRequest((DevNameRequest) request,out);
                 break;
-            }
+            }*/
             case CommandTypeConstant.SPORT_DEV_FORM_REQUEST:{
                 encodeSportDevFormRequest((SportDevFormRequest) request, out);
                 break;
             }
             case CommandTypeConstant.MONITOR_DEV_FORM_REQUEST:{
                 encodeMonitorDevFormRequest((MonitorDevFormRequest) request, out);
+				break;
             }
 
             case CommandTypeConstant.PATIENT_LIST_REQUEST:{
@@ -191,8 +192,8 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		byte[] name=toBytes(request.getLoginName());
 		out.writeByte(name.length);
 		out.writeBytes(name);
-		byte[] key=toBytes(request.getLoginKey());
 
+		byte[] key=toBytes(request.getLoginKey());
 		out.writeByte(key.length);
 		out.writeBytes(key);
 	}
@@ -202,9 +203,17 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 	}
 	private void encodeChangeKeyRequest(ChangeKeyRequest request,ByteBuf out)
 	{
-		out.writeIntLE(request.getUserID());
-		out.writeBytes(request.getUserOldKey());
-		out.writeBytes(request.getUserNewKey());
+		byte[] name=toBytes(request.getLoginName());
+		out.writeByte(name.length);
+		out.writeBytes(name);
+
+		byte[] key=toBytes(request.getUserOldKey());
+		out.writeByte(key.length);
+		out.writeBytes(key);
+
+		byte[] newkey=toBytes(request.getUserNewKey());
+		out.writeByte(newkey.length);
+		out.writeBytes(newkey);
 	}
 	private void encodePatientListRequest(PatientListRequest request,ByteBuf out)
 	{
@@ -214,9 +223,9 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 	}
 	private void encodeMutiMonitorRequest(MutiMonitorRequest request,ByteBuf out)
 	{
-		out.writeByte(request.getDeviceType());
-		out.writeIntLE(request.getUserID());
-		out.writeByte(request.getRequestID());
+		//out.writeByte(request.getDeviceType());
+		//out.writeIntLE(request.getUserID());
+		//out.writeByte(request.getRequestID());
 		out.writeShortLE(request.getPatientNumber());
 		for (Integer patientID:request.getPatientID())
 		{
@@ -226,24 +235,26 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 
 	private void encodeSingleMonitorRequest(SingleMonitorRequest request, ByteBuf out)
 	{
-		out.writeByte(request.getDeviceType());
-		out.writeIntLE(request.getUserID());
-		out.writeByte(request.getRequestID());
+		//out.writeByte(request.getDeviceType());
+		//out.writeIntLE(request.getUserID());
+		//out.writeByte(request.getRequestID());
 		out.writeShortLE(request.getPatientNumber());
 		out.writeIntLE(request.getPatientID());
 	}
 
-	private void encodeDevNameRequest(DevNameRequest request, ByteBuf out)
+	/*private void encodeDevNameRequest(DevNameRequest request, ByteBuf out)
 	{
 		out.writeIntLE(request.getUserID());
-	}
+	}*/
 	private void encodeSportDevFormRequest(SportDevFormRequest request, ByteBuf out)
 	{
-		out.writeIntLE(request.getUserID());
+		System.out.println("sport"+request.getUserID());
+		//out.writeIntLE(request.getUserID());
 	}
 	private void encodeMonitorDevFormRequest(MonitorDevFormRequest request, ByteBuf out)
 	{
-		out.writeIntLE(request.getUserID());
+		System.out.println("sport"+request.getUserID());
+		//out.writeIntLE(request.getUserID());
 	}
 
 }

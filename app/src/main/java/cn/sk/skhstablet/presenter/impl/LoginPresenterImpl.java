@@ -30,16 +30,9 @@ import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
 public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> implements ILoginPresenter.Presenter {
     @Override
     public void fetchStateData(final String userID, final String key) {
+
+        sendVerify(userID,key);
         //TcpUtils.connect(AppConstants.url, AppConstants.port);
-        invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
-            @Override
-            public void onResponse(Boolean data) {
-                //Log.e("10.40","4");
-                fetchData();
-                sendVerify(userID,key);
-                //fetchVerifyState();
-            }
-        });
     }
 
     @Override
@@ -84,9 +77,9 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
     {
         LoginRequest request=new LoginRequest(CommandTypeConstant.LOGIN_REQUEST);
         request.setUserID(0);
-        request.setDeviceType((byte) 0x01);
+        request.setDeviceType(AppConstants.DEV_TYPE);
         request.setRequestID(AppConstants.LOGIN_REQ_ID);
-        AppConstants.USER_ID=request.getUserID();
+        //AppConstants.USER_ID=request.getUserID();
         /*byte [] password=new byte[16];
         int i;
         for(i=0;i<key.length();i++)
@@ -95,8 +88,8 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
         }
         if(i!=16)
             password[i]='#';*/
-        request.setLoginKeyLength((byte) key.length());
-        request.setLoginNameLength((byte) loginName.length());
+        //request.setLoginKeyLength((byte) key.length());
+        //request.setLoginNameLength((byte) loginName.length());
         request.setLoginName(loginName);
         request.setLoginKey(key);
         invoke(TcpUtils.send(request), new Action1<Void>() {
@@ -109,18 +102,23 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
     @Override
     public void sendFormatRequest()
     {
-        DevNameRequest devNameRequest=new DevNameRequest(CommandTypeConstant.DEV_NAME_REQUEST);
+        /*DevNameRequest devNameRequest=new DevNameRequest(CommandTypeConstant.DEV_NAME_REQUEST);
         devNameRequest.setUserID(AppConstants.USER_ID);
-        SportDevFormRequest sportDevFormRequest=new SportDevFormRequest(CommandTypeConstant.SPORT_DEV_FORM_REQUEST);
-        sportDevFormRequest.setUserID(AppConstants.USER_ID);
-        MonitorDevFormRequest monitorDevFormRequest=new MonitorDevFormRequest(CommandTypeConstant.MONITOR_DEV_FORM_REQUEST);
-        monitorDevFormRequest.setUserID(AppConstants.USER_ID);
         invoke(TcpUtils.send(devNameRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
                 System.out.println("send success!");
             }
-        });
+        });*/
+        SportDevFormRequest sportDevFormRequest=new SportDevFormRequest(CommandTypeConstant.SPORT_DEV_FORM_REQUEST);
+        sportDevFormRequest.setUserID(AppConstants.USER_ID);
+        System.out.println("AppConstants.USER_ID"+AppConstants.USER_ID);
+        sportDevFormRequest.setDeviceType(AppConstants.DEV_TYPE);
+        sportDevFormRequest.setRequestID(AppConstants.SPORT_FORM_REQ_ID);
+        MonitorDevFormRequest monitorDevFormRequest=new MonitorDevFormRequest(CommandTypeConstant.MONITOR_DEV_FORM_REQUEST);
+        monitorDevFormRequest.setUserID(AppConstants.USER_ID);
+        monitorDevFormRequest.setDeviceType(AppConstants.DEV_TYPE);
+        monitorDevFormRequest.setRequestID(AppConstants.PHY_FORM_REQ_ID);
         invoke(TcpUtils.send(sportDevFormRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {

@@ -88,6 +88,8 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
     public void sendLogoutRequest() {
         LogoutRequest logoutRequest=new LogoutRequest(CommandTypeConstant.LOGOUT_REQUEST);
         logoutRequest.setUserID(AppConstants.USER_ID);
+        logoutRequest.setDeviceType(AppConstants.DEV_TYPE);
+        logoutRequest.setRequestID(AppConstants.LOGOUT_REQ_ID);
         invoke(TcpUtils.send(logoutRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
@@ -99,33 +101,41 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
     @Override
     public void registerFetchResponse() {
         //更新数据
-        Subscription listSubscription = RxBus.getDefault().toObservable(AppConstants.PATIENT_LIST_DATA_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
+        Subscription listSubscription = RxBus.getDefault().toObservable(AppConstants.PATIENT_LIST_DATA_STATE,Byte.class)
+                .subscribe(new Action1<Byte>() {
                     @Override
-                    public void call(Boolean b) {
-                        if(b!=true)
-                            return;
-                        int patientID;
-                        //说明更改了数据，新数据为全局变量
-                        for(Patient patient:AppConstants.PATIENT_LIST_DATA)
+                    public void call(Byte b) {
+                        if(b==CommandTypeConstant.PATIENT_LIST_SUCCESS)
                         {
-                            patientID=patient.getPatientID();
-                            if(hasPatient.containsKey(patientID))//说明已存在,且只有一个人
+                            int patientID;
+                            //说明更改了数据，新数据为全局变量
+                            for(Patient patient:AppConstants.PATIENT_LIST_DATA)
                             {
-                                patient.setName(mDatas.get(hasPatient.get(patientID)).getName());
-                                patient.setGender(mDatas.get(hasPatient.get(patientID)).getGender());
-                                patient.setHospitalNumber(mDatas.get(hasPatient.get(patientID)).getHospitalNumber());
-                                mDatas.set(hasPatient.get(patientID),patient);
-                                mView.refreshView(patient,hasPatient.get(patientID));
-                                return;
+                                patientID=patient.getPatientID();
+                                if(hasPatient.containsKey(patientID))//说明已存在,且只有一个人
+                                {
+                                    patient.setName(mDatas.get(hasPatient.get(patientID)).getName());
+                                    patient.setGender(mDatas.get(hasPatient.get(patientID)).getGender());
+                                    patient.setHospitalNumber(mDatas.get(hasPatient.get(patientID)).getHospitalNumber());
+                                    mDatas.set(hasPatient.get(patientID),patient);
+                                    mView.refreshView(patient,hasPatient.get(patientID));
+                                    return;
+                                }
+                                else
+                                {
+                                    mDatas.add(patient);
+                                    hasPatient.put(patientID,position++);
+                                }
                             }
-                            else
-                            {
-                                mDatas.add(patient);
-                                hasPatient.put(patientID,position++);
-                            }
+                            mView.refreshView(mDatas);
                         }
-                        mView.refreshView(mDatas);
+                        else if(b==CommandTypeConstant.PATIENT_LIST_NONE_FAIL)
+                        {
+                            System.out.println("病人列表获取未知错误");
+                        }
+                        else {
+                            System.out.println("未登录");
+                        }
                     }
                 });
         /*Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Boolean.class)

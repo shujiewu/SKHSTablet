@@ -1,7 +1,6 @@
 package cn.sk.skhstablet.ui.fragment;
 
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -20,47 +19,46 @@ import org.xutils.x;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.component.EditTextWithDel;
 import cn.sk.skhstablet.component.PaperButton;
+import cn.sk.skhstablet.injector.component.fragment.DaggerLoginComponent;
 import cn.sk.skhstablet.presenter.IChangekeyPresenter;
 import cn.sk.skhstablet.presenter.impl.ChangeKeyPresenterImpl;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import cn.sk.skhstablet.utlis.CheckUtils;
 import cn.sk.skhstablet.utlis.Tools;
 
-//import cn.cqu.sk.UserNameActivity;
 
-/*import cn.bmob.v3.BmobSMS;
-import cn.bmob.v3.BmobUser;
-import cn.bmob.v3.exception.BmobException;
-import cn.bmob.v3.listener.RequestSMSCodeListener;
-import cn.bmob.v3.listener.SaveListener;
-*/
-@ContentView(R.layout.fragment_regist)
+@ContentView(R.layout.fragment_change_key)
 public class FragmentChangeKey extends BaseFragment<ChangeKeyPresenterImpl> implements IChangekeyPresenter.View{
 @ViewInject(R.id.next)
 PaperButton nextBt;
     @ViewInject(R.id.userpassword)
     EditTextWithDel userpassword;
-   // @ViewInject(R.id.send_smscode)
-   // PaperButton sendsmscode;
-    @ViewInject(R.id.userphone)
-    EditTextWithDel userphone;
-    @ViewInject(R.id.smscode)
-    EditTextWithDel smscode;
-    @ViewInject(R.id.fg_regist)
-    LinearLayout fg_regist;
-    @ViewInject(R.id.rela_rephone)
-    RelativeLayout rela_rephone;
-    @ViewInject(R.id.rela_recode)
-    RelativeLayout rela_recode;
-    @ViewInject(R.id.rela_repass)
-    RelativeLayout rela_repass;
+    @ViewInject(R.id.loginname)
+    EditTextWithDel loginname;
+    @ViewInject(R.id.newpassword)
+    EditTextWithDel newpassword;
+    @ViewInject(R.id.renewpassword)
+    EditTextWithDel renewpassword;
+
+
+    @ViewInject(R.id.re_loginname)
+    RelativeLayout re_loginname;
+    @ViewInject(R.id.re_oldpass)
+    RelativeLayout re_oldpass;
+    @ViewInject(R.id.re_newpass)
+    RelativeLayout re_newpass;
+    @ViewInject(R.id.re_renewpass)
+    RelativeLayout re_renewpass;
+
     @ViewInject(R.id.usericon)
-    ImageView phoneIv;
-    @ViewInject(R.id.keyicon)
-    ImageView keyIv;
+    ImageView loginnameIv;
+    @ViewInject(R.id.rekeyicon)
+    ImageView rekeyIV;
     @ViewInject(R.id.codeicon)
     ImageView passIv;
-    MyCountTimer timer;
+    @ViewInject(R.id.newkeyicon)
+    ImageView newKeyIv;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
      return x.view().inject(this,inflater,container);
@@ -80,7 +78,7 @@ PaperButton nextBt;
 
     private void TextListener() {
         //用户名改变背景变
-        userphone.addTextChangedListener(new TextWatcher() {
+        loginname.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -93,37 +91,15 @@ PaperButton nextBt;
 
             @Override
             public void afterTextChanged(Editable s) {
-                String text = userphone.getText().toString();
-                if(CheckUtils.isMobile(text)){
+                String text =loginname.getText().toString();
+                /*if(CheckUtils.isMobile(text)){
                     //抖动
-                    rela_rephone.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
+                    re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
 
-                }
-
+                }*/
+                re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
             }
         });
-        //验证码改变背景变
-        smscode.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-                    rela_recode.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-
-
-
-            }
-        });
-        //密码改变背景变
         userpassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -138,9 +114,50 @@ PaperButton nextBt;
             @Override
             public void afterTextChanged(Editable s) {
 
-                rela_repass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
+                re_oldpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
 
 
+
+            }
+        });
+        //密码改变背景变
+        newpassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                re_newpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
+
+
+
+            }
+        });
+
+        //密码改变背景变
+        renewpassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                re_renewpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
 
             }
         });
@@ -149,90 +166,66 @@ PaperButton nextBt;
 
 
 
-
     }
 
+    private String loginName;
+    private String oldKey;
+    private String newKey;
     @Override
     protected void initView(View view)  {
-        //发送验证码点击事件
- /*       sendsmscode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final View view =v;
-                String phone = userphone.getText().toString();
-                boolean mobile = CheckUtils.isMobile(phone);
-                if (!TextUtils.isEmpty(phone)){
-                if (mobile) {
-                    timer = new MyCountTimer(60000, 1000);
-                    timer.start();
-                    BmobSMS.requestSMSCode(getActivity(), phone, "IYO短信",new RequestSMSCodeListener() {
-
-                        @Override
-                        public void done(Integer smsId,BmobException ex) {
-                            if(ex==null){//验证码发送成功
-                                Log.i("smile", "短信id："+smsId);
-                                showSnackar(view,"IYO提示：短信发送成功");
-                            }else{
-                                showSnackar(view,"IYO提示：短信发送失败"+"错误码"+smsId);
-
-                            }
-                        }
-
-                    });}else
-                {
-                    rela_rephone.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    phoneIv.setAnimation(Tools.shakeAnimation(2));
-                    showSnackar(view,"IYO提示：输入手机号码");
-                }
-
-
-                }else {
-                    rela_rephone.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    phoneIv.setAnimation(Tools.shakeAnimation(2));
-                  showSnackar(view,"IYO提示：手机号码不正确");
-                }
-
-            }
-        });*/
         //下一步的点击事件
         nextBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final View view = v;
                 final String password = userpassword.getText().toString();
-                String code = smscode.getText().toString();
-                final String phone = userphone.getText().toString();
+                final String name = loginname.getText().toString();
+                final String newpass = newpassword.getText().toString();
+                final String renewpass = renewpassword.getText().toString();
 
-                if (TextUtils.isEmpty(phone)){
+                if (TextUtils.isEmpty(name)){
                    // fg_regist.setBackgroundResource(R.color.colorAccent);
-                    rela_rephone.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    phoneIv.setAnimation(Tools.shakeAnimation(2));
-                    showSnackar(view,"IYO提示：请输入手机号码");
+                    re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+                    loginnameIv.setAnimation(Tools.shakeAnimation(2));
+                    showSnackar(view,"请输入手机号码");
 
                     return;
-                }
-                if(!CheckUtils.isMobile(phone)){
-                    rela_rephone.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    phoneIv.setAnimation(Tools.shakeAnimation(2));
-                    showSnackar(view,"IYO提示：手机号不正确");
-                    // fg_regist.setBackgroundResource(R.color.colorAccent);
-                    return;
-                }
-                if (TextUtils.isEmpty(code)){
-                    rela_recode.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    keyIv.setAnimation(Tools.shakeAnimation(2));
-                   // fg_regist.setBackgroundResource(R.color.colorAccent);
-                    showSnackar(view,"IYO提示：请输入验证码");
-                    return;
-
                 }
                 if (TextUtils.isEmpty(password)){
-                    rela_repass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+                    re_oldpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
                     passIv.setAnimation(Tools.shakeAnimation(2));
                    // fg_regist.setBackgroundResource(R.color.colorAccent);
-                    showSnackar(view,"IYO提示：请输入密码");
+                    showSnackar(view,"请输入旧密码");
+                    return;
+
+                }
+                if (TextUtils.isEmpty(newpass)){
+                    re_newpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+                    newKeyIv.setAnimation(Tools.shakeAnimation(2));
+                   // fg_regist.setBackgroundResource(R.color.colorAccent);
+                    showSnackar(view,"请输入新密码");
                     return;
                 }
+                if (TextUtils.isEmpty(renewpass)){
+                   re_renewpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+                   rekeyIV.setAnimation(Tools.shakeAnimation(2));
+                    // fg_regist.setBackgroundResource(R.color.colorAccent);
+                    showSnackar(view,"请再次输入新密码");
+                    return;
+                }
+                if(!renewpass.equals(newpass)){
+                    re_newpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+                    newKeyIv.setAnimation(Tools.shakeAnimation(2));
+                    re_renewpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+                    rekeyIV.setAnimation(Tools.shakeAnimation(2));
+                    showSnackar(view,"两次输入的密码不一致");
+                    return;
+                }
+                loginName=name;
+                oldKey=password;
+                newKey=newpass;
+                mPresenter.registerFetchResponse();
+                loadData();
  /*               final MyUser user = new MyUser();
                 user.setPassword(password);
                 user.setMobilePhoneNumber(phone);
@@ -267,34 +260,22 @@ PaperButton nextBt;
 
 
     }
-//事件定时器
-    class MyCountTimer extends CountDownTimer {
-
-        public MyCountTimer(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);
-        }
-        @Override
-        public void onTick(long millisUntilFinished) {
-     //       sendsmscode.setText((millisUntilFinished / 1000) +"秒后重发");
-      //      sendsmscode.setClickable(false);
-        }
-        @Override
-        public void onFinish() {
-       //     sendsmscode.setText("重新发送");
-       //     sendsmscode.setClickable(true);
-        }
-    }
 //回收timer
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(timer!=null){
-            timer.cancel();
-        }
+
     }
     @Override
     public void refreshView(Boolean mData) {
-
+        if(mData==true)
+        {
+            System.out.println("密码修改成功");
+        }
+        else
+        {
+            System.out.println("密码修改失败");
+        }
     }
 
     @Override
@@ -304,12 +285,13 @@ PaperButton nextBt;
 
     @Override
     protected void initInject() {
-
+        DaggerLoginComponent.builder()
+                .build().injectChangeKey(this);
     }
 
     @Override
     protected void loadData() {
-
+        mPresenter.sendRequest(loginName,oldKey,newKey);
     }
 }
 	

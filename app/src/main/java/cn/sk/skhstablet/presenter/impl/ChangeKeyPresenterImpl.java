@@ -22,10 +22,10 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
 
 
     @Override
-    public void sendRequest(String oldKey,String newKey) {
+    public void sendRequest(String loginName,String oldKey,String newKey) {
         ChangeKeyRequest request=new ChangeKeyRequest(CommandTypeConstant.CHANGE_KEY_REQUEST);
 
-        byte [] old=new byte[16];
+        /*byte [] old=new byte[16];
         byte [] change=new byte[16];
         int i;
         for(i=0;i<oldKey.length();i++)
@@ -39,10 +39,13 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
             change[i]=(byte) newKey.charAt(i);
         }
         if(i!=16)
-            change[i]='#';
-        request.setUserID(AppConstants.USER_ID);
-        request.setUserOldKey(old);
-        request.setUserNewKey(change);
+            change[i]='#';*/
+        request.setUserID(0);
+        request.setDeviceType(AppConstants.DEV_TYPE);
+        request.setRequestID(AppConstants.CHANGE_KEY_REQ_ID);
+        request.setLoginName(loginName);
+        request.setUserOldKey(oldKey);
+        request.setUserNewKey(newKey);
         invoke(TcpUtils.send(request), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {

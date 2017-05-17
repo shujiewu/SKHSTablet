@@ -76,20 +76,21 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
                 break;
             }
 
-            case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:{
+            case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:
+			case CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE:{
                 request=decodePatientListDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE);
                 break;
             }
             case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:{
-                request=decodePatientListDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE);
+                request=decodePatientListUpdateDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE);
                 break;
             }
 
 
-            case CommandTypeConstant.DEV_NAEM_RESPONSE:{
+            /*case CommandTypeConstant.DEV_NAEM_RESPONSE:{
                 request=decodeDevNameResponse(reqBuf,CommandTypeConstant.DEV_NAEM_RESPONSE);
                 break;
-            }
+            }*/
             case CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE:{
                 request=decodeMonitorDevFormResponse(reqBuf,CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE);
                 break;
@@ -104,10 +105,10 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
                 request=decodePushAckResponse(reqBuf,CommandTypeConstant.SINGLE_MONITOR_RESPONSE);
                 break;
             }
-            case CommandTypeConstant.PATIENT_LIST_RESPONSE:{
+            /*case CommandTypeConstant.PATIENT_LIST_RESPONSE:{
                 request=decodePushAckResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_RESPONSE);
                 break;
-            }
+            }*/
 
 			case CommandTypeConstant.MUTI_MONITOR_RESPONSE: {
 				request=decodePushAckResponse(reqBuf,CommandTypeConstant.MUTI_MONITOR_RESPONSE);
@@ -212,7 +213,40 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		response.setState(resBuf.readByte());
 		return response;
 	}
+	private AbstractProtocol decodePatientListUpdateDataResponse(ByteBuf resBuf,byte commandType)
+	{
+		PatientListResponse response=new PatientListResponse(commandType);
+		response.setDeviceType(resBuf.readByte());
+		response.setUserID(resBuf.readIntLE());
+		response.setRequestID(resBuf.readByte());
+		response.setState(PATIENT_LIST_SUCCESS);
 
+		List<Patient> patientList=new ArrayList<>();
+			Patient patient=new Patient();
+			patient.setPatientID(resBuf.readIntLE());
+			System.out.println(patient.getPatientID()+"病人id");
+			patient.setPhyConnectState(resBuf.readByte());
+			if(patient.getPhyConnectState()==PHY_CONN_ONLINE)
+			{
+				patient.setMonConnectState(resBuf.readByte());
+				System.out.println(1);
+			}
+			patient.setSportState(resBuf.readByte());
+			if(patient.getSportState()!=SPORT_DEV_CONNECT_OFFLINE)
+			{
+				System.out.println(2);
+				patient.setDeviceNumber(resBuf.readLongLE());
+				patient.setDevType(resBuf.readByte());
+				patient.setDev("跑步机");
+				patient.setConnectState(resBuf.readByte());
+				patient.setSportPlanID(resBuf.readIntLE());
+				patient.setSportPlanSegment(resBuf.readByte());
+			}
+			patient.setSelectStatus(PATIENT_SELECT_STATUS_FALSE);
+			patientList.add(patient);
+		response.setPatientList(patientList);
+		return response;
+	}
 	private AbstractProtocol decodePatientListDataResponse(ByteBuf resBuf,byte commandType)
 	{
 		PatientListResponse response=new PatientListResponse(commandType);
@@ -279,7 +313,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		return response;
 	}
 
-	private AbstractProtocol decodeDevNameResponse(ByteBuf resBuf,byte commandType)
+	/*private AbstractProtocol decodeDevNameResponse(ByteBuf resBuf,byte commandType)
 	{
 		DevNameResponse response=new DevNameResponse(commandType);
 		response.setUserID(resBuf.readIntLE());
@@ -299,7 +333,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		response.setDevName(devName);
 
 		return response;
-	}
+	}*/
 
 
 	private AbstractProtocol decodeMonitorDevFormResponse(ByteBuf resBuf,byte commandType)

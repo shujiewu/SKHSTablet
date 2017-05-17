@@ -43,12 +43,16 @@ public class AppConstants {
     public static final String PATIENT_SELECT_STATUS_TRUE="已选择";
     public static final String PATIENT_SELECT_STATUS_MONITOR="正在监控";
 
-    public static int USER_ID;
+    public static int USER_ID=0;
     public static final byte DEV_TYPE=0x01;
     public static byte SINGLE_REQ_ID=0;
     public static byte MUTI_REQ_ID=0;
     public static byte PATIENT_LIST_REQ_ID=0;
     public static byte LOGIN_REQ_ID=0;
+    public static byte CHANGE_KEY_REQ_ID=0;
+    public static byte LOGOUT_REQ_ID=0;
+    public static byte SPORT_FORM_REQ_ID=0;
+    public static byte PHY_FORM_REQ_ID=0;
 
     public static HashMap<Byte,String> DEV_NAME=new HashMap<>();
     public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM=new HashMap<>();

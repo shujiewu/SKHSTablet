@@ -23,7 +23,7 @@ public class CUSUMHandler extends ChannelInboundHandlerAdapter {
 		short sumInBuf = buf.getShortLE(sumIndex);
 		long end = System.currentTimeMillis();
 //		System.out.println((short)sum);
-		System.out.println(end - start);
+//		System.out.println(end - start);
 		if (sumInBuf == (short)sum) {
 			super.channelRead(ctx, msg);
 		}

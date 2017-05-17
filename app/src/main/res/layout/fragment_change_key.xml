@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:widget="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fg_regist"
+    android:id="@+id/fg_change_key"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <RelativeLayout
-        android:id="@+id/rela_rephone"
+        android:id="@+id/re_loginname"
         android:layout_gravity="center_horizontal"
         android:layout_marginRight="40dp"
         android:layout_marginLeft="40dp"
@@ -24,10 +24,9 @@
             android:id="@+id/usericon" />
 
         <cn.sk.skhstablet.component.EditTextWithDel
-            android:id="@+id/userphone"
+            android:id="@+id/loginname"
             android:layout_width="match_parent"
             android:textColor="@color/white"
-            android:inputType="number"
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:textColorHint="@color/white"
@@ -40,7 +39,7 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/rela_repass"
+        android:id="@+id/re_oldpass"
         android:layout_gravity="center_horizontal"
         android:layout_marginRight="40dp"
         android:layout_marginLeft="40dp"
@@ -61,7 +60,7 @@
         <cn.sk.skhstablet.component.EditTextWithDel
             android:id="@+id/userpassword"
             android:layout_width="match_parent"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
@@ -79,10 +78,11 @@
             android:layout_marginTop="20dp"
             android:layout_marginRight="40dp"
             android:layout_marginLeft="40dp"
-            android:id="@+id/rela_recode"
+            android:id="@+id/re_newpass"
             android:layout_gravity="center_horizontal"
             android:layout_width="match_parent"
             android:layout_height="40dp"
+            android:inputType="textPassword"
             android:background="@drawable/bg_border_color_black"
             >
             <ImageView
@@ -92,29 +92,29 @@
                 android:layout_height="28dp"
                 android:layout_marginLeft="15dp"
                 android:src="@drawable/keyicon"
-                android:id="@+id/keyicon" />
+                android:id="@+id/newkeyicon" />
 
             <cn.sk.skhstablet.component.EditTextWithDel
-                android:id="@+id/smscode"
+                android:id="@+id/newpassword"
                 android:layout_width="match_parent"
                 android:textColor="@color/white"
-                android:inputType="number"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:textColorHint="@color/white"
                 android:hint="输入新密码"
                 android:textSize="13sp"
+                android:inputType="textPassword"
                 android:background="@null"
                 android:layout_marginRight="10dp"
                 android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/keyicon" />
+                android:layout_toEndOf="@+id/newkeyicon" />
         </RelativeLayout>
 
     <RelativeLayout
         android:layout_marginTop="20dp"
         android:layout_marginRight="40dp"
         android:layout_marginLeft="40dp"
-        android:id="@+id/rela_recode2"
+        android:id="@+id/re_renewpass"
         android:layout_gravity="center_horizontal"
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -127,13 +127,13 @@
             android:layout_height="28dp"
             android:layout_marginLeft="15dp"
             android:src="@drawable/keyicon"
-            android:id="@+id/keyicon1" />
+            android:id="@+id/rekeyicon" />
 
         <cn.sk.skhstablet.component.EditTextWithDel
-            android:id="@+id/smscode1"
+            android:id="@+id/renewpassword"
             android:layout_width="match_parent"
             android:textColor="@color/white"
-            android:inputType="number"
+            android:inputType="textPassword"
             android:layout_height="match_parent"
             android:layout_marginLeft="10dp"
             android:textColorHint="@color/white"
@@ -142,7 +142,7 @@
             android:background="@null"
             android:layout_marginRight="10dp"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@+id/keyicon1" />
+            android:layout_toEndOf="@+id/rekeyicon" />
     </RelativeLayout>
 
     <cn.sk.skhstablet.component.PaperButton
@@ -159,7 +159,4 @@
         widget:paper_color="@color/maincolor"
         widget:paper_text_color="@color/white"
         />
-
-
-
 </LinearLayout>

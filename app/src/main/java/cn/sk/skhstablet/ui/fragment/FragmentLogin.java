@@ -231,7 +231,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     public void refreshView(Boolean mData) {
         if(mData==true)
         {
-            //mPresenter.sendFormatRequest();
+            mPresenter.sendFormatRequest();
             login_progress.setVisibility(View.GONE);
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
