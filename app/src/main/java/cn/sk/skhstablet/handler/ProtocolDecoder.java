@@ -36,6 +36,7 @@ import static cn.sk.skhstablet.app.AppConstants.MON_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
+import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
 import static cn.sk.skhstablet.app.CommandTypeConstant.LOGIN_SUCCESS;
 import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_SUCCESS;
@@ -176,9 +177,9 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		request.setPerformedExecutionAmount(reqBuf.readUnsignedShortLE());
 		request.setExercisePlanId(reqBuf.readIntLE());// 数据库主键，有符号
 		request.setExercisePlanSectionNumber(reqBuf.readUnsignedByte());
-		byte[] data = new byte[reqBuf.writerIndex() - request.getChecksum().length - reqBuf.readerIndex()];
-		reqBuf.readBytes(data);
-		request.setEquipmentData(data);
+		byte[] sportdata = new byte[reqBuf.writerIndex() - request.getChecksum().length - reqBuf.readerIndex()];
+		reqBuf.readBytes(sportdata);
+		request.setEquipmentData(sportdata);
 
 		PatientDetail patientDetail=new PatientDetail();
 		patientDetail.setPatientID(request.getPatientId());
@@ -203,8 +204,42 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				int valuelength=monitorDevForm.getLength();
 				byte [] value=new byte[valuelength];
 				System.arraycopy(phydata,j,value,0,valuelength);
-				phyDevValue.add(String.valueOf(value));
+
+				phyDevValue.add(String.valueOf(bytesToInt(value,0)));///byte
+
 				j=j+valuelength;
+			}
+		}
+
+		//size=sportdata.length;
+		List<SportDevForm> sportDevForms=SPORT_DEV_FORM.get(deviceId.deviceType);
+		int valuelength=0;
+
+		int pos=0;
+		for(SportDevForm sportDevForm:sportDevForms)
+		{
+			sportDevName.add(sportDevForm.getChineseName());
+			if(sportDevForm.getParaType()==CommandTypeConstant.SPORT_DEV_PARA_CERTAIN)
+			{
+				valuelength=sportDevForm.getLength();
+				byte [] value=new byte[valuelength];
+				System.arraycopy(sportdata,pos,value,0,valuelength);
+
+				sportDevValue.add(String.valueOf(bytesToInt(value,0)));///byte
+				pos=pos+valuelength;
+			}
+			else
+			{
+				valuelength=sportDevForm.getLength();
+				byte [] value=new byte[valuelength];
+				System.arraycopy(sportdata,pos,value,0,valuelength);
+				pos=pos+valuelength;
+
+				int length=bytesToInt(value,0);
+				byte [] realdata=new byte[length];
+				System.arraycopy(sportdata,pos,value,0,length);
+				sportDevValue.add(String.valueOf(value));///byte
+				pos=pos+length;
 			}
 		}
 
@@ -226,8 +261,8 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		if(response.getState()==LOGIN_SUCCESS)
 		{
 			response.setUserID(resBuf.readIntLE());
-			byte length=resBuf.readByte();
-			response.setUserNameLength(length);
+			short length=resBuf.readUnsignedByte();
+			response.setUserNameLength((byte)length);
 			byte[] name=new byte[length];
 			resBuf.readBytes(name);
 			response.setUserName(toUtf8(name));
@@ -415,17 +450,17 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				MonitorDevForm monitorDevForm=new MonitorDevForm();
 				//monitorDevForm.setMonitoringEquipmentTypeId(devType);
 				monitorDevForm.setParameterId(resBuf.readByte());
-				int length=resBuf.readByte();
+				int length=resBuf.readUnsignedByte();
 				byte[] chineseName =new byte[length];
 				resBuf.readBytes(chineseName);
 				monitorDevForm.setChineseName(toUtf8(chineseName));
 
-				length=resBuf.readByte();
+				length=resBuf.readUnsignedByte();
 				byte[] englishName = new byte[length];
 				resBuf.readBytes( englishName);
 				monitorDevForm.setEnglishName(toUtf8(englishName));
 
-				length=resBuf.readByte();
+				length=resBuf.readUnsignedByte();
 				byte[] unit = new byte[length];
 				resBuf.readBytes(unit);
 				monitorDevForm.setUnit(toUtf8(unit));
@@ -473,6 +508,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				{
 					SportDevForm sportDevForm=new SportDevForm();
 					sportDevForm.setParameterId(resBuf.readIntLE());
+					sportDevForm.setParaType(resBuf.readByte());
 					sportDevForm.setDeviceName(toUtf8(deviceNameBytes));
 					System.out.println(sportDevForm.getDeviceName());
 
@@ -504,13 +540,14 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 					sportDevForm.setUpOrder(resBuf.readByte());
 					sportDevForm.setMainControl(resBuf.readBoolean());
 					sportDevForm.setLength(resBuf.readByte());
-					sportDevForm.setPosition(resBuf.readByte());
+					//sportDevForm.setPosition(resBuf.readByte());
 					sportDevForm.setRate(resBuf.readDouble());
 
 					sportDevForms.add(sportDevForm);
 				}
 
 			}
+			Collections.sort(sportDevForms,Utils.sportDevComp);
 			devData.put(devType,sportDevForms);
 		}
 		response.setDevData(devData);
@@ -526,5 +563,14 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+	public static int bytesToInt(byte[] src, int offset) {
+		int value;
+		value = (int) ((src[offset] & 0xFF)
+				| ((src[offset+1] & 0xFF)<<8)
+				| ((src[offset+2] & 0xFF)<<16)
+				| ((src[offset+3] & 0xFF)<<24));
+		return value;
 	}
 }

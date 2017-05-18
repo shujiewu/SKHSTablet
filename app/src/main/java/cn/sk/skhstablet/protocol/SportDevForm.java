@@ -89,7 +89,16 @@ public class SportDevForm {
     private String parameterCode;
     private Boolean mainControl;
     private int length;
-    private int position;
+    private byte paraType;
+
+    public byte getParaType() {
+        return paraType;
+    }
+
+    public void setParaType(byte paraType) {
+        this.paraType = paraType;
+    }
+
     private Double rate;
 
     public int getDeviceTypeIdByte() {
@@ -104,13 +113,7 @@ public class SportDevForm {
         this.length = length;
     }
 
-    public int getPosition() {
-        return position;
-    }
 
-    public void setPosition(int position) {
-        this.position = position;
-    }
 
     public Double getRate() {
         return rate;

@@ -91,4 +91,7 @@ public class CommandTypeConstant {
 
 	public static final byte DEV_NAEM_RESPONSE=(byte)0xE9;
 	public static final byte PATIENT_LIST_RESPONSE=(byte)0xE3;//WUYONG
+
+	public static final byte SPORT_DEV_PARA_CERTAIN=0x01;
+	public static final byte SPORT_DEV_PARA_NOT_CERTAIN=0x00;
 }
