@@ -407,8 +407,13 @@ public class TcpUtils {
                         reqID=((PushAckResponse)data).getRequestID();
                         devType=((PushAckResponse)data).getDeviceType();
                         state=((PushAckResponse)data).getState();
+
                         if(userID!=AppConstants.USER_ID||reqID!=AppConstants.MUTI_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                        {
+
                             return;
+                        }
+
                         if(state==SUCCESS)
                         {
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));

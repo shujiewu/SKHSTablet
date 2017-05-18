@@ -89,6 +89,7 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                         }
                     }
                 });
+        System.out.println("registermuti");
         ((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
 
         ((LifeSubscription)mView).bindSubscription(mSubscription);

@@ -97,11 +97,11 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                },200);
 
                    //callback.onClick(holder.getAdapterPosition());
-               Log.e("longclick", "text1");
+               //Log.e("longclick", "text1");
                if (mOnItemLongClickListener != null) {
                    //注意这里使用getTag方法获取数据
                    mOnItemLongClickListener.onItemLongClick(view, (Integer) view.getTag());
-                   Log.e("longclick", "text");
+                   //Log.e("longclick", "text");
                }
                //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
                return true;

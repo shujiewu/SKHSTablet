@@ -87,6 +87,7 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                 System.out.println("send success!");
             }
         });
+        //mView.setPageState(AppConstants.STATE_LOADING);
     }
     @Inject
     public SingleMonPresenterImpl()

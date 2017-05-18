@@ -53,6 +53,8 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initInject();
+        mPresenter.registerFetchResponse();
     }
     View view;
     /*public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -116,7 +118,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
     protected void initView(View view) {
         recyclerView = (RecyclerView) view.findViewById(R.id.ry_muti_monitor);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
-        initInject();
+
         recyclerView.setAdapter(mutiMonitorAdapter);
         ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
 
@@ -130,8 +132,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
                 mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
             }
         });
-        mPresenter.registerFetchResponse();
-        //loadData();
+        System.out.println("registermuti");
     }
 
 
@@ -165,6 +166,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
             this.setState(AppConstants.STATE_SUCCESS);
         //else if(state==AppConstants.)
+        System.out.println("pagestatesucceses");
     }
 
     @Override

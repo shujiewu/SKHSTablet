@@ -85,6 +85,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             singleMonitorID = args.getString("singleMonitorID");
             //Log.e("single ID1",singleMonitorID);
         }
+        initInject();
+        mPresenter.registerFetchResponse();
         //Log.e("single ID1","1212");
     }
     //View view;
@@ -161,6 +163,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         DaggerSingleMonitorComponent.builder()
                 .singleMonitorModule(new SingleMonitorModule())
                 .build().injectSingleMonitor(this);
+        if (mPresenter!=null){
+            mPresenter.setView(this);}
     }
 
     @Override
@@ -170,7 +174,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
 
     public void loadData(String ID) {
-        mPresenter.fetchExercisePlan();
         mPresenter.sendPatientDetailRequest(ID);
     }
 
@@ -228,7 +231,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     @Override
     public void setPageState(int state) {
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
+        {
             this.setState(AppConstants.STATE_SUCCESS);
+            mPresenter.fetchExercisePlan();
+        }
     }
 
     /*public void registerFetchResponse()
@@ -250,9 +256,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     @Override
     protected void initView(View view)  {
-        initInject();
-        if (mPresenter!=null){
-            mPresenter.setView(this);}
+
+
 
         mainActivity=(MainActivity) getActivity();
 
@@ -299,6 +304,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
         elvExPlan = (ExpandableListView) view.findViewById(R.id.elv_exercise_plan);
         elvExPlan.setAdapter(exercisePlanAdapter);
-        mPresenter.registerFetchResponse();
+
     }
 }

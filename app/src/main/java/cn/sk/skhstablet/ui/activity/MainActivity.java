@@ -311,8 +311,6 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
                 if (singleMonitorFragment==null){
                     singleMonitorFragment=SingleMonitorFragment.newInstance(newSingleMonitorID);
-                    Log.e("TestA", "view == 2");
-
                     ft.add(R.id.contentView,singleMonitorFragment);
 
                 }else {
@@ -321,12 +319,12 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 ft.commit();
                 fm.executePendingTransactions();
 
-
+                //新的监控
                 if(newSingleMonitorID!=null&&!newSingleMonitorID.equals(singleMonitorID))
                 {
                     singleMonitorFragment.setState(STATE_LOADING);
-                    if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)///shanchu
-                        singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+                    //if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)///shanchu
+                    //   singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
                     singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.loadData(singleMonitorID);
                     singleMonitorFragment.getChangeDevPara().clear();
@@ -340,13 +338,6 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         addRightTopItem(textItem);
                     }
                 }
-                /*if(hasMenuItem(SAVEEdit)) {
-                    new Handler().post(new Runnable() {
-                        public void run() {
-                            removeRightTopItem(SAVEEdit);
-                        }
-                    });
-                }*/
                 break;
             case FRAGMENT_MUTI:
                 new Handler().post(new Runnable() {
@@ -357,7 +348,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 if (mutiMonitorFragment==null){
                     mutiMonitorFragment=new MutiMonitorFragment();
                     ft.add(R.id.contentView,mutiMonitorFragment);
-                    Log.e("TestA", "view == 3");
+                    System.out.println("registermuti3");
                 }else {
                     ft.show(mutiMonitorFragment);
                 }
@@ -370,6 +361,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 //textItem.show();
               //  removeRightTopItem(CLOSE_SINGLE);
                 ft.commit();
+                fm.executePendingTransactions();
                 break;
         }
 
@@ -405,8 +397,6 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 if(getPatientShow())
                 {
                     hidePatientList();
-
-                   // removeTopItem(STARTMONITOR);
                 }
                 else
                 {
@@ -437,12 +427,6 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 patientListAdapter.notifyDataSetChanged();
                 hidePatientList();
                 sendMonitorRequest();
-                //new Handler().post(new Runnable() {
-                //    public void run() {
-                 //       removeTopItem(STARTMONITOR);
-                //       removeTopItem(MONITORALL);
-                //    }
-               // });
                 showFragment(FRAGMENT_MUTI);
                 break;
             case LOG_OUT:
@@ -490,7 +474,10 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         .show();
                 break;
             case CANCEL_SINGLE_MON:
-                mPresenter.sendCancelSingleMonitorReq();
+                newSingleMonitorID=null;
+                singleMonitorID=null;
+                singleMonitorFragment.setState(AppConstants.STATE_EMPTY);
+                //mPresenter.sendCancelSingleMonitorReq();
                 showFragment(FRAGMENT_MUTI);
         }
     }
