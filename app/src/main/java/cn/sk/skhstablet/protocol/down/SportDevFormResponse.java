@@ -14,23 +14,28 @@ public class SportDevFormResponse extends AbstractProtocol {
     public SportDevFormResponse(byte command) {
         super(command);
     }
-    private int userID;
-    private byte devNumber;
+    private byte state;
+
+    public void setState(byte state) {
+        this.state = state;
+    }
+
+    public byte getState() {
+        return state;
+    }
+    private short devNumber;
     private HashMap<Byte,List<SportDevForm>> devData;
 
     public void setDevData(HashMap<Byte, List<SportDevForm>> devData) {
         this.devData = devData;
     }
 
-    public byte getDevNumber() {
+    public short getDevNumber() {
         return devNumber;
     }
 
-    public int getUserID() {
-        return userID;
-    }
 
-    public void setDevNumber(byte devNumber) {
+    public void setDevNumber(short devNumber) {
         this.devNumber = devNumber;
     }
 
@@ -38,7 +43,5 @@ public class SportDevFormResponse extends AbstractProtocol {
         return devData;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
-    }
+
 }

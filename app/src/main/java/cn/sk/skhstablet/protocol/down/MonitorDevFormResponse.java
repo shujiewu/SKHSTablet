@@ -14,23 +14,26 @@ public class MonitorDevFormResponse extends AbstractProtocol {
     public MonitorDevFormResponse(byte command) {
         super(command);
     }
-    private int userID;
-    private byte devNumber;
-    private HashMap<Byte,List<MonitorDevForm>> devData;
 
-    public void setUserID(int userID) {
-        this.userID = userID;
+    private byte state;
+
+    public void setState(byte state) {
+        this.state = state;
     }
 
-    public void setDevNumber(byte devNumber) {
+    public byte getState() {
+        return state;
+    }
+
+    private short devNumber;
+    private HashMap<Byte,List<MonitorDevForm>> devData;
+
+    public void setDevNumber(short devNumber) {
         this.devNumber = devNumber;
     }
 
-    public int getUserID() {
-        return userID;
-    }
 
-    public byte getDevNumber() {
+    public short getDevNumber() {
         return devNumber;
     }
 

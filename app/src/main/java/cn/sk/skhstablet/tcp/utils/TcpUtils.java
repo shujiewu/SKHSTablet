@@ -340,7 +340,7 @@ public class TcpUtils {
                                 paraLength=monitorDevForms.get(k).getLength();
                                 //取出值
                                 //paraValue=subBytes(physiologicalData,j,paraLength);
-                                phyDevName.set(k,monitorDevForms.get(k).getName());
+                                //phyDevName.set(k,monitorDevForms.get(k).getName());
                                 phyDevValue.set(k,String.valueOf(paraValue)+monitorDevForms.get(k).getUnit());
                             }
                         }
@@ -435,14 +435,14 @@ public class TcpUtils {
 
                     //修改密码，登录，注册的响应
                     case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:
-                        userID=((LoginAckResponse)data).getUserID();
-                        if(userID!=AppConstants.USER_ID)
-                            return;
+                        //userID=((LoginAckResponse)data).getUserID();
+                        //if(userID!=AppConstants.USER_ID)
+                        //    return;
                         state=((LoginAckResponse)data).getState();
-                        if(state==SUCCESS)
-                            RxBus.getDefault().post(AppConstants.CHANGE_KEY_STATE,new Boolean(true));
-                        else
-                            RxBus.getDefault().post(AppConstants.CHANGE_KEY_STATE,new Boolean(false));
+                        //if(state==SUCCESS)
+                        RxBus.getDefault().post(AppConstants.CHANGE_KEY_STATE,new Byte(state));
+                        //else
+                            //RxBus.getDefault().post(AppConstants.CHANGE_KEY_STATE,new Boolean(false));
                         break;
                     case CommandTypeConstant.LOGIN_ACK_RESPONSE:
                         //userID=((LoginAckResponse)data).getUserID();
@@ -480,19 +480,27 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID)
                             return;
                         AppConstants.DEV_NAME=((DevNameResponse)data).getDevName();
-                        break;
+                        break;*/
                     case CommandTypeConstant.SPORT_DEV_FORM_RESPONSE:
-                        userID=((DevNameResponse)data).getUserID();
-                        if(userID!=AppConstants.USER_ID)
+                        userID=((SportDevFormResponse)data).getUserID();
+                        reqID=((SportDevFormResponse)data).getRequestID();
+                        devType=((SportDevFormResponse)data).getDeviceType();
+                        state=((SportDevFormResponse)data).getState();
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PHY_FORM_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
-                        AppConstants.SPORT_DEV_FORM=((SportDevFormResponse)data).getDevData();
+                        if(state==SUCCESS)
+                            AppConstants.SPORT_DEV_FORM=((SportDevFormResponse)data).getDevData();
                         break;
                     case CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE:
-                        userID=((DevNameResponse)data).getUserID();
-                        if(userID!=AppConstants.USER_ID)
+                        userID=((MonitorDevFormResponse)data).getUserID();
+                        reqID=((MonitorDevFormResponse)data).getRequestID();
+                        devType=((MonitorDevFormResponse)data).getDeviceType();
+                        state=((MonitorDevFormResponse)data).getState();
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PHY_FORM_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
-                        MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
-                        break;*/
+                        if(state==SUCCESS)
+                            MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
+                        break;
                 }
 
                 /*switch (dataType)

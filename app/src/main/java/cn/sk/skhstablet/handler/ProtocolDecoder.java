@@ -72,7 +72,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
                 break;
             }
             case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:{
-                request=decodeLoginAckResponse(reqBuf,CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE);
+                request=decodeChangeKeyAckResponse(reqBuf,CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE);
                 break;
             }
 
@@ -188,6 +188,17 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			resBuf.readBytes(name);
 			response.setUserName(toUtf8(name));
 		}
+		return response;
+	}
+	private AbstractProtocol decodeChangeKeyAckResponse(ByteBuf resBuf,byte commandType)
+	{
+		LoginAckResponse response=new LoginAckResponse(commandType);
+		//response.setUserID(resBuf.readIntLE());
+
+		response.setDeviceType(resBuf.readByte());
+		response.setUserID(resBuf.readIntLE());
+		response.setRequestID(resBuf.readByte());
+		response.setState(resBuf.readByte());
 		return response;
 	}
 	private AbstractProtocol decodeLogoutAckResponse(ByteBuf resBuf,byte commandType)
@@ -339,10 +350,15 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 	private AbstractProtocol decodeMonitorDevFormResponse(ByteBuf resBuf,byte commandType)
 	{
 		MonitorDevFormResponse response=new MonitorDevFormResponse(commandType);
+		response.setDeviceType(resBuf.readByte());
 		response.setUserID(resBuf.readIntLE());
-		response.setDevNumber(resBuf.readByte());
+		response.setRequestID(resBuf.readByte());
+		response.setState(resBuf.readByte());
+		if(response.getState()!=SUCCESS)
+			return response;
+		response.setDevNumber(resBuf.readShortLE());
 
-		byte number=response.getDevNumber();
+		short number=response.getDevNumber();
 		HashMap<Byte,List<MonitorDevForm>> devData=new HashMap<>();
 		for(byte i=0;i<number;i++)
 		{
@@ -353,14 +369,29 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			for(byte j=0;j<paraNumber;j++)
 			{
 				MonitorDevForm monitorDevForm=new MonitorDevForm();
+				//monitorDevForm.setMonitoringEquipmentTypeId(devType);
+				monitorDevForm.setParameterId(resBuf.readByte());
+				int length=resBuf.readByte();
+				byte[] chineseName =new byte[length];
+				resBuf.readBytes(chineseName);
+				monitorDevForm.setChineseName(toUtf8(chineseName));
+
+				length=resBuf.readByte();
+				byte[] englishName = new byte[length];
+				resBuf.readBytes( englishName);
+				monitorDevForm.setEnglishName(toUtf8(englishName));
+
+				length=resBuf.readByte();
+				byte[] unit = new byte[length];
+				resBuf.readBytes(unit);
+				monitorDevForm.setUnit(toUtf8(unit));
+				System.out.println(monitorDevForm.getChineseName());
+				System.out.println(monitorDevForm.getEnglishName());
+				System.out.println(monitorDevForm.getUnit());
+				monitorDevForm.setOrder(resBuf.readByte());
 				monitorDevForm.setLength(resBuf.readByte());
-				byte req[]=new byte[64];
-				resBuf.readBytes(req);
-				String name=toUtf8(req);
-				resBuf.readBytes(req);
-				String unit=toUtf8(req);
-				monitorDevForm.setName(name);
-				monitorDevForm.setUnit(unit);
+				System.out.println(monitorDevForm.getLength());
+				monitorDevForm.setPosition(resBuf.readByte());
 				monitorDevForms.add(monitorDevForm);
 			}
 			devData.put(devType,monitorDevForms);
@@ -371,38 +402,69 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 	private AbstractProtocol decodeSportDevFormResponse(ByteBuf resBuf,byte commandType)
 	{
 		SportDevFormResponse response=new SportDevFormResponse(commandType);
+		response.setDeviceType(resBuf.readByte());
 		response.setUserID(resBuf.readIntLE());
-		response.setDevNumber(resBuf.readByte());
+		response.setRequestID(resBuf.readByte());
+		response.setState(resBuf.readByte());
+		if(response.getState()!=SUCCESS)
+			return response;
 
-		byte number=response.getDevNumber();
+		response.setDevNumber(resBuf.readShortLE());
+		short number=response.getDevNumber();
 		HashMap<Byte,List<SportDevForm>> devData=new HashMap<>();
 		for(byte i=0;i<number;i++)
 		{
 			byte devType=resBuf.readByte();
 			//not have length
+
+			int length=resBuf.readUnsignedByte();
+			byte[] deviceNameBytes =new byte[length];
+			resBuf.readBytes(deviceNameBytes);
 			byte paraNumber=resBuf.readByte();
 			List<SportDevForm> sportDevForms=new ArrayList<>();
-			for(byte j=0;j<paraNumber;j++)
+			if(paraNumber>0)
 			{
-				SportDevForm sportDevForm=new SportDevForm();
-				sportDevForm.setLength(resBuf.readByte());
-				byte req[]=new byte[64];   //64不知道够不，这里直接覆盖写，不知道是否可行
-				resBuf.readBytes(req);
-				String name=toUtf8(req);
-				resBuf.readBytes(req);
-				String unit=toUtf8(req);
-				sportDevForm.setName(name);
-				sportDevForm.setUnit(unit);
-
-				sportDevForm.setIsAdjust(resBuf.readByte());
-				if(sportDevForm.getIsAdjust()==0x00) //ketiaojie
+				for(byte j=0;j<paraNumber;j++)
 				{
-					sportDevForm.setMax(resBuf.readByte());
-					sportDevForm.setMin(resBuf.readByte());
-					sportDevForm.setPrecision(resBuf.readByte());
-					sportDevForm.setAdjustCode(resBuf.readByte());
+					SportDevForm sportDevForm=new SportDevForm();
+					sportDevForm.setParameterId(resBuf.readIntLE());
+					sportDevForm.setDeviceName(toUtf8(deviceNameBytes));
+					System.out.println(sportDevForm.getDeviceName());
+
+					length=resBuf.readUnsignedByte();
+					byte[] chineseName =new byte[length];
+					resBuf.readBytes(chineseName);
+					sportDevForm.setChineseName(toUtf8(chineseName));
+					System.out.println(sportDevForm.getChineseName());
+
+					length=resBuf.readUnsignedByte();
+					byte[] englishName = new byte[length];
+					resBuf.readBytes( englishName);
+					sportDevForm.setEnglishName(toUtf8(englishName));
+
+					length=resBuf.readUnsignedByte();
+					byte[] unit = new byte[length];
+					resBuf.readBytes(unit);
+					sportDevForm.setUnit(toUtf8(unit));
+
+					sportDevForm.setPrecision(resBuf.readDouble());
+					sportDevForm.setCanControl(resBuf.readBoolean());
+					if(sportDevForm.getCanControl())
+					{
+						length=resBuf.readUnsignedByte();
+						byte[] parameterCode=new byte[length];
+						resBuf.readBytes(parameterCode);
+						sportDevForm.setParameterCode(toUtf8(parameterCode));
+					}
+					sportDevForm.setUpOrder(resBuf.readByte());
+					sportDevForm.setMainControl(resBuf.readBoolean());
+					sportDevForm.setLength(resBuf.readByte());
+					sportDevForm.setPosition(resBuf.readByte());
+					sportDevForm.setRate(resBuf.readDouble());
+
+					sportDevForms.add(sportDevForm);
 				}
-				sportDevForms.add(sportDevForm);
+
 			}
 			devData.put(devType,sportDevForms);
 		}

@@ -56,10 +56,10 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
 
     @Override
     public void registerFetchResponse() {
-        Subscription changkeySubscription = RxBus.getDefault().toObservable(AppConstants.CHANGE_KEY_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
+        Subscription changkeySubscription = RxBus.getDefault().toObservable(AppConstants.CHANGE_KEY_STATE,Byte.class)
+                .subscribe(new Action1<Byte>() {
                     @Override
-                    public void call(Boolean s) {
+                    public void call(Byte s) {
                         mView.refreshView(s);
                     }
                 });

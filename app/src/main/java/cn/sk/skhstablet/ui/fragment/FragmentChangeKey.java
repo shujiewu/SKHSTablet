@@ -16,7 +16,9 @@ import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import cn.sk.skhstablet.R;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.component.EditTextWithDel;
 import cn.sk.skhstablet.component.PaperButton;
 import cn.sk.skhstablet.injector.component.fragment.DaggerLoginComponent;
@@ -267,14 +269,41 @@ PaperButton nextBt;
 
     }
     @Override
-    public void refreshView(Boolean mData) {
-        if(mData==true)
+    public void refreshView(Byte mData) {
+        if(mData== CommandTypeConstant.SUCCESS)
         {
-            System.out.println("密码修改成功");
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("密码修改成功")
+                    .setConfirmText("确定")
+                    .show();
+        }
+        else if(mData== CommandTypeConstant.OLD_KEY_FALSE)
+        {
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("原密码错误")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                        }
+                    })
+                    .show();
+            //System.out.println("密码修改失败");
         }
         else
         {
-            System.out.println("密码修改失败");
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("修改失败，未知错误")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                        }
+                    })
+                    .show();
+            //System.out.println("密码修改失败");
         }
     }
 

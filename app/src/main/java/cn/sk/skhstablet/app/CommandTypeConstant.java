@@ -36,6 +36,7 @@ public class CommandTypeConstant {
 	public static final byte SUCCESS = (byte) 0x00;
 	public static final byte NONE_FAIL = (byte) 0xFF;
 	public static final byte NO_LOGIN = (byte) 0xFE;
+	public static final byte OLD_KEY_FALSE = (byte) 0xFD;
 
 	public static final byte PATIENT_LIST_SUCCESS= (byte) 0x00;
 	public static final byte PATIENT_LIST_NONE_FAIL= (byte) 0xff;

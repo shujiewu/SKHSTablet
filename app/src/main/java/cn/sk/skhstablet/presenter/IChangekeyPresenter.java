@@ -5,7 +5,7 @@ package cn.sk.skhstablet.presenter;
  */
 
 public interface IChangekeyPresenter {
-    interface View extends BaseView<Boolean>{
+    interface View extends BaseView<Byte>{
     }
     interface Presenter{
         void sendRequest(String loginName,String oldKey,String newKey);
