@@ -164,6 +164,7 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
     public void setPageState(int state) {
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
             this.setState(AppConstants.STATE_SUCCESS);
+        //else if(state==AppConstants.)
     }
 
     @Override

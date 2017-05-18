@@ -112,7 +112,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         mRecyclerView.addItemDecoration(itemDecorator);
         patientListAdapter.setOnItemLongClickListener(new PatientListAdapter.OnPatientItemLongClickListener(){
             @Override
-            public void onItemLongClick(final View view , String data){
+            public void onItemLongClick(final View view , int data){
                 //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
                 //MainActivity mainActivity=(MainActivity) getActivity();
                 view.setPressed(true);
@@ -125,7 +125,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     showFragment(FRAGMENT_SINGLE);
                     //callback.onClick(holder.getAdapterPosition());
                 }, 200);*/
-                newSingleMonitorID=data;
+                newSingleMonitorID=String.valueOf(data);
                 view.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -425,11 +425,13 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
                 break;
             case STARTMONITOR:
+                patientID.clear();
                 for(Patient patient :patientListAdapter.mDatas)
                 {
                     if(patient.getSelectStatus().equals(PATIENT_SELECT_STATUS_TRUE)||patient.getSelectStatus().equals(PATIENT_SELECT_STATUS_MONITOR))
                     {
                         patient.setSelectStatus(PATIENT_SELECT_STATUS_MONITOR);
+                        patientID.add(patient.getPatientID());
                     }
                 }
                 patientListAdapter.notifyDataSetChanged();
@@ -528,7 +530,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public void reSendRequest() {
 
     }
-
+    List<Integer> patientID=new ArrayList<>();
     void loadData()
     {
         mPresenter.sentPatientListRequest();
@@ -536,9 +538,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     void sendMonitorRequest()
     {
         mutiMonitorFragment.setState(STATE_LOADING);
-        List<Integer> patientID=new ArrayList<>();
-        patientID.add(0,0);
-        patientID.add(1,1);
+        //patientID.add(0);
+       //patientID.add(1,1);
         mPresenter.sendMutiMonitorRequest(patientID);
 
         //if(mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)

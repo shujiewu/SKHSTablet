@@ -313,8 +313,8 @@ public class TcpUtils {
                     case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST: {
                         ///dataType=(byte)((ExerciseEquipmentDataResponse)data).getDeviceId().getDeviceType();
                         ExerciseEquipmentDataResponse response=(ExerciseEquipmentDataResponse)data;
-                        PatientDetail patientDetail=new PatientDetail();
-                        patientDetail.setPatientID(response.getPatientId());
+                        PatientDetail patientDetail=response.getPatientDetail();
+                        /*patientDetail.setPatientID(response.getPatientId());
                         patientDetail.setName(PATIENT_LIST_NAME_FORM.get(response.getPatientId()));
                         patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(response.getPatientId()));
                         DeviceId deviceId=response.getDeviceId();
@@ -343,7 +343,7 @@ public class TcpUtils {
                                 //phyDevName.set(k,monitorDevForms.get(k).getName());
                                 phyDevValue.set(k,String.valueOf(paraValue)+monitorDevForms.get(k).getUnit());
                             }
-                        }
+                        }*/
                         RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
                         break;
                     }

@@ -117,6 +117,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                                     patient.setName(mDatas.get(hasPatient.get(patientID)).getName());
                                     patient.setGender(mDatas.get(hasPatient.get(patientID)).getGender());
                                     patient.setHospitalNumber(mDatas.get(hasPatient.get(patientID)).getHospitalNumber());
+                                    patient.setSelectStatus(mDatas.get(hasPatient.get(patientID)).getSelectStatus());
                                     mDatas.set(hasPatient.get(patientID),patient);
                                     mView.refreshView(patient,hasPatient.get(patientID));
                                     return;

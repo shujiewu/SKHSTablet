@@ -3,6 +3,7 @@ package cn.sk.skhstablet.protocol.down;
 
 
 import cn.sk.skhstablet.app.CommandTypeConstant;
+import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
 
 public class ExerciseEquipmentDataResponse extends AbstractProtocol {
@@ -138,4 +139,12 @@ public class ExerciseEquipmentDataResponse extends AbstractProtocol {
 		RFID = rFID;
 	}
 
+	private PatientDetail patientDetail;
+
+	public PatientDetail getPatientDetail() {
+		return patientDetail;
+	}
+	public void setPatientDetail(PatientDetail patientDetail) {
+		this.patientDetail = patientDetail;
+	}
 }

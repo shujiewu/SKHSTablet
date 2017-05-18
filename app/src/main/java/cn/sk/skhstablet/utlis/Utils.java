@@ -6,6 +6,10 @@ import android.graphics.Color;
 import android.util.TypedValue;
 import android.view.View;
 
+import java.util.Comparator;
+
+import cn.sk.skhstablet.protocol.MonitorDevForm;
+
 public class Utils {
 	
 	
@@ -42,5 +46,15 @@ public class Utils {
 		bitmap.setPixels(pixels, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
 		return bitmap;
 	}
-	
+	public static Comparator monitorDevComp = new Comparator<MonitorDevForm>() {
+		@Override
+		public int compare(MonitorDevForm o1, MonitorDevForm o2) {
+			// TODO Auto-generated method stub
+			if(o1.getOrder()>o2.getOrder())
+				return 1;
+				//注意！！返回值必须是一对相反数，否则无效。jdk1.7以后就是这样。
+				//      else return 0; //无效
+			else return -1;
+		}
+	};
 }

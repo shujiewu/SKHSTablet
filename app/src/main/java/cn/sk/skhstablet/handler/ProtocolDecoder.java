@@ -2,12 +2,14 @@ package cn.sk.skhstablet.handler;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.domain.ECG;
 import cn.sk.skhstablet.model.Patient;
+import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
 import cn.sk.skhstablet.protocol.DeviceId;
 import cn.sk.skhstablet.protocol.MonitorDevForm;
@@ -22,12 +24,17 @@ import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
 import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
 import cn.sk.skhstablet.protocol.up.LoginRequest;
+import cn.sk.skhstablet.utlis.Utils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
+import static cn.sk.skhstablet.app.AppConstants.DEV_NAME;
+import static cn.sk.skhstablet.app.AppConstants.MON_DEV_FORM;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.LOGIN_SUCCESS;
 import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE;
@@ -153,11 +160,18 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 
 	private AbstractProtocol decodeExerciseEquipmentDataRequest(ByteBuf reqBuf) {
 		ExerciseEquipmentDataResponse request = new ExerciseEquipmentDataResponse();
+		DeviceId deviceId = decodeDeviceId(reqBuf);
+		request.setDeviceId(deviceId);
 		request.setRFID(reqBuf.readLongLE());
 		request.setPatientId(reqBuf.readIntLE());// 数据库主键，有符号
 		request.setDataPacketNumber(reqBuf.readUnsignedIntLE());
+
+
 		request.setPhysiologicalLength(reqBuf.readUnsignedShortLE());
-		reqBuf.readBytes(request.getPhysiologicalData());
+		byte phydata[]=new byte[request.getPhysiologicalLength()];
+		reqBuf.readBytes(phydata);
+		request.setPhysiologicalData(phydata);
+
 		request.setExercisePlanCompletionRate(reqBuf.readUnsignedByte());
 		request.setPerformedExecutionAmount(reqBuf.readUnsignedShortLE());
 		request.setExercisePlanId(reqBuf.readIntLE());// 数据库主键，有符号
@@ -165,6 +179,36 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		byte[] data = new byte[reqBuf.writerIndex() - request.getChecksum().length - reqBuf.readerIndex()];
 		reqBuf.readBytes(data);
 		request.setEquipmentData(data);
+
+		PatientDetail patientDetail=new PatientDetail();
+		patientDetail.setPatientID(request.getPatientId());
+		patientDetail.setName(PATIENT_LIST_NAME_FORM.get(request.getPatientId()));
+		patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(request.getPatientId()));
+		patientDetail.setDev(DEV_NAME.get(deviceId.deviceType));
+		patientDetail.setDevType(deviceId.deviceType);
+		patientDetail.setDeviceNumber(deviceId.deviceNumber);
+		patientDetail.setPercent(String.valueOf(request.getExercisePlanCompletionRate()));
+		int size=phydata[0];
+		List<String> sportDevName=new ArrayList<String>();  //指的是参数名称，而不是设备名称
+		List<String> phyDevName=new ArrayList<String>();
+		List<String> sportDevValue=new ArrayList<String>();
+		List<String> phyDevValue=new ArrayList<String>();
+		for(int i=0,j=1;i<size;i++)
+		{
+			List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(phydata[j]);
+			j++;
+			for(MonitorDevForm monitorDevForm:monitorDevForms)
+			{
+				phyDevName.add(monitorDevForm.getChineseName());
+				int valuelength=monitorDevForm.getLength();
+				byte [] value=new byte[valuelength];
+				System.arraycopy(phydata,j,value,0,valuelength);
+				phyDevValue.add(String.valueOf(value));
+				j=j+valuelength;
+			}
+		}
+
+		request.setPatientDetail(patientDetail);
 		return request;
 	}
 
@@ -394,6 +438,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				monitorDevForm.setPosition(resBuf.readByte());
 				monitorDevForms.add(monitorDevForm);
 			}
+			Collections.sort(monitorDevForms,Utils.monitorDevComp);//按照序号排序
 			devData.put(devType,monitorDevForms);
 		}
 		response.setDevData(devData);

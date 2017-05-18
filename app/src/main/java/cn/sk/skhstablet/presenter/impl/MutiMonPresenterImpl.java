@@ -35,7 +35,7 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
     }
 
     private List<PatientDetail> mDatas=new ArrayList<>();
-    private HashMap<String,Integer> hasPatient=new HashMap<>();
+    private HashMap<Integer,Integer> hasPatient=new HashMap<>();//id和位置
     private int position=0;
     @Override
     public void registerFetchResponse() {
@@ -43,16 +43,16 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 .subscribe(new Action1<PatientDetail>() {
                     @Override
                     public void call(PatientDetail s) {
-                        String id=s.getId();
-                        if(hasPatient.containsKey(id))
+                        int patientID=s.getPatientID();
+                        if(hasPatient.containsKey(patientID))
                         {
-                            mDatas.set(hasPatient.get(id),s);
-                            mView.refreshView(s,hasPatient.get(id));
+                            mDatas.set(hasPatient.get(patientID),s);
+                            mView.refreshView(s,hasPatient.get(patientID));
                         }
                         else
                         {
                             mDatas.add(s);
-                            hasPatient.put(id,position++);
+                            hasPatient.put(patientID,position++);
                             mView.refreshView(mDatas);
                         }
 
@@ -78,10 +78,11 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                             mView.setPageState(AppConstants.STATE_SUCCESS);
                             mDatas.clear();
                             hasPatient.clear();
+                            position=0;
                         }
                         else if(b==CommandTypeConstant.NONE_FAIL)
                         {
-                            System.out.println("多人列表获取未知错误");
+                            System.out.println("多人监控获取未知错误");
                         }
                         else {
                             System.out.println("未登录");
