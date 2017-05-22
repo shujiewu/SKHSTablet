@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
@@ -21,8 +22,10 @@ import javax.inject.Inject;
 
 import cn.sk.skhstablet.app.AppConstants;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
+import cn.sk.skhstablet.component.PaperButton;
 import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.SingleMonitorModule;
+import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
 import cn.sk.skhstablet.rx.RxBus;
@@ -63,6 +66,9 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     TextView percent;
     TextView tvHospitalNumber;
     TextView tvDevNumber;
+
+    PaperButton btnStart;
+    PaperButton btnStop;
     private String singleMonitorID;
     private HashMap<String,String> changeDevPara= new HashMap<>();
 
@@ -253,19 +259,41 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     protected int getLayoutId() {
         return R.layout.fragment_single_monitor;
     }
+    Patient patient;
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+        /*patientDetail=new PatientDetail();
+        patientDetail.setPatientID(patient.getPatientID());
+        patientDetail.setDeviceNumber(patient.getDeviceNumber());
+        patientDetail.setDev(patient.getDev());
+        patientDetail.setHospitalNumber(patient.getHospitalNumber());
+        patientDetail.setName(patient.getName());
+        //patientDetail.set
+        //patientDetail.setPercent(patient.get);
+        // patientDetail.set
+        name.setText(patientDetail.getName());
+        dev.setText(patientDetail.getDev());
+        //percent.setText(patientDetail.getPercent());
+        tvDevNumber.setText(patientDetail.getDeviceNumber());
+        tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));*/
+    }
 
     @Override
-    protected void initView(View view)  {
+    protected void initView(View view) {
 
 
-
-        mainActivity=(MainActivity) getActivity();
+        mainActivity = (MainActivity) getActivity();
 
         name = (TextView) view.findViewById(R.id.sname);
         tvHospitalNumber = (TextView) view.findViewById(R.id.shospitalNumber);
-        tvDevNumber=(TextView) view.findViewById(R.id.sdevNumber);
+        tvDevNumber = (TextView) view.findViewById(R.id.sdevNumber);
         dev = (TextView) view.findViewById(R.id.sdev);
-        percent=(TextView) view.findViewById(R.id.spercent);
+        percent = (TextView) view.findViewById(R.id.spercent);
 
         rySportParaView = (RecyclerView) view.findViewById(R.id.sry_sport_para);
         rySportParaView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -273,37 +301,58 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         TracksItemDecorator itemDecorator = new TracksItemDecorator(10);
         rySportParaView.addItemDecoration(itemDecorator);
         devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
-            @Override
-            public void SaveEdit(int position, String devValue) {
-                   //Log.e("testsava","1");
-                   //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
-                   String devName=devParaChangeAdapter.sportDevName.get(position);
-                   if(devValue.equals(devParaChangeAdapter.sportDevValue.get(position))&&changeDevPara.containsKey(devName))
-                       changeDevPara.remove(devName);
-                   else
-                   {
-                       changeDevPara.put(devName,devValue);
-                   }
-                   if(!mainActivity.hasMenuItem(mainActivity.SAVE_EDIT))
-                   {
-                       TextItem textItem = new TextItem(mainActivity, mainActivity.SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
-                       mainActivity.addRightTopItem(textItem);
-                   }
-               }
-           }
+                                                         @Override
+                                                         public void SaveEdit(int position, String devValue) {
+              //Log.e("testsava","1");
+              //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
+              String devName = devParaChangeAdapter.sportDevName.get(position);
+              if (devValue.equals(devParaChangeAdapter.sportDevValue.get(position)) && changeDevPara.containsKey(devName))
+                  changeDevPara.remove(devName);
+              else {
+                  changeDevPara.put(devName, devValue);
+              }
+              if (!mainActivity.hasMenuItem(mainActivity.SAVE_EDIT)) {
+                  TextItem textItem = new TextItem(mainActivity, mainActivity.SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
+                  mainActivity.addRightTopItem(textItem);
+              }
+          }
+                                                     }
         );
 
 
-
-        ryPhyParaView=(RecyclerView)view.findViewById(R.id.sry_phy_para);
+        ryPhyParaView = (RecyclerView) view.findViewById(R.id.sry_phy_para);
         itemDecorator = new TracksItemDecorator(10);
         ryPhyParaView.addItemDecoration(itemDecorator);
-        ryPhyParaView.setLayoutManager(new GridLayoutManager(getActivity(),2));
+        ryPhyParaView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         patientParaAdapter.setPageState(AppConstants.SINGLE_DATA);
         ryPhyParaView.setAdapter(patientParaAdapter);
 
         elvExPlan = (ExpandableListView) view.findViewById(R.id.elv_exercise_plan);
         elvExPlan.setAdapter(exercisePlanAdapter);
 
+        patientDetail=new PatientDetail();
+
+        //Patient patient=((MainActivity) getActivity()).patientListAdapter.mDatas.get(singleMonitorID);
+        patientDetail.setPatientID(patient.getPatientID());
+        patientDetail.setDeviceNumber(patient.getDeviceNumber());
+        patientDetail.setDev(patient.getDev());
+        patientDetail.setHospitalNumber(patient.getHospitalNumber());
+        patientDetail.setName(patient.getName());
+        //patientDetail.set
+        //patientDetail.setPercent(patient.get);
+       // patientDetail.set
+        name.setText(patientDetail.getName());
+        dev.setText(patientDetail.getDev());
+        //percent.setText(patientDetail.getPercent());
+        tvDevNumber.setText(patientDetail.getDeviceNumber());
+        tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
+
+        btnStart = (PaperButton) view.findViewById(R.id.bt_start);
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPresenter.sendControlStart(patientDetail.getPatientID(),patientDetail.getDeviceNumber());
+            }
+        });
     }
 }

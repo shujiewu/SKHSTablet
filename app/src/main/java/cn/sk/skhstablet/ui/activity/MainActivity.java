@@ -328,6 +328,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.loadData(singleMonitorID);
                     singleMonitorFragment.getChangeDevPara().clear();
+                    singleMonitorFragment.setPatient(patientListAdapter.mDatas.get(mPresenter.hasPatient.get(Integer.parseInt(singleMonitorID))));
                     isNewSingle=true;
                 }
                 else
@@ -541,7 +542,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
     @Override
     public void setSinglePageState(int state) {
-        if(state==AppConstants.STATE_SUCCESS&&singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+        if(state==AppConstants.STATE_SUCCESS)
             singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
     }
 

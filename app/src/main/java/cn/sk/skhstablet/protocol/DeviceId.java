@@ -5,9 +5,9 @@ import java.math.BigInteger;
 public class DeviceId {
 	public byte deviceType;
 	public byte deviceModel;
-	public long deviceNumber;
+	public String deviceNumber;
 
-	public DeviceId(byte deviceType, byte deviceModel, long deviceNumber) {
+	public DeviceId(byte deviceType, byte deviceModel, String deviceNumber) {
 		this.deviceType = deviceType;
 		this.deviceModel = deviceModel;
 		this.deviceNumber = deviceNumber;
@@ -48,8 +48,8 @@ public class DeviceId {
 			return deviceModel;
 	}
 
-	public BigInteger getDeviceNumber() {
-		return new BigInteger(Long.toString(deviceNumber));
+	public String getDeviceNumber() {
+		return deviceNumber;
 	}
 
 	public void setDeviceType(int deviceType) {
@@ -60,8 +60,8 @@ public class DeviceId {
 		this.deviceModel = (byte) deviceModel;
 	}
 
-	public void setDeviceNumber(BigInteger deviceNumber) {
-		this.deviceNumber = deviceNumber.longValue();
+	public void setDeviceNumber(String deviceNumber) {
+		this.deviceNumber = deviceNumber;
 	}
 	// public static void main(String[] args) {
 	// System.out.println(new DeviceId().equals(1));

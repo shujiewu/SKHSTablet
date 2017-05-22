@@ -17,5 +17,6 @@ public interface ISingleMonPresenter {
         void sendPatientDetailRequest(String ID);
         void fetchExercisePlan();
         void registerFetchResponse();
+        void sendControlStart(int patientID,String deviceID);
     }
 }

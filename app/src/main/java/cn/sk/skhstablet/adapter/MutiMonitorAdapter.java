@@ -115,7 +115,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
             viewHolder.dev.setText(patient.getDev());
             viewHolder.percent.setText(patient.getPercent());
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
-            viewHolder. tvDevNumber.setText(String.valueOf(patient.getDeviceNumber()));
+            viewHolder. tvDevNumber.setText(patient.getDeviceNumber());
 
 
             recyclerPhyParaView.setLayoutManager(new GridLayoutManager(context,2));

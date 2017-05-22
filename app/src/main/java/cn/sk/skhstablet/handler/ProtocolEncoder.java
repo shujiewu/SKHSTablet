@@ -21,6 +21,7 @@ import cn.sk.skhstablet.protocol.up.MonitorDevFormRequest;
 import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.protocol.up.PatientListRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
+import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
 import cn.sk.skhstablet.protocol.up.SportDevFormRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -97,6 +98,10 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
             }
 			case CommandTypeConstant.MUTI_MONITOR_REQUEST: {
 				encodeMutiMonitorRequest((MutiMonitorRequest)request, out);
+				break;
+			}
+			case CommandTypeConstant.SPORT_DEV_CONTROL_REQUEST:{
+				encodeSportDevControlRequest((SportDevControlRequest)request, out);
 				break;
 			}
 		}
@@ -176,11 +181,11 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		out.writeIntLE((int) response.getDataPacketNumber());
 	}
 
-	private void encodeDeviceId(DeviceId deviceId, ByteBuf out) {
+	/*private void encodeDeviceId(DeviceId deviceId, ByteBuf out) {
 		out.writeByte(deviceId.deviceType);
 		out.writeByte(deviceId.deviceModel);
-		out.writeLongLE(deviceId.deviceNumber);
-	}
+		out.write(deviceId.deviceNumber);
+	}*/
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -256,5 +261,28 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		System.out.println("sport"+request.getUserID());
 		//out.writeIntLE(request.getUserID());
 	}
+	private void encodeSportDevControlRequest(SportDevControlRequest request,  ByteBuf out) throws UnsupportedEncodingException {
+		//byte [] deviceID=new;
+		byte [] deviceID=new byte[8];
+		for(int i=0;i<8;i++)
+		{
+			deviceID[i]=Byte.parseByte(request.getDeviceID().substring(i*2,i*2+2));
+		}
 
+		/*byte[] bytes=request.getDeviceID().getBytes("US-ASCII");
+		System.out.println(bytes.length);
+		for(int i=bytes.length-1;i>=0;i--){
+			bytes[i]-=(byte)'0';
+		}
+		for(int i=0;i<bytes.length-1;i++){
+			System.out.print(bytes[i]);
+		}*/
+		out.writeBytes(deviceID);
+		out.writeByte(request.getParameterCode());
+		out.writeByte(request.getParaType());
+		//System.out.println(bytes);
+
+		if(request.getParameterCode()!=CommandTypeConstant.SPORT_DEV_START_STOP)
+			out.writeByte(request.getParaControlValue());
+	}
 }

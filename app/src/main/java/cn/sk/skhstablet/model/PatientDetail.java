@@ -95,7 +95,7 @@ public class PatientDetail {
     private String hospitalNumber;
     private int patientID;
     private byte devType;
-    private long deviceNumber;
+    private String deviceNumber;
     public void setPatientID(int patientID) {
         this.patientID = patientID;
     }
@@ -105,13 +105,13 @@ public class PatientDetail {
     public void setDevType(byte devType) {
         this.devType = devType;
     }
-    public void setDeviceNumber(long deviceNumber) {
+    public void setDeviceNumber(String deviceNumber) {
         this.deviceNumber = deviceNumber;
     }
     public void setHospitalNumber(String hospitalNumber) {
         this.hospitalNumber = hospitalNumber;
     }
-    public long getDeviceNumber() {
+    public String getDeviceNumber() {
         return deviceNumber;
     }
     public String getHospitalNumber() {

@@ -79,7 +79,7 @@ public class LoginActivity extends BaseActivity {
             }
         });
     }
-    public void rxNettyServerTest() {
+     /*public void rxNettyServerTest() {
         TcpServer<String,AbstractProtocol> server;
         server = TcpServer.newServer(60000)
 
@@ -115,7 +115,7 @@ public class LoginActivity extends BaseActivity {
                 });
         server.awaitShutdown();
     }
-    public static class MyEncoder extends MessageToByteEncoder<AbstractProtocol> {
+   public static class MyEncoder extends MessageToByteEncoder<AbstractProtocol> {
 
         @Override
         protected void encode(ChannelHandlerContext ctx, AbstractProtocol request, ByteBuf out) throws Exception {
@@ -201,7 +201,7 @@ public class LoginActivity extends BaseActivity {
 
         Log.e("10.40","3");
         return request;
-    }
+    }*/
 
     @Override
     protected void initInject() {

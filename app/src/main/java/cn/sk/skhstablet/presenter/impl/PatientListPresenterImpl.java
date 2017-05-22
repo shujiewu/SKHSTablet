@@ -30,7 +30,7 @@ import rx.functions.Action1;
 
 public class PatientListPresenterImpl extends BasePresenter<IPatientListPresenter.View> implements IPatientListPresenter.Presenter {
 
-    private HashMap<Integer,Integer> hasPatient=new HashMap<>();
+    public HashMap<Integer,Integer> hasPatient=new HashMap<>();
     public List<Patient> mDatas=new ArrayList<>();
     private int position=0;
     @Override
@@ -126,6 +126,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                                 {
                                     mDatas.add(patient);
                                     hasPatient.put(patientID,position++);
+                                    System.out.println(patient.getPatientID());
                                 }
                             }
                             mView.refreshView(mDatas);

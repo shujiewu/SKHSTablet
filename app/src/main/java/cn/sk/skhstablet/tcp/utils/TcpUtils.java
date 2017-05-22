@@ -307,7 +307,7 @@ public class TcpUtils {
                 switch (data.getCommand())
                 {
                     case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_REQUEST: {
-                        dataType=(byte)((ExercisePhysiologicalDataResponse)data).getDeviceId().getDeviceType();
+                        //dataType=(byte)((ExercisePhysiologicalDataResponse)data).getDeviceId().getDeviceType();
                         break;
                     }
                     case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST: {
@@ -353,6 +353,22 @@ public class TcpUtils {
 
                     case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:
                     case CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE:
+                        state=((PatientListResponse)data).getState();
+                        AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
+                        int size=AppConstants.PATIENT_LIST_DATA.size();
+                        //if(size>1)//新数据
+                        //{
+                            for(int i=0;i<size;i++)
+                            {
+                                if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
+                                {
+                                    PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
+                                    PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
+                                }
+                            }
+                        //}
+                        RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Byte(state));//通知数据改变
+                        break;
                     case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:  //完成注册
                         userID=((PatientListResponse)data).getUserID();
                         devType=((PatientListResponse)data).getDeviceType();
@@ -363,10 +379,10 @@ public class TcpUtils {
                         if(state==CommandTypeConstant.PATIENT_LIST_SUCCESS)
                         {
                             AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
-                            int size=AppConstants.PATIENT_LIST_DATA.size();
-                            if(size>1)//新数据
-                            {
-                                for(int i=0;i<size;i++)
+                            int number=AppConstants.PATIENT_LIST_DATA.size();
+                            //if(size>1)//新数据
+                            //{
+                                for(int i=0;i<number;i++)
                                 {
                                     if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
                                     {
@@ -374,7 +390,7 @@ public class TcpUtils {
                                         PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
                                     }
                                 }
-                            }
+                            //}
                         }
                         RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Byte(state));//通知数据改变
                         break;

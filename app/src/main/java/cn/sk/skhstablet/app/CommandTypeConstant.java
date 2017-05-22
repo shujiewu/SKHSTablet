@@ -69,15 +69,15 @@ public class CommandTypeConstant {
 
 	public static final byte LOGIN_REQUEST=(byte)0x04;
 	public static final byte LOGOUT_REQUEST=(byte)0x07;
-	public static final byte CHANGE_KEY_REQUEST=(byte)0xB0;
+	public static final byte CHANGE_KEY_REQUEST=(byte)0x0B;
 
 	//public static final byte DEV_NAME_REQUEST=(byte)0xD9;
-	public static final byte MONITOR_DEV_FORM_REQUEST=(byte)0xA0;
+	public static final byte MONITOR_DEV_FORM_REQUEST=(byte)0x0A;
 	public static final byte SPORT_DEV_FORM_REQUEST=(byte)0x09;
 
 	public static final byte LOGIN_ACK_RESPONSE=(byte)0x40;
 	public static final byte LOGOUT_ACK_RESPONSE=(byte)0x70;
-	public static final byte CHANGE_KEY_ACK_RESPONSE=(byte)0x0B;
+	public static final byte CHANGE_KEY_ACK_RESPONSE=(byte)0xB0;
 
 	public static final byte PATIENT_LIST_DATA_RESPONSE=(byte)0x10;
 	public static final byte PATIENT_LIST_UPDATE_RESPONSE=(byte)0x08;
@@ -86,7 +86,7 @@ public class CommandTypeConstant {
 	public static final byte MUTI_MONITOR_RESPONSE=(byte)0x20;
 	public static final byte SINGLE_MONITOR_RESPONSE=(byte)0x30;
 
-	public static final byte MONITOR_DEV_FORM_RESPONSE=(byte)0x0A;
+	public static final byte MONITOR_DEV_FORM_RESPONSE=(byte)0xA0;
 	public static final byte SPORT_DEV_FORM_RESPONSE=(byte)0x90;
 
 	public static final byte DEV_NAEM_RESPONSE=(byte)0xE9;
@@ -94,4 +94,9 @@ public class CommandTypeConstant {
 
 	public static final byte SPORT_DEV_PARA_CERTAIN=0x01;
 	public static final byte SPORT_DEV_PARA_NOT_CERTAIN=0x00;
+
+	public static final byte SPORT_DEV_CONTROL_REQUEST=(byte) 0x44;
+	public static final byte SPORT_DEV_CONTROL_RESPONSE=(byte) 0xC4;
+	public static final byte SPORT_DEV_START_STOP=(byte)0x00;
+	//public static final byte SPORT_DEV_STOP=(byte)0x00;
 }

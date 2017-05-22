@@ -13,6 +13,7 @@ import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
+import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
@@ -71,6 +72,23 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                 });
         ((LifeSubscription)mView).bindSubscription(singlePageSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscription);
+    }
+
+    @Override
+    public void sendControlStart(int patientID, String deviceID) {
+        SportDevControlRequest sportDevControlRequest=new SportDevControlRequest(CommandTypeConstant.SPORT_DEV_CONTROL_REQUEST);
+        sportDevControlRequest.setUserID(AppConstants.USER_ID);
+        sportDevControlRequest.setDeviceType(AppConstants.DEV_TYPE);
+        sportDevControlRequest.setRequestID((byte) 0x00);
+        sportDevControlRequest.setDeviceID(deviceID);
+        sportDevControlRequest.setParameterCode(CommandTypeConstant.SPORT_DEV_START_STOP);
+        sportDevControlRequest.setParaType((byte)0x03);
+        invoke(TcpUtils.send(sportDevControlRequest), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send success!");
+            }
+        });
     }
 
     public void sendRequest(String ID)

@@ -75,7 +75,7 @@ public class Patient implements Comparable<Patient>, Serializable{
     private String hospitalNumber;
     private int patientID;
     private byte devType;
-    private long deviceNumber;
+    private String deviceNumber;
     private byte sportState;
     private byte connectState;
     private byte monConnectState;
@@ -110,7 +110,7 @@ public class Patient implements Comparable<Patient>, Serializable{
         return sportState;
     }
 
-    public long getDeviceNumber() {
+    public String getDeviceNumber() {
         return deviceNumber;
     }
 
@@ -126,7 +126,7 @@ public class Patient implements Comparable<Patient>, Serializable{
         this.connectState = connectState;
     }
 
-    public void setDeviceNumber(long deviceNumber) {
+    public void setDeviceNumber(String deviceNumber) {
         this.deviceNumber = deviceNumber;
     }
 

@@ -42,6 +42,7 @@ public class AppConstants {
     public static final String PATIENT_SELECT_STATUS_FALSE="未选择";
     public static final String PATIENT_SELECT_STATUS_TRUE="已选择";
     public static final String PATIENT_SELECT_STATUS_MONITOR="正在监控";
+    //public static final String PATIENT_SELECT_STATUS_SINGLE_MONITOR="单人监控";
 
     public static int USER_ID=0;
     public static final byte DEV_TYPE=0x01;
