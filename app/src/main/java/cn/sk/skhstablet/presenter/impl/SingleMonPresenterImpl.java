@@ -12,6 +12,7 @@ import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
+import cn.sk.skhstablet.protocol.ControlState;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
 import cn.sk.skhstablet.rx.RxBus;
@@ -20,6 +21,8 @@ import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import rx.Subscription;
 import rx.functions.Action1;
+
+import static cn.sk.skhstablet.app.AppConstants.CONTROL_REQ_ID;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -70,19 +73,28 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                         }
                     }
                 });
+
+        Subscription controlSubscription = RxBus.getDefault().toObservable(AppConstants.CONTORL_REQ_STATE,ControlState.class)
+                .subscribe(new Action1<ControlState>() {
+                    @Override
+                    public void call(ControlState b) {
+                        mView.setControlState(b.getResultState(),b.getControlState());
+                    }
+                });
         ((LifeSubscription)mView).bindSubscription(singlePageSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscription);
+        ((LifeSubscription)mView).bindSubscription(controlSubscription);
     }
 
     @Override
-    public void sendControlStart(int patientID, String deviceID) {
+    public void sendControlStartStop(int patientID, String deviceID,byte type) {
         SportDevControlRequest sportDevControlRequest=new SportDevControlRequest(CommandTypeConstant.SPORT_DEV_CONTROL_REQUEST);
         sportDevControlRequest.setUserID(AppConstants.USER_ID);
         sportDevControlRequest.setDeviceType(AppConstants.DEV_TYPE);
-        sportDevControlRequest.setRequestID((byte) 0x00);
+        sportDevControlRequest.setRequestID(CONTROL_REQ_ID);
         sportDevControlRequest.setDeviceID(deviceID);
         sportDevControlRequest.setParameterCode(CommandTypeConstant.SPORT_DEV_START_STOP);
-        sportDevControlRequest.setParaType((byte)0x03);
+        sportDevControlRequest.setParaType(type);
         invoke(TcpUtils.send(sportDevControlRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {

@@ -12,11 +12,12 @@ public interface ISingleMonPresenter {
     interface View extends BaseView<PatientDetail>{
         void refreshExercisePlan(List<String> armTypes,List<List<String>> arms);
         void setPageState(int state);
+        void setControlState(byte resultState,byte controlState);
     }
     interface Presenter{
         void sendPatientDetailRequest(String ID);
         void fetchExercisePlan();
         void registerFetchResponse();
-        void sendControlStart(int patientID,String deviceID);
+        void sendControlStartStop(int patientID,String deviceID,byte type);
     }
 }

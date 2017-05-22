@@ -29,6 +29,7 @@ public class AppConstants {
     public static  final int MUTI_DATA=2000;
     public static  final int MUTI_REQ_STATE=2001;
     public static  final int SINGLE_REQ_STATE=3001;
+    public static  final int CONTORL_REQ_STATE=3002;
     public static  final int SINGLE_DATA=3000;
     public static  final int PATIENT_LIST_REQ_STATE=6001;
     public static  final int PATIENT_LIST_DATA_STATE=6002;
@@ -54,6 +55,7 @@ public class AppConstants {
     public static byte LOGOUT_REQ_ID=0;
     public static byte SPORT_FORM_REQ_ID=0;
     public static byte PHY_FORM_REQ_ID=0;
+    public static byte CONTROL_REQ_ID=0;
 
     public static HashMap<Byte,String> DEV_NAME=new HashMap<>();
     public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM=new HashMap<>();

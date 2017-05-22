@@ -326,9 +326,9 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     //if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)///shanchu
                     //   singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
                     singleMonitorID=newSingleMonitorID;
+                    singleMonitorFragment.setPatient(patientListAdapter.mDatas.get(mPresenter.hasPatient.get(Integer.parseInt(singleMonitorID))));
                     singleMonitorFragment.loadData(singleMonitorID);
                     singleMonitorFragment.getChangeDevPara().clear();
-                    singleMonitorFragment.setPatient(patientListAdapter.mDatas.get(mPresenter.hasPatient.get(Integer.parseInt(singleMonitorID))));
                     isNewSingle=true;
                 }
                 else
@@ -510,6 +510,10 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     {
         patientListAdapter.mDatas.set(position,mData);
         patientListAdapter.notifyItemChanged(position);
+        if(mData.getPatientID()==Integer.parseInt(singleMonitorID))
+        {
+             singleMonitorFragment.refreshPatient(mData.getDev(),mData.getDeviceNumber());
+        }
     }
 
 

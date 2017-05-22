@@ -98,5 +98,26 @@ public class CommandTypeConstant {
 	public static final byte SPORT_DEV_CONTROL_REQUEST=(byte) 0x44;
 	public static final byte SPORT_DEV_CONTROL_RESPONSE=(byte) 0xC4;
 	public static final byte SPORT_DEV_START_STOP=(byte)0x00;
+	public static final byte SPORT_DEV_CONTORL_ADD=(byte)0x00;
+	public static final byte SPORT_DEV_CONTORL_CUT=(byte)0x01;
+	public static final byte SPORT_DEV_CONTORL_TO=(byte)0x02;
+	public static final byte SPORT_DEV_CONTORL_STATR=(byte)0x03;
+	public static final byte SPORT_DEV_CONTORL_STOP=(byte)0x04;
 	//public static final byte SPORT_DEV_STOP=(byte)0x00;
+
+	public static final byte SPORT_DEV_CONTORL_SUCC=(byte)0x00;
+	public static final byte SPORT_DEV_CONTORL_FAIL=(byte)0xFF;
+	public static final byte SPORT_DEV_CONTORL_NOT_LOGIN=(byte)0xFE;
+	public static final byte SPORT_DEV_CONTORL_NONE_DEV=(byte)0xFD;
+	public static final byte SPORT_DEV_CONTORL_DEV_OFFLINE=(byte)0xFC;
+	public static final byte SPORT_DEV_CONTORL_IN_CONTORL=(byte)0xFB;
+	public static final byte SPORT_DEV_CONTORL_DEV_FREE=(byte)0xFA;
+	public static final byte SPORT_DEV_CONTORL_UNREACH=(byte)0xF9;
+
+	public static final byte SPORT_DEV_CONTORL_GREATER_MAX=(byte)0x00;
+	public static final byte SPORT_DEV_CONTORL_LESS_MIN=(byte)0x01;
+	public static final byte SPORT_DEV_CONTORL_FREE=(byte)0x02;
+	public static final byte SPORT_DEV_CONTORL_READY=(byte)0x03;
+	public static final byte SPORT_DEV_CONTORL_RUN=(byte)0x04;
+
 }

@@ -19,6 +19,7 @@ import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BaseView;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
+import cn.sk.skhstablet.protocol.ControlState;
 import cn.sk.skhstablet.protocol.DeviceId;
 import cn.sk.skhstablet.protocol.MonitorDevForm;
 import cn.sk.skhstablet.protocol.down.DevNameResponse;
@@ -28,6 +29,7 @@ import cn.sk.skhstablet.protocol.down.LoginAckResponse;
 import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
 import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
+import cn.sk.skhstablet.protocol.down.SportDevControlResponse;
 import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
@@ -49,6 +51,7 @@ import rx.functions.Action1;
 import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 
+import static cn.sk.skhstablet.app.AppConstants.CONTROL_REQ_ID;
 import static cn.sk.skhstablet.app.AppConstants.DEV_NAME;
 import static cn.sk.skhstablet.app.AppConstants.MON_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
@@ -393,6 +396,7 @@ public class TcpUtils {
                             //}
                         }
                         RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Byte(state));//通知数据改变
+                        AppConstants.PATIENT_LIST_REQ_ID++;
                         break;
                         /*userID=((PatientListResponse)data).getUserID();
                         devType=((PatientListResponse)data).getDeviceType();
@@ -413,10 +417,10 @@ public class TcpUtils {
                         if(state==SUCCESS)
                         {
                             RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Byte(state));
-                            AppConstants.SINGLE_REQ_ID++;
                         }
                         else
                             RxBus.getDefault().post(AppConstants.SINGLE_REQ_STATE,new Byte(state));
+                        AppConstants.SINGLE_REQ_ID++;
                         break;
                     case CommandTypeConstant.MUTI_MONITOR_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
@@ -433,10 +437,10 @@ public class TcpUtils {
                         if(state==SUCCESS)
                         {
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
-                            AppConstants.MUTI_REQ_ID++;
                         }
                         else
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
+                        AppConstants.MUTI_REQ_ID++;
                         break;
                     /*case CommandTypeConstant.PATIENT_LIST_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
@@ -475,12 +479,12 @@ public class TcpUtils {
 
                             String userName=((LoginAckResponse)data).getUserName();
                             System.out.println(userName);
-                            AppConstants.LOGIN_REQ_ID++;
                             AppConstants.USER_ID=((LoginAckResponse)data).getUserID();
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
                         }
                         else
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(false));
+                        AppConstants.LOGIN_REQ_ID++;
                         break;
                     case CommandTypeConstant.LOGOUT_ACK_RESPONSE:
                         userID=((LoginAckResponse)data).getUserID();
@@ -493,6 +497,7 @@ public class TcpUtils {
                             RxBus.getDefault().post(AppConstants.LOGOUT_STATE,new Boolean(true));
                         else
                             RxBus.getDefault().post(AppConstants.LOGOUT_STATE,new Boolean(false));
+                        AppConstants.LOGOUT_REQ_ID++;
                         break;
 
                     //格式名称对照表响应
@@ -507,10 +512,11 @@ public class TcpUtils {
                         reqID=((SportDevFormResponse)data).getRequestID();
                         devType=((SportDevFormResponse)data).getDeviceType();
                         state=((SportDevFormResponse)data).getState();
-                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PHY_FORM_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.SPORT_FORM_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
                         if(state==SUCCESS)
                             AppConstants.SPORT_DEV_FORM=((SportDevFormResponse)data).getDevData();
+                        AppConstants.SPORT_FORM_REQ_ID++;
                         break;
                     case CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE:
                         userID=((MonitorDevFormResponse)data).getUserID();
@@ -521,7 +527,21 @@ public class TcpUtils {
                             return;
                         if(state==SUCCESS)
                             MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
+                        AppConstants.PHY_FORM_REQ_ID++;
                         break;
+                    case CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE:{
+                        userID=((SportDevControlResponse)data).getUserID();
+                        reqID=((SportDevControlResponse)data).getRequestID();
+                        devType=((SportDevControlResponse)data).getDeviceType();
+
+                        byte resultState=((SportDevControlResponse)data).getState();
+                        byte controlState=((SportDevControlResponse)data).getControlResultCode();
+                        if(userID!=AppConstants.USER_ID||devType!=AppConstants.DEV_TYPE||reqID!=AppConstants.CONTROL_REQ_ID)
+                            return;
+                        CONTROL_REQ_ID++;
+                        RxBus.getDefault().post(AppConstants.CONTORL_REQ_STATE,new ControlState(resultState,controlState));
+                        break;
+                    }
                 }
 
                 /*switch (dataType)

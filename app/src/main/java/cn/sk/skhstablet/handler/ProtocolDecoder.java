@@ -128,7 +128,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			}
 
 			case CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE:{
-				request=decodeSportDecControlResponse(reqBuf,CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE);
+				request=decodeSportDevControlResponse(reqBuf,CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE);
 				break;
 			}
 		}
@@ -680,7 +680,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		return response;
 	}
 
-	private AbstractProtocol  decodeSportDecControlResponse(ByteBuf resBuf,byte commandType)
+	private AbstractProtocol  decodeSportDevControlResponse(ByteBuf resBuf,byte commandType)
 	{
 		SportDevControlResponse response=new SportDevControlResponse(commandType);
 		response.setDeviceType(resBuf.readByte());
@@ -688,7 +688,12 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		response.setRequestID(resBuf.readByte());
 		response.setState(resBuf.readByte());
 
-
+		byte [] deviceNumber=new byte[8];
+		resBuf.readBytes(deviceNumber);
+		response.setDeviceID(ByteBufUtil.hexDump(deviceNumber));
+		response.setParameterCode(resBuf.readByte());
+		response.setParaType(resBuf.readByte());
+		response.setControlResultCode(resBuf.readByte());
 		return  response;
 	}
 	public static String toUtf8(byte str[]) {

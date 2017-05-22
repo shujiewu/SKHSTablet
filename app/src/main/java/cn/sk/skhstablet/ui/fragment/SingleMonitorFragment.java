@@ -22,6 +22,7 @@ import javax.inject.Inject;
 
 import cn.sk.skhstablet.app.AppConstants;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.component.PaperButton;
 import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.SingleMonitorModule;
@@ -240,9 +241,48 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         {
             this.setState(AppConstants.STATE_SUCCESS);
             mPresenter.fetchExercisePlan();
+
+
+
+            //Patient patient=((MainActivity) getActivity()).patientListAdapter.mDatas.get(singleMonitorID);
+            patientDetail.setPatientID(patient.getPatientID());
+            patientDetail.setDeviceNumber(patient.getDeviceNumber());
+            patientDetail.setDev(patient.getDev());
+            patientDetail.setHospitalNumber(patient.getHospitalNumber());
+            patientDetail.setName(patient.getName());
+            //patientDetail.set
+            //patientDetail.setPercent(patient.get);
+            // patientDetail.set
+            name.setText(patientDetail.getName());
+            dev.setText(patientDetail.getDev());
+            //percent.setText(patientDetail.getPercent());
+            tvDevNumber.setText(patientDetail.getDeviceNumber());
+            tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
         }
     }
 
+    @Override
+    public void setControlState(byte resultState,byte controlState) {
+        System.out.println("参数返回成功");
+        if(resultState== CommandTypeConstant.SPORT_DEV_CONTORL_SUCC)
+        {
+            System.out.println("设备控制成功");
+        }
+        if(controlState==CommandTypeConstant. SPORT_DEV_CONTORL_LESS_MIN)
+        {
+            System.out.println("低于最小值");
+        }
+    }
+
+    public void refreshPatient(String devName,String devNumber)
+    {
+        patientDetail.setDev(devName);
+        patientDetail.setDeviceNumber(devNumber);
+        //patientDetail.setPercent(percentValue);
+        dev.setText(devName);
+        tvDevNumber.setText(devNumber);
+        //percent.setText(percentValue);
+    }
     /*public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_DATA,PatientDetail.class)
@@ -267,20 +307,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     public void setPatient(Patient patient) {
         this.patient = patient;
-        /*patientDetail=new PatientDetail();
-        patientDetail.setPatientID(patient.getPatientID());
-        patientDetail.setDeviceNumber(patient.getDeviceNumber());
-        patientDetail.setDev(patient.getDev());
-        patientDetail.setHospitalNumber(patient.getHospitalNumber());
-        patientDetail.setName(patient.getName());
-        //patientDetail.set
-        //patientDetail.setPercent(patient.get);
-        // patientDetail.set
-        name.setText(patientDetail.getName());
-        dev.setText(patientDetail.getDev());
-        //percent.setText(patientDetail.getPercent());
-        tvDevNumber.setText(patientDetail.getDeviceNumber());
-        tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));*/
     }
 
     @Override
@@ -332,26 +358,21 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
         patientDetail=new PatientDetail();
 
-        //Patient patient=((MainActivity) getActivity()).patientListAdapter.mDatas.get(singleMonitorID);
-        patientDetail.setPatientID(patient.getPatientID());
-        patientDetail.setDeviceNumber(patient.getDeviceNumber());
-        patientDetail.setDev(patient.getDev());
-        patientDetail.setHospitalNumber(patient.getHospitalNumber());
-        patientDetail.setName(patient.getName());
-        //patientDetail.set
-        //patientDetail.setPercent(patient.get);
-       // patientDetail.set
-        name.setText(patientDetail.getName());
-        dev.setText(patientDetail.getDev());
-        //percent.setText(patientDetail.getPercent());
-        tvDevNumber.setText(patientDetail.getDeviceNumber());
-        tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
-
         btnStart = (PaperButton) view.findViewById(R.id.bt_start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPresenter.sendControlStart(patientDetail.getPatientID(),patientDetail.getDeviceNumber());
+                if(patientDetail!=null)
+                    mPresenter.sendControlStartStop(patientDetail.getPatientID(),patientDetail.getDeviceNumber(),CommandTypeConstant.SPORT_DEV_CONTORL_STATR);
+            }
+        });
+
+        btnStop = (PaperButton) view.findViewById(R.id.bt_stop);
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(patientDetail!=null)
+                    mPresenter.sendControlStartStop(patientDetail.getPatientID(),patientDetail.getDeviceNumber(),CommandTypeConstant.SPORT_DEV_CONTORL_STOP);
             }
         });
     }
