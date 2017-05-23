@@ -26,6 +26,14 @@
             />
 
         <TextView
+            android:id="@+id/hospitalNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            />
+        <TextView
             android:id="@+id/gender"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -33,7 +41,6 @@
             android:layout_marginLeft="@dimen/margin"
             android:textColor="@android:color/darker_gray"
             />
-
     </LinearLayout>
     <LinearLayout
         android:layout_width="0dp"
@@ -43,14 +50,7 @@
         android:layout_weight="0.55"
         >
 
-        <TextView
-            android:id="@+id/hospitalNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin"
-            android:textSize="12sp"
-            android:textColor="@android:color/darker_gray"
-            />
+
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -72,6 +72,27 @@
         android:textColor="@android:color/holo_green_light"
         />
 </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="监护设备"
+                android:layout_marginLeft="@dimen/margin"
+                android:textColor="@android:color/white"
+                />
+            <TextView
+                android:id="@+id/tvMonState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:layout_marginLeft="@dimen/margin"
+                android:textColor="@android:color/holo_green_light"
+                />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

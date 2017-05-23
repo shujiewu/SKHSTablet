@@ -60,7 +60,7 @@ public class AppConstants {
     public static HashMap<Byte,String> DEV_NAME=new HashMap<>();
     public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM=new HashMap<>();
     public static HashMap<Byte,List<MonitorDevForm>> MON_DEV_FORM=new HashMap<>();
-
+    //public static HashMap<String,>
 
     public static List<Patient> PATIENT_LIST_DATA=new ArrayList<>();
     public static HashMap<Integer,String> PATIENT_LIST_NAME_FORM=new HashMap<>();

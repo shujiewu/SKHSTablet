@@ -184,6 +184,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         TextView gender;
         TextView tvSelectStatus;
         TextView tvPhyState;
+        TextView tvMonState;
         TextView tvSportState;
         TextView status;
         public PatientListHolder(View view) {
@@ -193,6 +194,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             tvSelectStatus = (TextView) view.findViewById(R.id.selectState);
             tvPhyState=(TextView) view.findViewById(R.id.tvPhyState);
             tvSportState=(TextView) view.findViewById(R.id.tvSportState);
+            tvMonState=(TextView) view.findViewById(R.id.tvMonState);
             gender=(TextView) view.findViewById(R.id.gender);
             status=(TextView) view.findViewById(R.id.status);
             TextWatcher textWatcher = new TextWatcher() {
@@ -225,34 +227,60 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             viewHolder.name.setText(patient.getName());
             viewHolder.tvSelectStatus.setText(patient.getSelectStatus());
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
-            if(patient.getSportState()== CommandTypeConstant.SPORT_NOMAL)
-                viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_green));
-            else if(patient.getSportState()== CommandTypeConstant.SPORT_WARNING)
-                viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_orange));
-            else
-                viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_grey));
 
-            if(patient.getMonConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_ONLINE)
+            if(patient.getSportState()!=CommandTypeConstant.SPORT_DEV_CONNECT_OFFLINE)   //运动状态不为未打卡
             {
-                viewHolder.tvPhyState.setTextColor(context.getResources().getColor(R.color.textgreen));
-                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.patient_online));
+                if(patient.getSportState()== CommandTypeConstant.SPORT_NOMAL)
+                    viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_green));//正常运动
+                else if(patient.getSportState()== CommandTypeConstant.SPORT_WARNING)
+                    viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_orange));//预警运动
+                else
+                {
+                    viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_white));  //未运动
+                }
+                if(patient.getConnectState()== CommandTypeConstant.SPORT_CONN_ONLINE)//设备在线
+                {
+                    viewHolder.tvSportState.setTextColor(context.getResources().getColor(R.color.textgreen));
+                    viewHolder.tvSportState.setText(patient.getDev());
+                }
+                else
+                {
+                    viewHolder.tvSportState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                    viewHolder.tvSportState.setText(context.getResources().getString(R.string.patient_offline));//设备离线
+                }
             }
             else
             {
+                viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_grey));//未打卡
+                viewHolder.tvSportState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));//设备无
+                viewHolder.tvSportState.setText(context.getResources().getString(R.string.none));
+            }
+
+
+            if(patient.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_ONLINE)
+            {
+                viewHolder.tvPhyState.setTextColor(context.getResources().getColor(R.color.textgreen));
+                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.patient_online));
+                if(patient.getMonConnectState()== CommandTypeConstant.MON_DEV_CONNECT_ONLINE)
+                {
+                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(R.color.textgreen));
+                    viewHolder.tvMonState.setText(context.getResources().getString(R.string.patient_online));
+                }
+                else
+                {
+                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                    viewHolder.tvMonState.setText(context.getResources().getString(R.string.patient_offline));
+                }
+            }
+            else
+            {
+                viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
                 viewHolder.tvPhyState.setText(context.getResources().getString(R.string.patient_offline));
             }
 
-            if(patient.getConnectState()== CommandTypeConstant.SPORT_DEV_CONNECT_ONLINE)
-            {
-                viewHolder.tvSportState.setTextColor(context.getResources().getColor(R.color.textgreen));
-                viewHolder.tvSportState.setText(patient.getDev());
-            }
-            else
-            {
-                viewHolder.tvSportState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                viewHolder.tvSportState.setText(context.getResources().getString(R.string.patient_offline));
-            }
+
 
             viewHolder.gender.setText(patient.getGender());
         }

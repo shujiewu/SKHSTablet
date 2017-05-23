@@ -76,6 +76,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
            // viewHolder.sbSportParaValue.setProgress(Integer.valueOf(paraValue));
             viewHolder.qvSportParaValue.setQuantity(Integer.valueOf(paraValue));
             viewHolder.qvSportParaValue.setMaxQuantity(50);
+
             if (!paraName.equals("坡度"))
             {
                 //viewHolder.tvSportParaValue.setFocusableInTouchMode(false);

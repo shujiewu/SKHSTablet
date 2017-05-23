@@ -21,4 +21,6 @@
 
     <string name="patient_online">在线</string>
     <string name="patient_offline">离线</string>
+
+    <string name="none">无</string>
 </resources>

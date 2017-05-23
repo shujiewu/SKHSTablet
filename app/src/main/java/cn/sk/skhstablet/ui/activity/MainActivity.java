@@ -526,7 +526,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     {
         patientListAdapter.mDatas.set(position,mData);
         patientListAdapter.notifyItemChanged(position);
-        if(mData.getPatientID()==Integer.parseInt(singleMonitorID))
+        if(singleMonitorID!=null&&mData.getPatientID()==Integer.parseInt(singleMonitorID))
         {
              singleMonitorFragment.refreshPatient(mData.getDev(),mData.getDeviceNumber());
         }//更新单人监控

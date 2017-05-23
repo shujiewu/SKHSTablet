@@ -266,7 +266,7 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		byte [] deviceID=new byte[8];
 		for(int i=0;i<8;i++)
 		{
-			deviceID[i]=Byte.parseByte(request.getDeviceID().substring(i*2,i*2+2));
+			deviceID[i]=Byte.parseByte(request.getDeviceID().substring(i*2,i*2+2));//这里需要判断
 		}
 
 		/*byte[] bytes=request.getDeviceID().getBytes("US-ASCII");

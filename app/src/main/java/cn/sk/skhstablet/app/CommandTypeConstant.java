@@ -52,16 +52,21 @@ public class CommandTypeConstant {
 
 	//连接状态
 	public static final byte SPORT_DEV_CONNECT_ONLINE=(byte)0x00;  //已打卡
+
 	public static final byte PHY_DEV_CONNECT_ONLINE=(byte)0x00;     //生理仪在线
 	public static final byte PHY_DEV_CONNECT_OFFLINE=(byte)0x01;    //生理仪离线
+
+	public static final byte MON_DEV_CONNECT_ONLINE=(byte)0x00;     //监护设备在线
+	public static final byte MON_DEV_CONNECT_OFFLINE=(byte)0x01;    //监护设备离线
 
 	//运动状态
 	public static final byte SPORT_NOMAL=(byte)0x01;                  //正常运动
 	public static final byte SPORT_WARNING=(byte)0x02;				//预警运动
 	public static final byte SPORT_NONE=(byte)0x00;					//未运动
-	public static final byte SPORT_DEV_CONNECT_OFFLINE=(byte)0x03; //未打卡
-	public static final byte SPORT_CONN_ONLINE=(byte)0x00;
-	public static final byte SPORT_CONN_OFFLINE=(byte)0x01;
+	public static final byte SPORT_DEV_CONNECT_OFFLINE=(byte)0x03;  //未打卡
+
+	public static final byte SPORT_CONN_ONLINE=(byte)0x00;           //运动设备在线
+	public static final byte SPORT_CONN_OFFLINE=(byte)0x01;			//运动设备离线
 
 	public static final byte SINGLE_MONITOR_REQUEST=(byte)0x03;
 	public static final byte MUTI_MONITOR_REQUEST=(byte)0x02;
