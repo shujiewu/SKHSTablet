@@ -27,6 +27,7 @@ import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.component.LoadingPage;
 import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.MutiMonitorModule;
+import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.presenter.IMutiMonPresenter;
 import cn.sk.skhstablet.presenter.impl.MutiMonPresenterImpl;
 import cn.sk.skhstablet.rx.RxBus;
@@ -161,6 +162,14 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         mutiMonitorAdapter.notifyItemChanged(position);
     }
 
+    public void refreshDevInfo(Patient mData, int position) {
+        PatientDetail patientDetail=mutiMonitorAdapter.patientDetailList.get(position);
+        patientDetail.setDeviceNumber(mData.getDeviceNumber());
+        patientDetail.setDev(mData.getDev());
+        patientDetail.setDevType(mData.getDevType());
+        mutiMonitorAdapter.patientDetailList.set(position,patientDetail);
+        mutiMonitorAdapter.notifyItemChanged(position);
+    }
     @Override
     public void setPageState(int state) {
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)

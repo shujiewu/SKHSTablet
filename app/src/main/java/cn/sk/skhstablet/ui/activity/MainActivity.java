@@ -22,7 +22,9 @@ import com.nineoldandroids.view.ViewHelper;
 import com.tapadoo.alerter.Alerter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 
 import javax.inject.Inject;
@@ -52,6 +54,8 @@ import rx.subscriptions.CompositeSubscription;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
 import static cn.sk.skhstablet.app.AppConstants.STATE_LOADING;
+import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 
 public class MainActivity extends BorderActivity implements IPatientListPresenter.View,LifeSubscription {
     private RecyclerView mRecyclerView;
@@ -77,7 +81,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     private FragmentTransaction ft;
     private SingleMonitorFragment singleMonitorFragment;
     private MutiMonitorFragment mutiMonitorFragment;
-    private String singleMonitorID;
+
     public String newSingleMonitorID;
     public Boolean isNewSingle;
     @Override
@@ -449,9 +453,21 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 mPresenter.sendLogoutRequest();
                 break;
             case SAVE_EDIT:
+                String content="";
+                String key="";
+                String val="";
+                Map map = singleMonitorFragment.getChangeDevPara();
+                Iterator iter = map.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    key = (String)entry.getKey();
+                    val = (String)entry.getValue();
+                    content=content+key+"   "+val+"\n";
+                }
+
                 new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("提示")
-                        .setContentText("确定修改参数？")
+                        .setContentText(content)
                         .setConfirmText("确定")
                         .setCancelText("取消")
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -513,7 +529,11 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         if(mData.getPatientID()==Integer.parseInt(singleMonitorID))
         {
              singleMonitorFragment.refreshPatient(mData.getDev(),mData.getDeviceNumber());
-        }
+        }//更新单人监控
+        if(hasMutiPatient.containsKey(patientID))
+        {
+             mutiMonitorFragment.refreshDevInfo(mData,hasMutiPatient.get(patientID));
+        }//更新多人监控
     }
 
 

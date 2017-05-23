@@ -52,14 +52,14 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		out.writeIntLE(msg.getUserID());
 		out.writeByte(msg.getRequestID());
 		switch (msg.getCommand()) {
-		case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
+		/*case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
 			encodeExercisePhysiologicalDataResponse((ExercisePhysiologicalDataResponse) request, out);
 			break;
 		}
 		case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
 			encodeExerciseEquipmentDataResponse((ExerciseEquipmentDataResponse)request, out);
 			break;
-		}
+		}*/
 
 			case CommandTypeConstant.LOGIN_REQUEST: {
 				encodeLoginRequest((LoginRequest)request, out);

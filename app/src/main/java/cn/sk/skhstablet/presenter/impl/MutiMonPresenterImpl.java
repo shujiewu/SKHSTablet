@@ -24,6 +24,8 @@ import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
+import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+
 /**
  * Created by wyb on 2017/4/25.
  */
@@ -35,7 +37,7 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
     }
 
     private List<PatientDetail> mDatas=new ArrayList<>();
-    private HashMap<Integer,Integer> hasPatient=new HashMap<>();//id和位置
+
     private int position=0;
     @Override
     public void registerFetchResponse() {
@@ -44,15 +46,15 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                     @Override
                     public void call(PatientDetail s) {
                         int patientID=s.getPatientID();
-                        if(hasPatient.containsKey(patientID))
+                        if(hasMutiPatient.containsKey(patientID))
                         {
-                            mDatas.set(hasPatient.get(patientID),s);
-                            mView.refreshView(s,hasPatient.get(patientID));
+                            mDatas.set(hasMutiPatient.get(patientID),s);
+                            mView.refreshView(s,hasMutiPatient.get(patientID));
                         }
                         else
                         {
                             mDatas.add(s);
-                            hasPatient.put(patientID,position++);
+                            hasMutiPatient.put(patientID,position++);
                             mView.refreshView(mDatas);
                         }
 
@@ -77,7 +79,7 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                         {
                             mView.setPageState(AppConstants.STATE_SUCCESS);
                             mDatas.clear();
-                            hasPatient.clear();
+                            hasMutiPatient.clear();
                             position=0;
                         }
                         else if(b==CommandTypeConstant.NONE_FAIL)

@@ -24,6 +24,8 @@ import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
 import rx.Subscription;
 import rx.functions.Action1;
 
+import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+
 /**
  * Created by wyb on 2017/4/25.
  */

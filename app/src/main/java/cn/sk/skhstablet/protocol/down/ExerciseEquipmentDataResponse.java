@@ -9,7 +9,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
 public class ExerciseEquipmentDataResponse extends AbstractProtocol {
 
 	public ExerciseEquipmentDataResponse() {
-		this(CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST);
+		this(CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE);
 	}
 
 	private ExerciseEquipmentDataResponse(byte command) {

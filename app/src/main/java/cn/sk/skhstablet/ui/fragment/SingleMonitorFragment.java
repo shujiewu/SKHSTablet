@@ -187,7 +187,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     @Override
     public void refreshView(PatientDetail mData) {
 
-        if(patientDetail!=null&&patientDetail.getDev().equals(mData.getDev())&&patientDetail.getId().equals(mData.getId()))
+        if(patientDetail!=null&&patientDetail.getDevType()==mData.getDevType()&&patientDetail.getPatientID()==mData.getPatientID())
         {
             devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
             devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
@@ -197,7 +197,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             {
                  if(patientDetail.getSportDevName().get(i).equals(mData.getSportDevName().get(i))&&!patientDetail.getSportDevValue().get(i).equals(mData.getSportDevValue().get(i)))
                       devParaChangeAdapter.notifyItemChanged(i);
-            }
+            }//局部更新
         }
         else
         {
@@ -332,7 +332,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
               //Log.e("testsava","1");
               //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
               String devName = devParaChangeAdapter.sportDevName.get(position);
-              if (devValue.equals(devParaChangeAdapter.sportDevValue.get(position)) && changeDevPara.containsKey(devName))
+              if (devValue.equals(devParaChangeAdapter.sportDevValue.get(position)) && changeDevPara.containsKey(devName))//如果未改变
                   changeDevPara.remove(devName);
               else {
                   changeDevPara.put(devName, devValue);

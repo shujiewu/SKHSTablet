@@ -65,4 +65,7 @@ public class AppConstants {
     public static List<Patient> PATIENT_LIST_DATA=new ArrayList<>();
     public static HashMap<Integer,String> PATIENT_LIST_NAME_FORM=new HashMap<>();
     public static HashMap<Integer,String> PATIENT_LIST_NUMBER_FORM=new HashMap<>();
+
+    public static HashMap<Integer,Integer> hasMutiPatient=new HashMap<>();//id和位置
+    public static String singleMonitorID;
 }

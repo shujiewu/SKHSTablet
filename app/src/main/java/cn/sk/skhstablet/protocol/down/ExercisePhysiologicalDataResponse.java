@@ -11,7 +11,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
 public class ExercisePhysiologicalDataResponse extends AbstractProtocol {
 
 	public ExercisePhysiologicalDataResponse() {
-		this(CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_REQUEST);
+		this(CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE);
 	}
 
 	private ExercisePhysiologicalDataResponse(byte command) {

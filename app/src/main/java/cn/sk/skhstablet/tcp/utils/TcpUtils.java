@@ -57,6 +57,8 @@ import static cn.sk.skhstablet.app.AppConstants.MON_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
+import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 import static cn.sk.skhstablet.app.CommandTypeConstant.MUTI_MONITOR_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.model.PatientDetailList.phyValue;
@@ -309,14 +311,22 @@ public class TcpUtils {
                 int userID;
                 switch (data.getCommand())
                 {
-                    case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_REQUEST: {
+                    case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
                         //dataType=(byte)((ExercisePhysiologicalDataResponse)data).getDeviceId().getDeviceType();
                         break;
                     }
-                    case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST: {
+                    case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
                         ///dataType=(byte)((ExerciseEquipmentDataResponse)data).getDeviceId().getDeviceType();
                         ExerciseEquipmentDataResponse response=(ExerciseEquipmentDataResponse)data;
                         PatientDetail patientDetail=response.getPatientDetail();
+                        if(String.valueOf(patientDetail.getPatientID()).equals(singleMonitorID))
+                        {
+                            RxBus.getDefault().post(AppConstants.SINGLE_DATA,patientDetail);
+                        }
+                        if(hasMutiPatient.containsKey(patientDetail.getPatientID()))
+                        {
+                            RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
+                        }
                         /*patientDetail.setPatientID(response.getPatientId());
                         patientDetail.setName(PATIENT_LIST_NAME_FORM.get(response.getPatientId()));
                         patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(response.getPatientId()));
@@ -347,7 +357,6 @@ public class TcpUtils {
                                 phyDevValue.set(k,String.valueOf(paraValue)+monitorDevForms.get(k).getUnit());
                             }
                         }*/
-                        RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
                         break;
                     }
                     case CommandTypeConstant.DOCTOR_ADVICE_RESPONSE:
