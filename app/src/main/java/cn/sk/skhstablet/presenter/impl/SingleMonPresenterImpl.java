@@ -1,8 +1,11 @@
 package cn.sk.skhstablet.presenter.impl;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Observable;
 
 import javax.inject.Inject;
 
@@ -17,12 +20,17 @@ import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
+import cn.sk.skhstablet.tcp.utils.Callback;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import cn.sk.skhstablet.ui.base.BaseFragment;
+import rx.Observer;
 import rx.Subscription;
 import rx.functions.Action1;
 
 import static cn.sk.skhstablet.app.AppConstants.CONTROL_REQ_ID;
+import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.reconnect;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -111,10 +119,22 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         singleMonitorRequest.setRequestID(AppConstants.SINGLE_REQ_ID);
         singleMonitorRequest.setPatientNumber((short) 1);
         singleMonitorRequest.setPatientID(Integer.parseInt(ID));
-        invoke(TcpUtils.send(singleMonitorRequest), new Action1<Void>() {
+        lastSinglePatientID=ID;
+        invoke(TcpUtils.send(singleMonitorRequest), new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onError(Throwable e) {
+                //subscriber.onError(e);
+                //reconnect();
+               // subscriber.unsubscribe();
+                Log.e("sendsingle","error");
+                /*invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
+                    @Override
+                    public void onResponse(Boolean data) {
+                        fetchData();
+                        RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(true));
+                    }
+                });*/
+                reconnect();
             }
         });
         //mView.setPageState(AppConstants.STATE_LOADING);

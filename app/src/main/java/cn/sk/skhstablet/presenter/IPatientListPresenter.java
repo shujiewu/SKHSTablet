@@ -14,6 +14,7 @@ public interface IPatientListPresenter {
         void setMutiPageState(int state);
         void setSinglePageState(int state);
         void logoutSuccess(boolean b);
+        void loadSinglePatient(String singleID);
     }
     interface Presenter{
         void sentPatientListRequest();

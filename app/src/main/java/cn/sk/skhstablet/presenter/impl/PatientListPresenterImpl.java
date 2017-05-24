@@ -1,5 +1,7 @@
 package cn.sk.skhstablet.presenter.impl;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +26,11 @@ import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
 import rx.Subscription;
 import rx.functions.Action1;
 
+import static cn.sk.skhstablet.app.AppConstants.LOGIN_KEY;
+import static cn.sk.skhstablet.app.AppConstants.LOGIN_NAME;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
+import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -62,6 +68,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         mutiMonitorRequest.setRequestID(AppConstants.MUTI_REQ_ID);
         mutiMonitorRequest.setPatientNumber((short) patientID.size());
         mutiMonitorRequest.setPatientID(patientID);
+        lastMutiPatientID=patientID;
         invoke(TcpUtils.send(mutiMonitorRequest), new Action1<Void>() {
             @Override
             public void call(Void aVoid) {
@@ -173,8 +180,55 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                 });
         ((LifeSubscription)mView).bindSubscription(logoutSubscription);
 
-    }
 
+        Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        if(s==true)
+                        {
+                            sendVerify();
+                        }
+                        else
+                        {
+                            System.out.println("网络有问题，请过段时间再试");
+                        }
+                            //mView.reSendRequest();
+                    }
+                });
+
+        Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean s) {
+                        Log.e("login","succees2");
+                        if(s==true)
+                        {
+                            sentPatientListRequest();
+                            if(lastMutiPatientID!=null)
+                                sendMutiMonitorRequest(lastMutiPatientID);
+                            if(lastSinglePatientID!=null)
+                                mView.loadSinglePatient(lastSinglePatientID);
+                        }
+                    }
+                });
+
+    }
+    public void sendVerify()
+    {
+        LoginRequest request=new LoginRequest(CommandTypeConstant.LOGIN_REQUEST);
+        request.setUserID(AppConstants.USER_ID);
+        request.setDeviceType(AppConstants.DEV_TYPE);
+        request.setRequestID(AppConstants.LOGIN_REQ_ID);
+        request.setLoginName(LOGIN_NAME);
+        request.setLoginKey(LOGIN_KEY);
+        invoke(TcpUtils.send(request), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send success!");
+            }
+        });
+    }
     @Inject
     public PatientListPresenterImpl()
     {

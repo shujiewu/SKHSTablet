@@ -38,6 +38,9 @@ import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
+import static cn.sk.skhstablet.app.AppConstants.LOGIN_KEY;
+import static cn.sk.skhstablet.app.AppConstants.LOGIN_NAME;
+
 //import cn.cqu.sk.HomeActivity;
 //import cn.cqu.sk.UserNameActivity;
 
@@ -231,6 +234,8 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     public void refreshView(Boolean mData) {
         if(mData==true)
         {
+            LOGIN_NAME=UserID;
+            LOGIN_KEY=Key;
             mPresenter.sendFormatRequest();
             login_progress.setVisibility(View.GONE);
             Intent intent = new Intent(getActivity(), MainActivity.class);

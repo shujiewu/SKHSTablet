@@ -7,10 +7,13 @@ import com.blankj.utilcode.utils.NetworkUtils;
 import com.blankj.utilcode.utils.ToastUtils;
 
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.Stateful;
 import cn.sk.skhstablet.presenter.BaseView;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import rx.Subscriber;
+
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.mConnection;
 
 /**
  * Created by quantan.liu on 2017/3/21.
@@ -53,16 +56,24 @@ public class Callback<T> extends Subscriber<T> {
     public void onfail() {
 
         if (!NetworkUtils.isConnected()) {
-            ToastUtils.showShortToast("你连接的网络有问题，请检查连接");
-            if (target != null) {
+            ToastUtils.showShortToast("你的网络有问题，请检查连接");
+            //if (target != null) {
                 //target.setState(AppConstants.STATE_ERROR);
+            //}
+            System.out.println("手机网络未连接");
+            if (mConnection != null)
+            {
+                mConnection.closeNow();
+                Log.e("error", "close");
             }
+            RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
             return;
         }
         else
         {
             TcpUtils.reconnect();
         }
+        //TcpUtils.reconnect();
        // }
         /*ToastUtils.showShortToast("程序员哥哥偷懒去了，快去举报他");
         if (target != null) {

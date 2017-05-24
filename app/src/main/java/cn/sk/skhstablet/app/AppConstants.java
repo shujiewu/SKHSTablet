@@ -57,6 +57,8 @@ public class AppConstants {
     public static byte PHY_FORM_REQ_ID=0;
     public static byte CONTROL_REQ_ID=0;
 
+    public static String LOGIN_NAME;
+    public static String LOGIN_KEY;
     public static HashMap<Byte,String> DEV_NAME=new HashMap<>();
     public static HashMap<Byte,List<SportDevForm>> SPORT_DEV_FORM=new HashMap<>();
     public static HashMap<Byte,List<MonitorDevForm>> MON_DEV_FORM=new HashMap<>();
@@ -68,4 +70,7 @@ public class AppConstants {
 
     public static HashMap<Integer,Integer> hasMutiPatient=new HashMap<>();//id和位置
     public static String singleMonitorID;
+
+    public static List<Integer> lastMutiPatientID;
+    public static String lastSinglePatientID;
 }

@@ -72,6 +72,8 @@ import static cn.sk.skhstablet.model.PatientDetailList.sportValue;
 public class TcpUtils {
     public static  <T> void invoke(LifeSubscription lifecycle,Observable<T> observable, Action1<T> callback)
     {
+        if(observable==null)
+            return;
         Subscription subscription = observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback);
@@ -162,6 +164,8 @@ public class TcpUtils {
                             public void onError(Throwable e) {
                                 subscriber.onError(e);
                                 //reconnect();
+                                subscriber.unsubscribe();
+                                e.printStackTrace();
                                 Log.e("r","rc");
                              }
 
@@ -245,7 +249,10 @@ public class TcpUtils {
 
     public static Observable<Void> send(AbstractProtocol s) {
         Log.e("10.40","5");
-        return mConnection.write(Observable.just(s));
+        if (mConnection != null) {
+            return mConnection.write(Observable.just(s));
+        }
+        else return null;
     }
 
     private static int spacingTime =2;
@@ -259,6 +266,7 @@ public class TcpUtils {
         {
             RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
             reconnectTime=0;
+            ToastUtils.showShortToast("网络不可达，未知错误");
             return;
         }
 
@@ -294,6 +302,10 @@ public class TcpUtils {
     {
         Log.e("error", "refetch");
         invoke(TcpUtils.receive(), new Callback<AbstractProtocol>() {
+            @Override
+            public void onError(Throwable e) {
+                super.onError(e);
+            }
             @Override
             public void onResponse(final AbstractProtocol data) {
                 // ByteBuf buf = (ByteBuf)data;

@@ -292,6 +292,15 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             ft.hide(mutiMonitorFragment);
         }
     }
+    @Override
+    public void loadSinglePatient(String singleID)
+    {
+        singleMonitorID=singleID;
+        singleMonitorFragment.setPatient(patientListAdapter.mDatas.get(mPresenter.hasPatient.get(Integer.parseInt(singleMonitorID))));
+        singleMonitorFragment.loadData(singleMonitorID);
+        singleMonitorFragment.getChangeDevPara().clear();
+        isNewSingle=true;
+    }
     public void showFragment(int index){
 
         ft=fm.beginTransaction();
@@ -329,11 +338,12 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     singleMonitorFragment.setState(STATE_LOADING);
                     //if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)///shanchu
                     //   singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
-                    singleMonitorID=newSingleMonitorID;
+                    /*singleMonitorID=newSingleMonitorID;
                     singleMonitorFragment.setPatient(patientListAdapter.mDatas.get(mPresenter.hasPatient.get(Integer.parseInt(singleMonitorID))));
                     singleMonitorFragment.loadData(singleMonitorID);
                     singleMonitorFragment.getChangeDevPara().clear();
-                    isNewSingle=true;
+                    isNewSingle=true;*/
+                    loadSinglePatient(newSingleMonitorID);
                 }
                 else
                 {
