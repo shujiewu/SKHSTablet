@@ -222,4 +222,8 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         bindSubscription(mSubscription);
         bindSubscription(mSubscriptionRequest);
     }*/
+    public List<PatientDetail> getPatientDetailList()
+    {
+        return mutiMonitorAdapter.patientDetailList;
+    }
 }

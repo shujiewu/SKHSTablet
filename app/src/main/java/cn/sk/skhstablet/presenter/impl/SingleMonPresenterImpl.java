@@ -29,6 +29,7 @@ import rx.functions.Action1;
 
 import static cn.sk.skhstablet.app.AppConstants.CONTROL_REQ_ID;
 import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
+import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.reconnect;
 
@@ -123,18 +124,10 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         invoke(TcpUtils.send(singleMonitorRequest), new Callback<Void>() {
             @Override
             public void onError(Throwable e) {
-                //subscriber.onError(e);
-                //reconnect();
-               // subscriber.unsubscribe();
                 Log.e("sendsingle","error");
-                /*invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
-                    @Override
-                    public void onResponse(Boolean data) {
-                        fetchData();
-                        RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(true));
-                    }
-                });*/
-                reconnect();
+                mView.setPageState(AppConstants.STATE_ERROR);
+                if(netState==AppConstants.STATE_DIS_CONN)
+                    reconnect();
             }
         });
         //mView.setPageState(AppConstants.STATE_LOADING);

@@ -13,6 +13,7 @@ import cn.sk.skhstablet.presenter.BaseView;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import rx.Subscriber;
 
+import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.mConnection;
 
 /**
@@ -64,20 +65,17 @@ public class Callback<T> extends Subscriber<T> {
             if (mConnection != null)
             {
                 mConnection.closeNow();
-                Log.e("error", "close");
+                //Log.e("error", "close");
             }
             RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
+            netState=AppConstants.STATE_DIS_CONN;
             return;
         }
         else
         {
+            System.out.println("尝试重新连接");
+            //if(mConnection==null)
             TcpUtils.reconnect();
         }
-        //TcpUtils.reconnect();
-       // }
-        /*ToastUtils.showShortToast("程序员哥哥偷懒去了，快去举报他");
-        if (target != null) {
-            target.setState(AppConstants.STATE_EMPTY);
-        }*/
     }
 }

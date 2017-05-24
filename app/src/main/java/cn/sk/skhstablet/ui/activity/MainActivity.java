@@ -42,6 +42,7 @@ import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.injector.module.activity.MainActivityModule;
 import cn.sk.skhstablet.presenter.IPatientListPresenter;
 import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
+import cn.sk.skhstablet.tcp.Stateful;
 import cn.sk.skhstablet.ui.base.BaseFragment;
 import cn.sk.skhstablet.ui.fragment.MutiMonitorFragment;
 import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
@@ -57,7 +58,7 @@ import static cn.sk.skhstablet.app.AppConstants.STATE_LOADING;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 
-public class MainActivity extends BorderActivity implements IPatientListPresenter.View,LifeSubscription {
+public class MainActivity extends BorderActivity implements IPatientListPresenter.View,LifeSubscription,Stateful {
     private RecyclerView mRecyclerView;
     final int COPY = 0;
     final int PASTE = 1;
@@ -536,11 +537,11 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     {
         patientListAdapter.mDatas.set(position,mData);
         patientListAdapter.notifyItemChanged(position);
-        if(singleMonitorID!=null&&mData.getPatientID()==Integer.parseInt(singleMonitorID))
+        if(singleMonitorFragment.getPatientDetail()!=null&&singleMonitorID!=null&&mData.getPatientID()==Integer.parseInt(singleMonitorID))
         {
              singleMonitorFragment.refreshPatient(mData.getDev(),mData.getDeviceNumber());
         }//更新单人监控
-        if(hasMutiPatient.containsKey(patientID))
+        if(mutiMonitorFragment.getPatientDetailList()!=null&&hasMutiPatient.containsKey(patientID))
         {
              mutiMonitorFragment.refreshDevInfo(mData,hasMutiPatient.get(patientID));
         }//更新多人监控
@@ -572,6 +573,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public void setMutiPageState(int state) {
         if(state==AppConstants.STATE_SUCCESS&&mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
             mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+        if(state==AppConstants.STATE_ERROR)
+            mutiMonitorFragment.setState(AppConstants.STATE_ERROR);
     }
 
     @Override
@@ -606,4 +609,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         }
     }
 
+    @Override
+    public void setState(int state) {
+
+    }
 }

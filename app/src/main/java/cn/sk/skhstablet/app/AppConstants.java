@@ -73,4 +73,11 @@ public class AppConstants {
 
     public static List<Integer> lastMutiPatientID;
     public static String lastSinglePatientID;
+    public static Boolean isLogout=false;
+    public static Boolean isCancelSingle=false;
+
+    public static byte netState;
+    public static byte STATE_CONN=0x00;
+    public static byte STATE_DIS_CONN=(byte) 0xff;
+    public static byte STATE_IN_CONN=0x01;
 }

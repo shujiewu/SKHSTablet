@@ -21,6 +21,7 @@ import cn.sk.skhstablet.protocol.up.PatientListRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
+import cn.sk.skhstablet.tcp.utils.Callback;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
 import rx.Subscription;
@@ -29,8 +30,12 @@ import rx.functions.Action1;
 import static cn.sk.skhstablet.app.AppConstants.LOGIN_KEY;
 import static cn.sk.skhstablet.app.AppConstants.LOGIN_NAME;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.isCancelSingle;
+import static cn.sk.skhstablet.app.AppConstants.isLogout;
 import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
 import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
+import static cn.sk.skhstablet.app.AppConstants.netState;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.reconnect;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -69,10 +74,13 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         mutiMonitorRequest.setPatientNumber((short) patientID.size());
         mutiMonitorRequest.setPatientID(patientID);
         lastMutiPatientID=patientID;
-        invoke(TcpUtils.send(mutiMonitorRequest), new Action1<Void>() {
+        invoke(TcpUtils.send(mutiMonitorRequest),new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send mutiMonitorRequest!");
+            public void onError(Throwable e) {
+                Log.e("sendmuti","error");
+                mView.setMutiPageState(AppConstants.STATE_ERROR);
+                if(netState==AppConstants.STATE_DIS_CONN)
+                    reconnect();
             }
         });
     }
@@ -83,12 +91,15 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         singleMonitorRequest.setUserID(AppConstants.USER_ID);
         singleMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
         singleMonitorRequest.setRequestID(AppConstants.SINGLE_REQ_ID);
-        singleMonitorRequest.setPatientNumber((short) 1);
-        singleMonitorRequest.setPatientID(0);
-        invoke(TcpUtils.send(singleMonitorRequest), new Action1<Void>() {
+        singleMonitorRequest.setPatientNumber((short) 0);
+        //singleMonitorRequest.setPatientID(0);
+        isCancelSingle=true;
+        invoke(TcpUtils.send(singleMonitorRequest), new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onError(Throwable e) {
+                Log.e("sendcancel","error");
+                if(netState==AppConstants.STATE_DIS_CONN)
+                    reconnect();
             }
         });
     }
@@ -99,10 +110,13 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         logoutRequest.setUserID(AppConstants.USER_ID);
         logoutRequest.setDeviceType(AppConstants.DEV_TYPE);
         logoutRequest.setRequestID(AppConstants.LOGOUT_REQ_ID);
-        invoke(TcpUtils.send(logoutRequest), new Action1<Void>() {
+        isLogout=true;
+        invoke(TcpUtils.send(logoutRequest),new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onError(Throwable e) {
+                Log.e("sendlogout","error");
+                if(netState==AppConstants.STATE_DIS_CONN)
+                    reconnect();
             }
         });
     }
@@ -204,9 +218,19 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         Log.e("login","succees2");
                         if(s==true)
                         {
+                            if(isLogout)
+                            {
+                                sendLogoutRequest();
+                                return;
+                            }
                             sentPatientListRequest();
                             if(lastMutiPatientID!=null)
                                 sendMutiMonitorRequest(lastMutiPatientID);
+                            if(isCancelSingle)
+                            {
+                                sendCancelSingleMonitorReq();
+                                return;
+                            }
                             if(lastSinglePatientID!=null)
                                 mView.loadSinglePatient(lastSinglePatientID);
                         }

@@ -244,7 +244,8 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		//out.writeIntLE(request.getUserID());
 		//out.writeByte(request.getRequestID());
 		out.writeShortLE(request.getPatientNumber());
-		out.writeIntLE(request.getPatientID());
+		if(request.getPatientNumber()!=0)
+			out.writeIntLE(request.getPatientID());
 	}
 
 	/*private void encodeDevNameRequest(DevNameRequest request, ByteBuf out)

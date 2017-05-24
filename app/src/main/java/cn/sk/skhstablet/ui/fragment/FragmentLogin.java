@@ -249,6 +249,8 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
             login_progress.setVisibility(View.GONE);
             rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
             codeicon.setAnimation(Tools.shakeAnimation(2));
+            rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
+            loginusericon.setAnimation(Tools.shakeAnimation(2));
             bt_login.setEnabled(true);
         }
         //userphone.setText(mData);

@@ -176,7 +176,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     @Override
     protected void loadData() {
-
+        mPresenter.sendPatientDetailRequest(AppConstants.lastSinglePatientID);
     }
 
 
@@ -259,6 +259,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             tvDevNumber.setText(patientDetail.getDeviceNumber());
             tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
         }
+        if(state==AppConstants.STATE_ERROR)
+            this.setState(AppConstants.STATE_ERROR);
     }
 
     @Override
@@ -375,5 +377,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                     mPresenter.sendControlStartStop(patientDetail.getPatientID(),patientDetail.getDeviceNumber(),CommandTypeConstant.SPORT_DEV_CONTORL_STOP);
             }
         });
+    }
+
+    public PatientDetail getPatientDetail()
+    {
+        return patientDetail;
     }
 }

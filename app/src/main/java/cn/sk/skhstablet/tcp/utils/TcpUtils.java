@@ -58,6 +58,7 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 import static cn.sk.skhstablet.app.CommandTypeConstant.MUTI_MONITOR_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
@@ -174,6 +175,7 @@ public class TcpUtils {
                                 mConnection = connection;
                                 subscriber.onNext(true);
                                 Log.e("10.40","1");
+                                netState=AppConstants.STATE_CONN;
                             }
                         });
             }
@@ -248,14 +250,14 @@ public class TcpUtils {
     }*/
 
     public static Observable<Void> send(AbstractProtocol s) {
-        Log.e("10.40","5");
+        //Log.e("10.40","5");
         if (mConnection != null) {
             return mConnection.write(Observable.just(s));
         }
         else return null;
     }
 
-    private static int spacingTime =2;
+    private static int spacingTime =3;
     /**
      * 断开自动重新连接
      */
@@ -267,9 +269,10 @@ public class TcpUtils {
             RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
             reconnectTime=0;
             ToastUtils.showShortToast("网络不可达，未知错误");
+            netState=AppConstants.STATE_DIS_CONN;
             return;
         }
-
+        netState=AppConstants.STATE_IN_CONN;
         //延迟spacingTime秒后进行重连
         Observable.timer(spacingTime, TimeUnit.SECONDS).subscribe((new Action1<Long>() {
             @Override
@@ -277,10 +280,11 @@ public class TcpUtils {
                 if (mConnection != null)
                 {
                     mConnection.closeNow();
-                    Log.e("error", "close");
+                    Log.e("error1", "close");
                 }
                 Log.e("error", "reconnect");
                 //re(AppConstants.url, AppConstants.port);
+
                 invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
                     @Override
                     public void onResponse(Boolean data) {

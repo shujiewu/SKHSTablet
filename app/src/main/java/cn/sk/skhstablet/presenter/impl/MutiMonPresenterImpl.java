@@ -14,6 +14,7 @@ import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.IMutiMonPresenter;
+import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.Callback;
@@ -25,6 +26,7 @@ import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -107,7 +109,21 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 System.out.println("send success!");
             }
         });*/
-
+        if(lastMutiPatientID==null)
+            return;
+        MutiMonitorRequest mutiMonitorRequest=new MutiMonitorRequest(CommandTypeConstant.MUTI_MONITOR_REQUEST);
+        mutiMonitorRequest.setUserID(AppConstants.USER_ID);
+        mutiMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
+        mutiMonitorRequest.setRequestID(AppConstants.MUTI_REQ_ID);
+        mutiMonitorRequest.setPatientNumber((short) lastMutiPatientID.size());
+        mutiMonitorRequest.setPatientID(lastMutiPatientID);
+        //lastMutiPatientID=patientID;
+        invoke(TcpUtils.send(mutiMonitorRequest), new Action1<Void>() {
+            @Override
+            public void call(Void aVoid) {
+                System.out.println("send mutiMonitorRequest!");
+            }
+        });
     }
     List<PatientDetail> mData=new ArrayList<>();
     /*public void registerFetchResponse()
