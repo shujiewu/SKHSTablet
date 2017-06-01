@@ -38,6 +38,7 @@
         android:layout_height="match_parent"
         android:paddingLeft="40dp"
         android:paddingRight="60dp"
+        android:visibility="gone"
         app:qv_quantity="10" >
     </cn.sk.skhstablet.component.QuantityView>
 />

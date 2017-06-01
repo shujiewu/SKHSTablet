@@ -47,19 +47,21 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 .subscribe(new Action1<PatientDetail>() {
                     @Override
                     public void call(PatientDetail s) {
-                        int patientID=s.getPatientID();
-                        if(hasMutiPatient.containsKey(patientID))
+                        if(mView.getPageState()==AppConstants.STATE_SUCCESS)
                         {
-                            mDatas.set(hasMutiPatient.get(patientID),s);
-                            mView.refreshView(s,hasMutiPatient.get(patientID));
-                        }
-                        else
-                        {
-                            mDatas.add(s);
-                            hasMutiPatient.put(patientID,position++);
-                            mView.refreshView(mDatas);
-                        }
-
+                            int patientID=s.getPatientID();
+                            if(hasMutiPatient.containsKey(patientID))
+                            {
+                                mDatas.set(hasMutiPatient.get(patientID),s);
+                                mView.refreshView(s,hasMutiPatient.get(patientID));
+                            }
+                            else
+                            {
+                                mDatas.add(s);
+                                hasMutiPatient.put(patientID,position++);
+                                mView.refreshView(mDatas);
+                            }
+                        }//成功界面才更新，否则抛弃
                     }
                 });
 

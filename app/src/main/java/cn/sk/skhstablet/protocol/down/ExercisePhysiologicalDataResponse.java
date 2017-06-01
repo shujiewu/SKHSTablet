@@ -6,6 +6,8 @@ import java.util.Map;
 
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.domain.ECG;
+import cn.sk.skhstablet.model.PatientDetail;
+import cn.sk.skhstablet.model.PatientPhyData;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
 
 public class ExercisePhysiologicalDataResponse extends AbstractProtocol {
@@ -67,4 +69,13 @@ public class ExercisePhysiologicalDataResponse extends AbstractProtocol {
 		this.physiologicalData = physiologicalData;
 	}
 
+	private PatientPhyData patientPhyData;
+
+	public PatientPhyData getPatientPhyData() {
+		return patientPhyData;
+	}
+
+	public void setPatientPhyData(PatientPhyData patientPhyData) {
+		this.patientPhyData = patientPhyData;
+	}
 }

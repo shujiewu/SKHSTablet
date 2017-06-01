@@ -37,6 +37,8 @@ import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
 import cn.sk.skhstablet.injector.component.fragment.DaggerMainActivtityComponent;
+import cn.sk.skhstablet.model.PatientDetail;
+import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerMainActivtityComponent;
 import cn.sk.skhstablet.injector.module.activity.MainActivityModule;
@@ -54,6 +56,7 @@ import rx.subscriptions.CompositeSubscription;
 
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
+import static cn.sk.skhstablet.app.AppConstants.STATE_EMPTY;
 import static cn.sk.skhstablet.app.AppConstants.STATE_LOADING;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
@@ -504,8 +507,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             case CANCEL_SINGLE_MON:
                 newSingleMonitorID=null;
                 singleMonitorID=null;
-                singleMonitorFragment.setState(AppConstants.STATE_EMPTY);
-                //mPresenter.sendCancelSingleMonitorReq();
+                singleMonitorFragment.setPageState(AppConstants.STATE_EMPTY);
+                mPresenter.sendCancelSingleMonitorReq();
                 showFragment(FRAGMENT_MUTI);
         }
     }
@@ -539,7 +542,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         patientListAdapter.notifyItemChanged(position);
         if(singleMonitorFragment.getPatientDetail()!=null&&singleMonitorID!=null&&mData.getPatientID()==Integer.parseInt(singleMonitorID))
         {
-             singleMonitorFragment.refreshPatient(mData.getDev(),mData.getDeviceNumber());
+             singleMonitorFragment.refreshPatient(mData.getDevType(),mData.getDev(),mData.getDeviceNumber());
         }//更新单人监控
         if(mutiMonitorFragment.getPatientDetailList()!=null&&hasMutiPatient.containsKey(patientID))
         {
@@ -571,8 +574,33 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
     @Override
     public void setMutiPageState(int state) {
+        if(patientID.size()==0)
+        {
+            mutiMonitorFragment.setState(STATE_EMPTY);
+            return;
+        }//如果正在监控为0则页面设置为空
         if(state==AppConstants.STATE_SUCCESS&&mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+        {
             mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+            for(Patient patient :patientListAdapter.mDatas)
+            {
+                if(patient.getSelectStatus().equals(PATIENT_SELECT_STATUS_MONITOR))
+                {
+                    //patient.setSelectStatus(PATIENT_SELECT_STATUS_MONITOR);
+                    PatientDetail patientDetail=new PatientDetail();
+                    //patientDetail.setDevType(patient.getDevType());
+                    patientDetail.setDev(patient.getDev());
+                    patientDetail.setName(patient.getName());
+                    patientDetail.setPatientID(patient.getPatientID());
+                    patientDetail.setHospitalNumber(patient.getHospitalNumber());
+                    RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
+                    //patientID.add(patient.getPatientID());
+                }
+            }
+            return;
+            //List<PatientDetail> patientDetails=new
+        }
+
         if(state==AppConstants.STATE_ERROR)
             mutiMonitorFragment.setState(AppConstants.STATE_ERROR);
     }

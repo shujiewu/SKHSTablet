@@ -3,6 +3,7 @@ package cn.sk.skhstablet.ui.fragment;
 import android.app.Fragment;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.transition.Visibility;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,17 +17,22 @@ import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import cn.sk.skhstablet.app.AppConstants;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.component.PaperButton;
+import cn.sk.skhstablet.component.PathView;
 import cn.sk.skhstablet.injector.component.fragment.DaggerSingleMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.SingleMonitorModule;
 import cn.sk.skhstablet.model.Patient;
+import cn.sk.skhstablet.model.PatientPhyData;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.presenter.impl.SingleMonPresenterImpl;
 import cn.sk.skhstablet.rx.RxBus;
@@ -70,6 +76,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     PaperButton btnStart;
     PaperButton btnStop;
+    PaperButton btnChange;
     private String singleMonitorID;
     private HashMap<String,String> changeDevPara= new HashMap<>();
 
@@ -191,12 +198,18 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         {
             devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
             devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
+            devParaChangeAdapter.setDevType(patientDetail.getDevType());
             //devParaChangeAdapter.notifyDataSetChanged();
             int size=patientDetail.getSportDevName().size();
             for(int i=0;i<size;i++)
             {
                  if(patientDetail.getSportDevName().get(i).equals(mData.getSportDevName().get(i))&&!patientDetail.getSportDevValue().get(i).equals(mData.getSportDevValue().get(i)))
-                      devParaChangeAdapter.notifyItemChanged(i);
+                 {
+                     patientDetail.getSportDevValue().set(i,mData.getSportDevValue().get(i));
+                     devParaChangeAdapter.sportDevValue.set(i,mData.getSportDevValue().get(i));
+                     devParaChangeAdapter.notifyItemChanged(i);
+                 }
+
             }//局部更新
         }
         else
@@ -204,6 +217,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             patientDetail= mData;
             devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
             devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
+            devParaChangeAdapter.setDevType(patientDetail.getDevType());
             devParaChangeAdapter.notifyDataSetChanged();
         }
         patientParaAdapter.phyDevName=patientDetail.getPhyDevName();
@@ -250,6 +264,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             patientDetail.setDev(patient.getDev());
             patientDetail.setHospitalNumber(patient.getHospitalNumber());
             patientDetail.setName(patient.getName());
+            patientDetail.setDevType(patient.getDevType());
             //patientDetail.set
             //patientDetail.setPercent(patient.get);
             // patientDetail.set
@@ -259,8 +274,14 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             tvDevNumber.setText(patientDetail.getDeviceNumber());
             tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
         }
-        if(state==AppConstants.STATE_ERROR)
+        else if(state==AppConstants.STATE_ERROR)
             this.setState(AppConstants.STATE_ERROR);
+        else if(state==AppConstants.STATE_EMPTY)
+        {
+            this.setState(AppConstants.STATE_EMPTY);
+            //还需要清空数据
+        }
+
     }
 
     @Override
@@ -276,10 +297,23 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         }
     }
 
-    public void refreshPatient(String devName,String devNumber)
+    @Override
+    public void refreshPhyData(PatientPhyData patientPhyData) {
+        if(patientPhyData!=null&&patientDetail.getDev()==null)
+        {
+            patientParaAdapter.phyDevName=patientPhyData.getPhyDevName();
+            patientParaAdapter.phyDevValue=patientPhyData.getPhyDevValue();
+            System.out.println("生理數據顯示");
+            patientParaAdapter.notifyDataSetChanged();
+        }//设备为空才更新数据
+        //更新心电数据
+    }
+
+    public void refreshPatient(byte devType,String devName,String devNumber)
     {
         patientDetail.setDev(devName);
         patientDetail.setDeviceNumber(devNumber);
+        patientDetail.setDevType(devType);
         //patientDetail.setPercent(percentValue);
         dev.setText(devName);
         tvDevNumber.setText(devNumber);
@@ -360,6 +394,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
         patientDetail=new PatientDetail();
 
+
+
         btnStart = (PaperButton) view.findViewById(R.id.bt_start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -377,8 +413,62 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                     mPresenter.sendControlStartStop(patientDetail.getPatientID(),patientDetail.getDeviceNumber(),CommandTypeConstant.SPORT_DEV_CONTORL_STOP);
             }
         });
-    }
 
+        btnChange= (PaperButton) view.findViewById(R.id.bt_change);
+        btnChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String content="";
+                String key="";
+                String val="";
+                Map map = changeDevPara;
+                Iterator iter = map.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    key = (String)entry.getKey();
+                    val = (String)entry.getValue();
+                    content=content+key+"   "+val+"\n";
+                }
+
+                new SweetAlertDialog(view.getContext(), SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("提示")
+                        .setContentText(content)
+                        .setConfirmText("确定")
+                        .setCancelText("取消")
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                //sDialog.dismissWithAnimation();
+                                sDialog
+                                        .setTitleText("修改成功")
+                                        .setConfirmText("确定")
+                                        .setContentText("")
+                                        .setConfirmClickListener(null)
+                                        .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                            }
+                        })
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                sDialog.cancel();
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        pathView=(PathView) view.findViewById(R.id.ecgView);
+
+        byte [] content=new byte[255];
+        for(int i=0;i<content.length;i++)
+        {
+            content[i]=127;
+        }
+        pathView.setContent(content);
+
+       // btnChange.setVisibility(View.GONE);
+    }
+    private PathView pathView;
     public PatientDetail getPatientDetail()
     {
         return patientDetail;

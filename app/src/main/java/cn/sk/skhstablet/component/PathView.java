@@ -14,11 +14,16 @@ public class PathView extends CardiographView {
     public PathView(Context context, AttributeSet attrs) {
         this(context, attrs,0);
     }
-
+    byte [] content=new byte[255];
     public PathView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mPaint = new Paint();
         mPath = new Path();
+
+        for(int i=0;i<content.length;i++)
+        {
+            content[i]=0x10;
+        }
     }
 
 
@@ -40,17 +45,36 @@ public class PathView extends CardiographView {
         //设置画笔style
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(mLineColor);
-        mPaint.setStrokeWidth(5);
+        mPaint.setStrokeWidth(2);
         canvas.drawPath(mPath,mPaint);
 
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+        invalidate();
+    }
+
+    public void drawECG(Canvas canvas, byte[] content)
+    {
+        mPath.moveTo(0,mHeight/2);
+        int tmp = 0;
+        for(int i = 0;i<content.length;i++) {
+            mPath.lineTo(tmp+i, mHeight / 2+content[i]);
+            tmp+=2;
+        }
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setColor(mLineColor);
+        mPaint.setStrokeWidth(2);
+        canvas.drawPath(mPath,mPaint);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         drawPath(canvas);
-        scrollBy(1,0);
-        postInvalidateDelayed(10);
+        drawECG(canvas,content);
+        scrollBy(5,0);
+       // postInvalidateDelayed(100);
     }
-
 
 }

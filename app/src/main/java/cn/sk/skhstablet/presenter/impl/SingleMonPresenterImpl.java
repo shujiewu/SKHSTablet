@@ -13,9 +13,11 @@ import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
+import cn.sk.skhstablet.model.PatientPhyData;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.protocol.ControlState;
+import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
 import cn.sk.skhstablet.rx.RxBus;
@@ -47,12 +49,12 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
 
     @Override
     public void fetchExercisePlan() {
-        List<String> armTypes=new ArrayList<>(Arrays.asList("运动方案1：在跑步机上运动10分钟", "运动方案2：在椭圆机上运动200米", "运动方案3：在跑步机上运动5分钟", "运动方案4"));
+        List<String> armTypes=new ArrayList<>(Arrays.asList("运动方案1：在跑步机上运动10分钟", "运动方案2：在椭圆机上运动200米", "运动方案3：在跑步机上运动5分钟"));
         List<List<String>> arms=new ArrayList<>();
         arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动1分钟", "第二段：以1米每秒的速度运动1分钟")));
-        arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动2分钟", "第二段：以1米每秒的速度运动2分钟")));
+        arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在椭圆机上运动2分钟", "第二段：以1米每秒的速度运动2分钟")));
         arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动3分钟", "第二段：以1米每秒的速度运动3分钟")));
-        arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动4分钟", "第二段：以1米每秒的速度运动4分钟")));
+        //arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动4分钟", "第二段：以1米每秒的速度运动4分钟")));
         mView.refreshExercisePlan(armTypes,arms);
     }
 
@@ -66,7 +68,14 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                     }
                 });
 
-
+        Subscription mPhySubscription = RxBus.getDefault().toObservable(AppConstants.PHY_DATA,PatientPhyData.class)
+                .subscribe(new Action1<PatientPhyData>() {
+                    @Override
+                    public void call(PatientPhyData s) {
+                        System.out.println("生理數據接收");
+                        mView.refreshPhyData(s);
+                    }
+                });
         Subscription singlePageSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_REQ_STATE,Byte.class)
                 .subscribe(new Action1<Byte>() {
                     @Override
@@ -93,6 +102,8 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         ((LifeSubscription)mView).bindSubscription(singlePageSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscription);
         ((LifeSubscription)mView).bindSubscription(controlSubscription);
+
+        ((LifeSubscription)mView).bindSubscription(mPhySubscription);
     }
 
     @Override
@@ -122,6 +133,25 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         singleMonitorRequest.setPatientID(Integer.parseInt(ID));
         lastSinglePatientID=ID;
         invoke(TcpUtils.send(singleMonitorRequest), new Callback<Void>() {
+            @Override
+            public void onError(Throwable e) {
+                Log.e("sendsingle","error");
+                mView.setPageState(AppConstants.STATE_ERROR);
+                if(netState==AppConstants.STATE_DIS_CONN)
+                    reconnect();
+            }
+        });
+
+
+        List<Integer> patientIDList=new ArrayList<>();
+        patientIDList.add(Integer.parseInt(ID));
+        MutiMonitorRequest mutiMonitorRequest=new MutiMonitorRequest(CommandTypeConstant.MUTI_MONITOR_REQUEST);
+        mutiMonitorRequest.setUserID(AppConstants.USER_ID);
+        mutiMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
+        mutiMonitorRequest.setRequestID(AppConstants.SINGLE_SPORT_REQ_ID);
+        mutiMonitorRequest.setPatientNumber((short)1);
+        mutiMonitorRequest.setPatientID(patientIDList);//zhiyouyige
+        invoke(TcpUtils.send(mutiMonitorRequest), new Callback<Void>() {
             @Override
             public void onError(Throwable e) {
                 Log.e("sendsingle","error");

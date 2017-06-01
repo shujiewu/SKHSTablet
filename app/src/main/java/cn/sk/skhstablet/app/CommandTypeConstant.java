@@ -125,4 +125,7 @@ public class CommandTypeConstant {
 	public static final byte SPORT_DEV_CONTORL_READY=(byte)0x03;
 	public static final byte SPORT_DEV_CONTORL_RUN=(byte)0x04;
 
+	public static final byte SPORT_DEV_CANNOT_CONTROL=0x00;
+	public static final byte SPORT_DEV_CAN_CONTROL=0x01;
+
 }

@@ -11,6 +11,7 @@ import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.domain.ECG;
 import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientDetail;
+import cn.sk.skhstablet.model.PatientPhyData;
 import cn.sk.skhstablet.protocol.AbstractProtocol;
 import cn.sk.skhstablet.protocol.DeviceId;
 import cn.sk.skhstablet.protocol.MonitorDevForm;
@@ -143,7 +144,54 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		request.setDeviceId(deviceId);
 		request.setDataPacketNumber(reqBuf.readUnsignedIntLE());
 		request.setPhysiologicalLength(reqBuf.readUnsignedShortLE());
-		reqBuf.readBytes(request.getPhysiologicalData());
+
+
+		//reqBuf.readBytes(request.getPhysiologicalData());
+		int size=reqBuf.readUnsignedByte();
+		List<String> phyDevName=new ArrayList<String>();
+		List<String> phyDevValue=new ArrayList<String>();
+		System.out.println("size"+size);
+		for(int i=0;i<size;i++)
+		{
+			byte monitorType=reqBuf.readByte();
+			List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(monitorType);
+			//j++;
+			System.out.println(i);
+			System.out.println(monitorType);
+			for(MonitorDevForm monitorDevForm:monitorDevForms)
+			{
+				phyDevName.add(monitorDevForm.getChineseName());
+				int valuelength=monitorDevForm.getLength();
+				System.out.println("valuelenght"+valuelength);
+				long value=0;
+				switch (valuelength)
+				{
+					case 1:
+						value=reqBuf.readByte();
+						break;
+					case 2:
+						value=reqBuf.readShortLE();
+						break;
+					case 4:
+						value=reqBuf.readIntLE();
+						break;
+					case 8:
+						value=reqBuf.readLongLE();
+						break;
+				}
+
+				//byte [] value=new byte[valuelength];
+				//System.arraycopy(phydata,j,value,0,valuelength);
+				//reqBuf.readBytes(value);
+				phyDevValue.add(String.valueOf(value));///byte
+				//j=j+valuelength;
+			}
+		}
+		PatientPhyData patientPhyData=new PatientPhyData();
+		patientPhyData.setPhyDevName(phyDevName);
+		patientPhyData.setPhyDevValue(phyDevValue);
+		request.setPatientPhyData(patientPhyData);
+
 		short ecgAmount = reqBuf.readUnsignedByte();
 		for (short i = 0; i < ecgAmount; i++) {
 			short ecgNumber = reqBuf.readUnsignedByte();
@@ -312,7 +360,10 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				//pos=pos+length;
 			}
 		}
-
+		patientDetail.setPhyDevName(phyDevName);
+		patientDetail.setPhyDevValue(phyDevValue);
+		patientDetail.setSportDevName(sportDevName);
+		patientDetail.setSportDevValue(sportDevValue);
 		request.setPatientDetail(patientDetail);
 		return request;
 	}
@@ -616,8 +667,10 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				monitorDevForm.setPosition(resBuf.readByte());
 				monitorDevForms.add(monitorDevForm);
 			}
+			System.out.println("montype"+devType);
 			Collections.sort(monitorDevForms,Utils.monitorDevComp);//按照序号排序
 			devData.put(devType,monitorDevForms);
+
 		}
 		response.setDevData(devData);
 		return response;

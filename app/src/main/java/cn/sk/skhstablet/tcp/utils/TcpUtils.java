@@ -329,6 +329,9 @@ public class TcpUtils {
                 {
                     case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
                         //dataType=(byte)((ExercisePhysiologicalDataResponse)data).getDeviceId().getDeviceType();
+                        //ExercisePhysiologicalDataResponse response=(ExercisePhysiologicalDataResponse) data;
+                        RxBus.getDefault().post(AppConstants.PHY_DATA,((ExercisePhysiologicalDataResponse) data).getPatientPhyData());
+                        System.out.println("生理數據發送");
                         break;
                     }
                     case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
@@ -453,19 +456,25 @@ public class TcpUtils {
                         devType=((PushAckResponse)data).getDeviceType();
                         state=((PushAckResponse)data).getState();
 
-                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.MUTI_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                        if(userID!=AppConstants.USER_ID||devType!=AppConstants.DEV_TYPE)
                         {
-
                             return;
                         }
+                        if(reqID==AppConstants.MUTI_REQ_ID)
+                        {
+                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
+                        }
+                        //else
+                        //{
 
-                        if(state==SUCCESS)
+                        //}
+                        /*if(state==SUCCESS)
                         {
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
                         }
                         else
-                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
-                        AppConstants.MUTI_REQ_ID++;
+                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));*/
+                        //AppConstants.MUTI_REQ_ID++;
                         break;
                     /*case CommandTypeConstant.PATIENT_LIST_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
@@ -551,8 +560,15 @@ public class TcpUtils {
                         if(userID!=AppConstants.USER_ID||reqID!=AppConstants.PHY_FORM_REQ_ID||devType!=AppConstants.DEV_TYPE)
                             return;
                         if(state==SUCCESS)
+                        {
                             MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
-                        AppConstants.PHY_FORM_REQ_ID++;
+                            System.out.println("mon form");
+                            byte tyep=(byte)0x0f;
+                            List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(tyep);
+                            System.out.println("monisize"+MON_DEV_FORM.size());
+                        }
+                            //MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
+                        //AppConstants.PHY_FORM_REQ_ID++;
                         break;
                     case CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE:{
                         userID=((SportDevControlResponse)data).getUserID();

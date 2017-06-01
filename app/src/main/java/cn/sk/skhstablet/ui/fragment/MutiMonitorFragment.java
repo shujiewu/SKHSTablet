@@ -179,6 +179,11 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
     }
 
     @Override
+    public int getPageState() {
+        return this.getState();
+    }
+
+    @Override
     public void reSendRequest() {
         loadData();
     }

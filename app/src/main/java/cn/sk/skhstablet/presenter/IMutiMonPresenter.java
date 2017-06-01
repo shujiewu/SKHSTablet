@@ -12,6 +12,7 @@ public interface IMutiMonPresenter {
     interface View extends BaseView<List<PatientDetail>>{
         void refreshView(PatientDetail mData,int position);
         void setPageState(int state);
+        int getPageState();
     }
     interface Presenter{
         void fetchPatientDetailData();

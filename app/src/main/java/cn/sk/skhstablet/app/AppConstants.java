@@ -31,10 +31,12 @@ public class AppConstants {
     public static  final int SINGLE_REQ_STATE=3001;
     public static  final int CONTORL_REQ_STATE=3002;
     public static  final int SINGLE_DATA=3000;
+    public static  final int PHY_DATA=3005;
+
     public static  final int PATIENT_LIST_REQ_STATE=6001;
     public static  final int PATIENT_LIST_DATA_STATE=6002;
 
-    public static  final  String url="10.250.110.19";
+    public static  final  String url="192.168.2.180";
     public static  final  int port=10000;
 
     public static final int RE_SEND_REQUEST=4000;
@@ -48,7 +50,10 @@ public class AppConstants {
     public static int USER_ID=0;
     public static final byte DEV_TYPE=0x01;
     public static byte SINGLE_REQ_ID=0;
+
     public static byte MUTI_REQ_ID=0;
+    public static byte SINGLE_SPORT_REQ_ID=1;
+
     public static byte PATIENT_LIST_REQ_ID=0;
     public static byte LOGIN_REQ_ID=0;
     public static byte CHANGE_KEY_REQ_ID=0;
