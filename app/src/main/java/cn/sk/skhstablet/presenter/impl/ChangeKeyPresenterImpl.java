@@ -10,6 +10,7 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
 import cn.sk.skhstablet.protocol.up.ChangeKeyRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
+import cn.sk.skhstablet.tcp.utils.Callback;
 import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import rx.Subscription;
 import rx.functions.Action1;
@@ -24,32 +25,23 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
     @Override
     public void sendRequest(String loginName,String oldKey,String newKey) {
         ChangeKeyRequest request=new ChangeKeyRequest(CommandTypeConstant.CHANGE_KEY_REQUEST);
-
-        /*byte [] old=new byte[16];
-        byte [] change=new byte[16];
-        int i;
-        for(i=0;i<oldKey.length();i++)
-        {
-            old[i]=(byte) oldKey.charAt(i);
-        }
-        if(i!=16)
-            old[i]='#';
-        for(i=0;i<newKey.length();i++)
-        {
-            change[i]=(byte) newKey.charAt(i);
-        }
-        if(i!=16)
-            change[i]='#';*/
         request.setUserID(0);
         request.setDeviceType(AppConstants.DEV_TYPE);
         request.setRequestID(AppConstants.CHANGE_KEY_REQ_ID);
         request.setLoginName(loginName);
         request.setUserOldKey(oldKey);
         request.setUserNewKey(newKey);
-        invoke(TcpUtils.send(request), new Action1<Void>() {
+        invoke(TcpUtils.send(request), new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onError(Throwable e) {
+                System.out.println("修改密码发送失败");
+                mView.refreshView(CommandTypeConstant.NONE_FAIL);
+                this.unsubscribe();
+            }
+            @Override
+            public void onCompleted() {
+                System.out.println("修改密码发送完成");
+                this.unsubscribe();
             }
         });
     }
@@ -65,7 +57,6 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
                 });
         ((LifeSubscription)mView).bindSubscription(changkeySubscription);
     }
-
     @Inject
     public ChangeKeyPresenterImpl()
     {

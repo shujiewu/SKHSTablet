@@ -132,7 +132,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         setOrientation(HORIZONTAL);
 
         addView(mButtonRemove, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
-        addView(mTextViewQuantity,new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,(float)1.5));
+        addView(mTextViewQuantity,new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,(float)1.0));
         addView(mButtonAdd, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
 
         mButtonAdd.setOnClickListener(this);

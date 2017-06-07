@@ -22,5 +22,6 @@ public interface IPatientListPresenter {
         void sendCancelSingleMonitorReq();
         void sendLogoutRequest();
         void registerFetchResponse();
+        void sendControl(String deviceID,byte parameterCode,byte paraType,byte paraControlValue);
     }
 }

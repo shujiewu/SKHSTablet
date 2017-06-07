@@ -86,7 +86,7 @@ public class SportDevForm {
     private Double precision;
     private Boolean canControl;
     private int upOrder;
-    private String parameterCode;
+    private byte parameterCode;
     private Boolean mainControl;
     private int length;
     private byte paraType;
@@ -187,11 +187,11 @@ public class SportDevForm {
         this.upOrder = upOrder;
     }
 
-    public String getParameterCode() {
+    public byte getParameterCode() {
         return parameterCode;
     }
 
-    public void setParameterCode(String parameterCode) {
+    public void setParameterCode(byte parameterCode) {
         this.parameterCode = parameterCode;
     }
 
@@ -209,5 +209,15 @@ public class SportDevForm {
 
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
+    }
+
+    private String displayUnit;
+
+    public String getDisplayUnit() {
+        return displayUnit;
+    }
+
+    public void setDisplayUnit(String displayUnit) {
+        this.displayUnit = displayUnit;
     }
 }

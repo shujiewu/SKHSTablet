@@ -69,7 +69,7 @@ public class AppConstants {
     public static HashMap<Byte,List<MonitorDevForm>> MON_DEV_FORM=new HashMap<>();
     //public static HashMap<String,>
 
-    public static List<Patient> PATIENT_LIST_DATA=new ArrayList<>();
+    public static List<Patient> PATIENT_LIST_DATA=new ArrayList<>();//新到的病人列表信息
     public static HashMap<Integer,String> PATIENT_LIST_NAME_FORM=new HashMap<>();
     public static HashMap<Integer,String> PATIENT_LIST_NUMBER_FORM=new HashMap<>();
 

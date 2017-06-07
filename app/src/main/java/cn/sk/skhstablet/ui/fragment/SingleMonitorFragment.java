@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -78,9 +79,9 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     PaperButton btnStop;
     PaperButton btnChange;
     private String singleMonitorID;
-    private HashMap<String,String> changeDevPara= new HashMap<>();
+    private HashMap<Integer,String> changeDevPara= new HashMap<>();
 
-    public HashMap<String, String> getChangeDevPara() {
+    public HashMap<Integer, String> getChangeDevPara() {
         return changeDevPara;
     }
 
@@ -194,7 +195,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     @Override
     public void refreshView(PatientDetail mData) {
 
-        if(patientDetail!=null&&patientDetail.getDevType()==mData.getDevType()&&patientDetail.getPatientID()==mData.getPatientID())
+        if(patientDetail!=null&&patientDetail.getDevType()==mData.getDevType()&&patientDetail.getPatientID()==mData.getPatientID()&&patientDetail.getSportDevName()!=null)
         {
             devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
             devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
@@ -224,13 +225,19 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         patientParaAdapter.phyDevValue=patientDetail.getPhyDevValue();
         patientParaAdapter.notifyDataSetChanged();
 
-
+        if (patientDetail.getDeviceNumber()==null||!patientDetail.getDeviceNumber().equals(tvDevNumber.getText().toString()))
+            changeDevPara.clear();
 
         name.setText(patientDetail.getName());
         dev.setText(patientDetail.getDev());
         percent.setText(patientDetail.getPercent());
         tvDevNumber.setText(String.valueOf(patientDetail.getDeviceNumber()));
         tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
+
+        //if(patientDetail.getSportDevName()!=null&&btnChange.getVisibility()==View.GONE)
+        //{
+            //btnChange.setVisibility(View.VISIBLE);
+        //}
     }
 
     @Override
@@ -256,7 +263,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             this.setState(AppConstants.STATE_SUCCESS);
             mPresenter.fetchExercisePlan();
 
-
+            if (patient.getDeviceNumber()==null||!patient.getDeviceNumber().equals(patientDetail.getDeviceNumber()))
+                changeDevPara.clear();
 
             //Patient patient=((MainActivity) getActivity()).patientListAdapter.mDatas.get(singleMonitorID);
             patientDetail.setPatientID(patient.getPatientID());
@@ -307,10 +315,35 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             patientParaAdapter.notifyDataSetChanged();
         }//设备为空才更新数据
         //更新心电数据
+        Map<Short,List<Short>> map = patientPhyData.getEcgs();
+        if(map!=null)
+        {
+            /*Iterator iter = map.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+
+            }*/
+            Short i=1;
+            List<Short> ecgData=map.get(i);
+            //if(ecgData==null)
+            //{
+                System.out.println("weikong");
+           // }
+            //for(int i=0;i<255;i++)
+            //    System.out.println(ecgData.get(i));
+            pathView.setECG(ecgData);
+        }
+
+
+        //if(patientPhyData.)
+
     }
 
     public void refreshPatient(byte devType,String devName,String devNumber)
     {
+        if (devNumber==null||!devNumber.equals(patientDetail.getDeviceNumber()))
+            changeDevPara.clear();
+
         patientDetail.setDev(devName);
         patientDetail.setDeviceNumber(devNumber);
         patientDetail.setDevType(devType);
@@ -345,6 +378,15 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         this.patient = patient;
     }
 
+    public String getDeviceID()
+    {
+        return patientDetail.getDeviceNumber();
+    }
+    public byte getDeviceType()
+    {
+        return patientDetail.getDevType();
+    }
+
     @Override
     protected void initView(View view) {
 
@@ -367,12 +409,15 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                                                          public void SaveEdit(int position, String devValue) {
               //Log.e("testsava","1");
               //Toast.makeText(getActivity(),"修改了"+position+"位置,"+string, Toast.LENGTH_SHORT).show();
-              String devName = devParaChangeAdapter.sportDevName.get(position);
-              if (devValue.equals(devParaChangeAdapter.sportDevValue.get(position)) && changeDevPara.containsKey(devName))//如果未改变
-                  changeDevPara.remove(devName);
+
+              //String devName = devParaChangeAdapter.sportDevName.get(position);
+              String devOriginValue = devParaChangeAdapter.sportDevValue.get(position);
+              /*if (devValue.equals(devParaChangeAdapter.sportDevValue.get(position)) && changeDevPara.containsKey(position))//如果未改变
+                  changeDevPara.remove(position);
               else {
-                  changeDevPara.put(devName, devValue);
-              }
+                  changeDevPara.put(position, devOriginValue+"修改为"+devValue);
+              }*/
+               changeDevPara.put(position, devOriginValue+"修改为"+devValue);
               if (!mainActivity.hasMenuItem(mainActivity.SAVE_EDIT)) {
                   TextItem textItem = new TextItem(mainActivity, mainActivity.SAVE_EDIT, "保存修改", Color.parseColor("#1E88E5"));
                   mainActivity.addRightTopItem(textItem);
@@ -457,15 +502,17 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             }
         });
 
-        pathView=(PathView) view.findViewById(R.id.ecgView);
+        btnChange.setVisibility(View.GONE);
 
-        byte [] content=new byte[255];
+        pathView=(PathView) view.findViewById(R.id.ecgView);
+        //pathView.setECG(null);
+        /*byte [] content=new byte[255];
         for(int i=0;i<content.length;i++)
         {
             content[i]=127;
         }
         pathView.setContent(content);
-
+        */
        // btnChange.setVisibility(View.GONE);
     }
     private PathView pathView;

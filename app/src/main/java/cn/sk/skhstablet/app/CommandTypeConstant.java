@@ -113,11 +113,11 @@ public class CommandTypeConstant {
 	public static final byte SPORT_DEV_CONTORL_SUCC=(byte)0x00;
 	public static final byte SPORT_DEV_CONTORL_FAIL=(byte)0xFF;
 	public static final byte SPORT_DEV_CONTORL_NOT_LOGIN=(byte)0xFE;
-	public static final byte SPORT_DEV_CONTORL_NONE_DEV=(byte)0xFD;
-	public static final byte SPORT_DEV_CONTORL_DEV_OFFLINE=(byte)0xFC;
-	public static final byte SPORT_DEV_CONTORL_IN_CONTORL=(byte)0xFB;
-	public static final byte SPORT_DEV_CONTORL_DEV_FREE=(byte)0xFA;
-	public static final byte SPORT_DEV_CONTORL_UNREACH=(byte)0xF9;
+	public static final byte SPORT_DEV_CONTORL_NONE_DEV=(byte)0x9F;
+	public static final byte SPORT_DEV_CONTORL_DEV_OFFLINE=(byte)0x9E;
+	public static final byte SPORT_DEV_CONTORL_IN_CONTORL=(byte)0x9D;
+	public static final byte SPORT_DEV_CONTORL_DEV_FREE=(byte)0x9C;
+	public static final byte SPORT_DEV_CONTORL_UNREACH=(byte)0x9B;
 
 	public static final byte SPORT_DEV_CONTORL_GREATER_MAX=(byte)0x00;
 	public static final byte SPORT_DEV_CONTORL_LESS_MIN=(byte)0x01;
@@ -127,5 +127,8 @@ public class CommandTypeConstant {
 
 	public static final byte SPORT_DEV_CANNOT_CONTROL=0x00;
 	public static final byte SPORT_DEV_CAN_CONTROL=0x01;
+
+	public static final byte IDLE_HEART_REQUEST=(byte)0x06;
+	public static final byte IDLE_HEART_RESPONSE=(byte)0x60;
 
 }

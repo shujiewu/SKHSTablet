@@ -72,7 +72,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
 
                 if (mOnItemLongClickListener != null) {
                     //注意这里使用getTag方法获取数据
-                    mOnItemLongClickListener.onItemLongClick(view, (String) view.getTag());
+                    mOnItemLongClickListener.onItemLongClick(view, (Integer) view.getTag());
                 }
                 //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
                 return true;
@@ -111,24 +111,27 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         }
 
         public void bind(MutiMonitorHolder viewHolder, PatientDetail patient) {
+            System.out.println("muti1");
             viewHolder.name.setText(patient.getName());
             viewHolder.dev.setText(patient.getDev());
             viewHolder.percent.setText(patient.getPercent());
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
             viewHolder. tvDevNumber.setText(patient.getDeviceNumber());
-
+            System.out.println("muti2");
 
             recyclerPhyParaView.setLayoutManager(new GridLayoutManager(context,2));
             ViewGroup.LayoutParams layoutParams = recyclerPhyParaView.getLayoutParams();
-            int lineNumber = patient.getPhyDevName().size()%2;
+            //int lineNumber = patient.getPhyDevName().size()%2;
             //layoutParams.height =200;
             recyclerPhyParaView.setLayoutParams(layoutParams);
             //recyclerPhyParaView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerPhyParaView.setAdapter(new PatientParaAdapter(patient.getPhyDevName(),patient.getPhyDevValue()));
+            if(patient.getPhyDevName()!=null)
+                recyclerPhyParaView.setAdapter(new PatientParaAdapter(patient.getPhyDevName(),patient.getPhyDevValue()));
 
             recyclerSportParaView.setLayoutManager(new GridLayoutManager(context,2));
-            recyclerSportParaView.setAdapter(new SportDevParaAdapter(patient.getSportDevName(),patient.getSportDevValue()));
-
+            if(patient.getSportDevName()!=null)
+                recyclerSportParaView.setAdapter(new SportDevParaAdapter(patient.getSportDevName(),patient.getSportDevValue()));
+            System.out.println("muti3");
             //TracksItemDecorator itemDecorator = new TracksItemDecorator(
              //       context.getResources().getDimensionPixelSize(R.dimen.decoration_size));
             //recyclerSportParaView.addItemDecoration(itemDecorator);
@@ -136,6 +139,6 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         }
     }
     public static interface OnRecyclerViewItemLongClickListener {
-        void onItemLongClick(View view , String data);
+        void onItemLongClick(View view ,Integer data);
     }
 }

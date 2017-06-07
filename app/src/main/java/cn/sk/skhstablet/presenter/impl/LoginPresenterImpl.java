@@ -92,10 +92,12 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
         //request.setLoginNameLength((byte) loginName.length());
         request.setLoginName(loginName);
         request.setLoginKey(key);
-        invoke(TcpUtils.send(request), new Action1<Void>() {
+        invoke(TcpUtils.send(request),  new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("验证发送完成");
+                this.unsubscribe();
             }
         });
     }
@@ -119,16 +121,20 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
         monitorDevFormRequest.setUserID(AppConstants.USER_ID);
         monitorDevFormRequest.setDeviceType(AppConstants.DEV_TYPE);
         monitorDevFormRequest.setRequestID(AppConstants.PHY_FORM_REQ_ID);
-        invoke(TcpUtils.send(sportDevFormRequest), new Action1<Void>() {
+        invoke(TcpUtils.send(sportDevFormRequest), new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("运动设备格式发送完成");
+                this.unsubscribe();
             }
         });
-        invoke(TcpUtils.send(monitorDevFormRequest), new Action1<Void>() {
+        invoke(TcpUtils.send(monitorDevFormRequest), new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("监护格式发送完成");
+                this.unsubscribe();
             }
         });
     }

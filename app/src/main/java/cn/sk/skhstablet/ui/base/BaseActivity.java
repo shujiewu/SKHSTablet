@@ -30,9 +30,6 @@ import cn.sk.skhstablet.receiver.NetworkStateReceiver;
 
 @SuppressLint({ "ResourceAsColor", "NewApi" })
 public abstract class BaseActivity<T extends BasePresenter> extends AppCompatActivity{
-   // protected LoadingPage mLoadingPage;
-   // @Inject
-   // protected T mPresenter;
 
     @Inject
     protected T mPresenter;
@@ -65,7 +62,8 @@ public abstract class BaseActivity<T extends BasePresenter> extends AppCompatAct
         }
     }
 
-    // 双击返回键�?�?/*	@Override
+    // 双击返回键
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_DOWN) {

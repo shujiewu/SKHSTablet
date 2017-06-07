@@ -1,6 +1,7 @@
 package cn.sk.skhstablet.model;
 import java.io.Serializable;
 
+import static cn.sk.skhstablet.app.AppConstants.DEV_NAME;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
@@ -171,5 +172,21 @@ public class Patient implements Comparable<Patient>, Serializable{
 
     public void setSportPlanSegment(byte sportPlanSegment) {
         this.sportPlanSegment = sportPlanSegment;
+    }
+
+    public Patient(int patientID,String name, String gender, String hospitalNumber, byte phyConnectState,byte monConnectState,byte sportState,String deviceNumber,byte devType,byte connectState,String selectStatus)
+    {
+        this.patientID=patientID;
+        this.name=name;
+        this.gender=gender;
+        this.hospitalNumber=hospitalNumber;
+        this.phyConnectState=phyConnectState;
+        this.monConnectState=monConnectState;
+        this.sportState=sportState;
+        this.deviceNumber=deviceNumber;
+        this.devType=devType;
+        this.dev=DEV_NAME.get(devType);
+        this.connectState=connectState;
+        this.selectStatus=selectStatus;
     }
 }

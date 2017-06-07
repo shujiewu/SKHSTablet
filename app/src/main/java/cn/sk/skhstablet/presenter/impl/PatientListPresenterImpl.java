@@ -19,6 +19,7 @@ import cn.sk.skhstablet.protocol.up.LogoutRequest;
 import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.protocol.up.PatientListRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
+import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.Callback;
@@ -27,8 +28,12 @@ import cn.sk.skhstablet.ui.fragment.SingleMonitorFragment;
 import rx.Subscription;
 import rx.functions.Action1;
 
+import static cn.sk.skhstablet.app.AppConstants.CONTROL_REQ_ID;
 import static cn.sk.skhstablet.app.AppConstants.LOGIN_KEY;
 import static cn.sk.skhstablet.app.AppConstants.LOGIN_NAME;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.isCancelSingle;
 import static cn.sk.skhstablet.app.AppConstants.isLogout;
@@ -57,10 +62,12 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         patientListRequest.setDeviceType(AppConstants.DEV_TYPE);
         patientListRequest.setRequestID(AppConstants.PATIENT_LIST_REQ_ID);
         //System.out.println("send patientListRequest!");
-        invoke(TcpUtils.send(patientListRequest), new Action1<Void>() {
+        invoke(TcpUtils.send(patientListRequest), new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send patientListRequest!");
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("病人列表发送完成");
+                this.unsubscribe();
             }
         });
     }
@@ -82,6 +89,12 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                 if(netState==AppConstants.STATE_DIS_CONN)
                     reconnect();
             }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("多人监控发送完成");
+                this.unsubscribe();
+            }
         });
     }
 
@@ -101,6 +114,12 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                 if(netState==AppConstants.STATE_DIS_CONN)
                     reconnect();
             }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("取消单人监控发送完成");
+                this.unsubscribe();
+            }
         });
     }
 
@@ -118,6 +137,13 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                 if(netState==AppConstants.STATE_DIS_CONN)
                     reconnect();
             }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("注销发送完成");
+                this.unsubscribe();
+            }
+
         });
     }
 
@@ -132,7 +158,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         {
                             int patientID;
                             //说明更改了数据，新数据为全局变量
-                            for(Patient patient:AppConstants.PATIENT_LIST_DATA)
+                            for(Patient patient: PATIENT_LIST_DATA)
                             {
                                 patientID=patient.getPatientID();
                                 if(hasPatient.containsKey(patientID))//说明已存在,且只有一个人
@@ -153,6 +179,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                                 }
                             }
                             mView.refreshView(mDatas);
+                            testPatientList();
                         }
                         else if(b==CommandTypeConstant.PATIENT_LIST_NONE_FAIL)
                         {
@@ -236,6 +263,27 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         }
                     }
                 });
+        Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Byte.class)
+                .subscribe(new Action1<Byte>() {
+                    @Override
+                    public void call(Byte b) {
+                        if(b== CommandTypeConstant.SUCCESS)
+                        {
+                            mView.setMutiPageState(AppConstants.STATE_SUCCESS);
+                            //mDatas.clear();
+                            //hasMutiPatient.clear();
+                            //position=0;
+
+                        }
+                        else if(b==CommandTypeConstant.NONE_FAIL)
+                        {
+                            System.out.println("多人监控获取未知错误");
+                        }
+                        else {
+                            System.out.println("未登录");
+                        }
+                    }
+                });
 
     }
     public void sendVerify()
@@ -246,17 +294,77 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         request.setRequestID(AppConstants.LOGIN_REQ_ID);
         request.setLoginName(LOGIN_NAME);
         request.setLoginKey(LOGIN_KEY);
-        invoke(TcpUtils.send(request), new Action1<Void>() {
+        invoke(TcpUtils.send(request), new Callback<Void>() {
             @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("重连验证发送完成");
+                this.unsubscribe();
             }
         });
     }
+
+    @Override
+    public void sendControl(String deviceID,byte parameterCode,byte paraType,byte paraControlValue) {
+        if(deviceID!=null)
+        {
+            SportDevControlRequest sportDevControlRequest=new SportDevControlRequest(CommandTypeConstant.SPORT_DEV_CONTROL_REQUEST);
+            sportDevControlRequest.setUserID(AppConstants.USER_ID);
+            sportDevControlRequest.setDeviceType(AppConstants.DEV_TYPE);
+            sportDevControlRequest.setRequestID(CONTROL_REQ_ID);
+            sportDevControlRequest.setDeviceID(deviceID);
+            sportDevControlRequest.setParameterCode(parameterCode);
+            sportDevControlRequest.setParaType(paraType);
+            sportDevControlRequest.setParaControlValue(paraControlValue);
+            invoke(TcpUtils.send(sportDevControlRequest), new Callback<Void>() {
+                @Override
+                public void onCompleted() {
+                    super.onCompleted();
+                    System.out.println("参数修改发送完成");
+                    this.unsubscribe();
+                }
+            });
+        }
+    }
+
     @Inject
     public PatientListPresenterImpl()
     {
 
+    }
+    void testPatientList()
+    {
+        int size=PatientList.PATIENTS.size();
+        for(int i=0;i<size;i++)
+        {
+            if(!PATIENT_LIST_NAME_FORM.containsKey(PatientList.PATIENTS.get(i).getPatientID()))
+            {
+                PATIENT_LIST_NAME_FORM.put(PatientList.PATIENTS.get(i).getPatientID(),PatientList.PATIENTS.get(i).getName());
+                PATIENT_LIST_NUMBER_FORM.put(PatientList.PATIENTS.get(i).getPatientID(),PatientList.PATIENTS.get(i).getHospitalNumber());
+            }
+        }
+        int patientID;
+        for(Patient patient:PatientList.PATIENTS)
+        {
+            patientID=patient.getPatientID();
+            if(hasPatient.containsKey(patientID))//说明已存在,且只有一个人
+            {
+                patient.setName(mDatas.get(hasPatient.get(patientID)).getName());
+                patient.setGender(mDatas.get(hasPatient.get(patientID)).getGender());
+                patient.setHospitalNumber(mDatas.get(hasPatient.get(patientID)).getHospitalNumber());
+                patient.setSelectStatus(mDatas.get(hasPatient.get(patientID)).getSelectStatus());
+                mDatas.set(hasPatient.get(patientID),patient);
+                mView.refreshView(patient,hasPatient.get(patientID));
+                return;
+            }
+            else
+            {
+                mDatas.add(patient);
+                hasPatient.put(patientID,position++);
+                System.out.println(patient.getPatientID());
+            }
+        }
+        mView.refreshView(mDatas);
     }
 
 }

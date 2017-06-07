@@ -113,7 +113,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                     public void afterTextChanged(Editable s) {
                         if(!s.toString().isEmpty())
                         {
-                            if (mOnEditChangeListener != null) {
+                            if (mOnEditChangeListener != null&&!s.toString().equals(viewHolder.tvSportParaValue.getText().toString())) {
                                 //注意这里使用getTag方法获取数据
                                 mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getmTextViewQuantity().getTag(),s.toString());
                             }
@@ -123,6 +123,10 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                     }
                 };
                 viewHolder.qvSportParaValue.getmTextViewQuantity().addTextChangedListener(textWatcher);
+            }
+            else
+            {
+                viewHolder.qvSportParaValue.setVisibility(View.GONE);
             }
             /*if (!paraName.equals("坡度"))
             {

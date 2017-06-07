@@ -140,7 +140,7 @@
                             android:gravity="center"
                             android:id="@+id/spercent"
                             android:textSize="20sp"
-                            android:text="10%"/>
+                          />
                     </LinearLayout>
 
 
@@ -224,7 +224,7 @@
                     <cn.sk.skhstablet.component.PaperButton
                         android:id="@+id/bt_change"
                         widget:paper_corner_radius="19dp"
-                        android:layout_marginLeft="50dp"
+
                         android:layout_gravity="center_horizontal"
                         android:layout_width="0dp"
                         android:layout_weight="0.5"

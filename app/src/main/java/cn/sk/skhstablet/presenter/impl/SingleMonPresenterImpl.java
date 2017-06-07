@@ -11,12 +11,15 @@ import javax.inject.Inject;
 
 import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.app.CommandTypeConstant;
+import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
+import cn.sk.skhstablet.model.PatientList;
 import cn.sk.skhstablet.model.PatientPhyData;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.protocol.ControlState;
+import cn.sk.skhstablet.protocol.SportDevForm;
 import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
@@ -30,6 +33,11 @@ import rx.Subscription;
 import rx.functions.Action1;
 
 import static cn.sk.skhstablet.app.AppConstants.CONTROL_REQ_ID;
+import static cn.sk.skhstablet.app.AppConstants.DEV_NAME;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
+import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
+import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
+import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
 import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
@@ -65,6 +73,7 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                     @Override
                     public void call(PatientDetail s) {
                         mView.refreshView(s);
+
                     }
                 });
 
@@ -74,6 +83,7 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                     public void call(PatientPhyData s) {
                         System.out.println("生理數據接收");
                         mView.refreshPhyData(s);
+
                     }
                 });
         Subscription singlePageSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_REQ_STATE,Byte.class)
@@ -89,6 +99,7 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                         else {
                             System.out.println("未登录");
                         }
+                        //testSinglePatient();
                     }
                 });
 
@@ -108,19 +119,24 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
 
     @Override
     public void sendControlStartStop(int patientID, String deviceID,byte type) {
-        SportDevControlRequest sportDevControlRequest=new SportDevControlRequest(CommandTypeConstant.SPORT_DEV_CONTROL_REQUEST);
-        sportDevControlRequest.setUserID(AppConstants.USER_ID);
-        sportDevControlRequest.setDeviceType(AppConstants.DEV_TYPE);
-        sportDevControlRequest.setRequestID(CONTROL_REQ_ID);
-        sportDevControlRequest.setDeviceID(deviceID);
-        sportDevControlRequest.setParameterCode(CommandTypeConstant.SPORT_DEV_START_STOP);
-        sportDevControlRequest.setParaType(type);
-        invoke(TcpUtils.send(sportDevControlRequest), new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
-            }
-        });
+        if(deviceID!=null)
+        {
+            SportDevControlRequest sportDevControlRequest=new SportDevControlRequest(CommandTypeConstant.SPORT_DEV_CONTROL_REQUEST);
+            sportDevControlRequest.setUserID(AppConstants.USER_ID);
+            sportDevControlRequest.setDeviceType(AppConstants.DEV_TYPE);
+            sportDevControlRequest.setRequestID(CONTROL_REQ_ID);
+            sportDevControlRequest.setDeviceID(deviceID);
+            sportDevControlRequest.setParameterCode(CommandTypeConstant.SPORT_DEV_START_STOP);
+            sportDevControlRequest.setParaType(type);
+            invoke(TcpUtils.send(sportDevControlRequest), new Callback<Void>() {
+                @Override
+                public void onCompleted() {
+                    super.onCompleted();
+                    System.out.println("启停控制发送完成");
+                    this.unsubscribe();
+                }
+            });
+        }
     }
 
     public void sendRequest(String ID)
@@ -140,6 +156,12 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                 if(netState==AppConstants.STATE_DIS_CONN)
                     reconnect();
             }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("重新发送单人监控生理仪发送完成");
+                this.unsubscribe();
+            }
         });
 
 
@@ -158,6 +180,13 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                 mView.setPageState(AppConstants.STATE_ERROR);
                 if(netState==AppConstants.STATE_DIS_CONN)
                     reconnect();
+
+            }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("重新发送单人监控康复设备发送完成");
+                this.unsubscribe();
             }
         });
         //mView.setPageState(AppConstants.STATE_LOADING);
@@ -166,5 +195,37 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
     public SingleMonPresenterImpl()
     {
 
+    }
+
+    void testSinglePatient()
+    {
+        Patient patient= PatientList.PATIENTS.get(2);
+        PatientDetail patientDetail=new PatientDetail();
+        patientDetail.setPatientID(patient.getPatientID());
+        patientDetail.setName(PATIENT_LIST_NAME_FORM.get(patientDetail.getPatientID()));
+        patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(patientDetail.getPatientID()));
+        patientDetail.setDev(DEV_NAME.get(patient.getDevType()));
+        patientDetail.setDevType(patient.getDevType());
+        patientDetail.setDeviceNumber(patient.getDeviceNumber());
+        patientDetail.setPercent("90");
+        List<String> sportDevName=new ArrayList<String>();  //指的是参数名称，而不是设备名称
+        List<String> phyDevName=new ArrayList<String>(Arrays.asList("心率","收缩压","舒张压","血氧"));
+        List<String> phyDevValue=new ArrayList<String>(Arrays.asList("99","99","132","94"));
+        List<String> sportDevValue=new ArrayList<String>();
+
+        List<SportDevForm> sportDevForms=SPORT_DEV_FORM.get(patient.getDevType());
+        String [] val=new String[]{"780","119","1208","51","3"};
+        for(int i=0;i<sportDevForms.size();i++) {
+            sportDevName.add(sportDevForms.get(i).getChineseName());
+            sportDevValue.add(val[i]);///byte
+        }
+        patientDetail.setPhyDevName(phyDevName);
+        patientDetail.setPhyDevValue(phyDevValue);
+        patientDetail.setSportDevName(sportDevName);
+        patientDetail.setSportDevValue(sportDevValue);
+       // if(mView.getState()==AppConstants.STATE_SUCCESS)
+        //{
+        mView.refreshView(patientDetail);
+       // }//成功界面才更新，否则抛弃
     }
 }

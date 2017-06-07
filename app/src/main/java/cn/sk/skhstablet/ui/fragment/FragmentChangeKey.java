@@ -163,11 +163,6 @@ PaperButton nextBt;
 
             }
         });
-
-
-
-
-
     }
 
     private String loginName;
@@ -176,6 +171,7 @@ PaperButton nextBt;
     @Override
     protected void initView(View view)  {
         //下一步的点击事件
+        mPresenter.registerFetchResponse();
         nextBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -189,8 +185,7 @@ PaperButton nextBt;
                    // fg_regist.setBackgroundResource(R.color.colorAccent);
                     re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
                     loginnameIv.setAnimation(Tools.shakeAnimation(2));
-                    showSnackar(view,"请输入手机号码");
-
+                    showSnackar(view,"请输入登录名");
                     return;
                 }
                 if (TextUtils.isEmpty(password)){
@@ -226,37 +221,7 @@ PaperButton nextBt;
                 loginName=name;
                 oldKey=password;
                 newKey=newpass;
-                mPresenter.registerFetchResponse();
                 loadData();
- /*               final MyUser user = new MyUser();
-                user.setPassword(password);
-                user.setMobilePhoneNumber(phone);
-                user.signOrLogin(getActivity(), code, new SaveListener() {
-
-                    @Override
-                    public void onSuccess() {
-                        Tools.saveUserInfo(getActivity(),"userinfo",phone,password);
-                        // TODO Auto-generated method stub
-                      //  fg_regist.setBackgroundResource(R.color.green);
-                        Intent intent = new Intent(getActivity(), UserNameActivity.class);
-                        startActivity(intent);
-                        getActivity().overridePendingTransition(R.anim.fade,
-                                R.anim.my_alpha_action);
-                        Log.i("smile", ""+ BmobUser.getCurrentUser(getActivity(),MyUser.class).getUsername()+"-"+user.getAge()+"-"+user.getObjectId()+"-"+user.getEmail());
-                    }
-
-                    @Override
-                    public void onFailure(int code, String msg) {
-                        // TODO Auto-generated method stub
-
-                        rela_recode.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                        keyIv.setAnimation(Tools.shakeAnimation(2));
-                        showSnackar(view,"IYO提示：验证码错误");
-                       // fg_regist.setBackgroundResource(R.color.colorAccent);
-                    }
-                });*/
-
-
             }
         });
 

@@ -125,11 +125,11 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
 
         mutiMonitorAdapter.setOnItemLongClickListener(new MutiMonitorAdapter.OnRecyclerViewItemLongClickListener(){
             @Override
-            public void onItemLongClick(View view , String data){
+            public void onItemLongClick(View view ,Integer data){
                 //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
                 MainActivity mainActivity=(MainActivity) getActivity();
                 view.setPressed(false);
-                mainActivity.newSingleMonitorID=data;
+                mainActivity.newSingleMonitorID=String.valueOf(data);
                 mainActivity.showFragment(mainActivity.FRAGMENT_SINGLE);
             }
         });
@@ -173,7 +173,10 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
     @Override
     public void setPageState(int state) {
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
+        {
             this.setState(AppConstants.STATE_SUCCESS);
+        }
+
         //else if(state==AppConstants.)
         System.out.println("pagestatesucceses");
     }

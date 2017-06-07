@@ -36,6 +36,7 @@ public class Callback<T> extends Subscriber<T> {
     public void onError(Throwable e) {
         e.printStackTrace();
         onfail();
+        //this.unsubscribe();
     }
 
     @Override
@@ -74,7 +75,6 @@ public class Callback<T> extends Subscriber<T> {
         else
         {
             System.out.println("尝试重新连接");
-            //if(mConnection==null)
             TcpUtils.reconnect();
         }
     }

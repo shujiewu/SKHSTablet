@@ -31,6 +31,7 @@ import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
 import cn.sk.skhstablet.protocol.down.SportDevControlResponse;
 import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
+import cn.sk.skhstablet.protocol.up.IdleHeartRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.Stateful;
@@ -60,6 +61,7 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
+import static cn.sk.skhstablet.app.CommandTypeConstant.IDLE_HEART_REQUEST;
 import static cn.sk.skhstablet.app.CommandTypeConstant.MUTI_MONITOR_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.model.PatientDetailList.phyValue;
@@ -151,30 +153,29 @@ public class TcpUtils {
 
                         })
                         .channelOption(ChannelOption.SO_KEEPALIVE, true)
-                        .channelOption(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000) //服务器掉线还要等五秒，自己掉线直接重连
+                        //.channelOption(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000) //服务器掉线还要等五秒，自己掉线直接重连
                         //.readTimeOut(5, TimeUnit.SECONDS) //5秒未读到数据
+                        .readTimeOut(15, TimeUnit.SECONDS) //15秒未读到数据
                         .createConnectionRequest()
 
                         .subscribe(new Observer<Connection<AbstractProtocol, AbstractProtocol>>() {
                             @Override
                             public void onCompleted() {
-                                subscriber.onCompleted();Log.e("r","rc2");
+                                subscriber.onCompleted();
+                                subscriber.unsubscribe();
                             }
 
                             @Override
                             public void onError(Throwable e) {
                                 subscriber.onError(e);
-                                //reconnect();
                                 subscriber.unsubscribe();
                                 e.printStackTrace();
-                                Log.e("r","rc");
                              }
 
                             @Override
                             public void onNext(Connection<AbstractProtocol, AbstractProtocol> connection) {
                                 mConnection = connection;
                                 subscriber.onNext(true);
-                                Log.e("10.40","1");
                                 netState=AppConstants.STATE_CONN;
                             }
                         });
@@ -264,7 +265,7 @@ public class TcpUtils {
     private static int reconnectTime=0;
     public static void reconnect() {
         reconnectTime++;
-        if(reconnectTime==20)
+        if(reconnectTime==10)
         {
             RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
             reconnectTime=0;
@@ -280,18 +281,51 @@ public class TcpUtils {
                 if (mConnection != null)
                 {
                     mConnection.closeNow();
-                    Log.e("error1", "close");
                 }
-                Log.e("error", "reconnect");
-                //re(AppConstants.url, AppConstants.port);
-
                 invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
                     @Override
                     public void onResponse(Boolean data) {
                         fetchData();
                         RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(true));
-                        //lifecycle.reSendRequest();
                         reconnectTime=0;
+                    }
+                    @Override
+                    public void onCompleted() {
+                        super.onCompleted();
+                        this.unsubscribe();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println("尝试重新连接");
+                        reconnect();
+                        this.unsubscribe();
+                    }
+                });
+            }
+        }));
+    }
+
+    private static int heartTime =5;
+    public static void sendIdleHeart()
+    {
+        Observable.interval(heartTime, TimeUnit.SECONDS).subscribe((new Action1<Long>() {
+            @Override
+            public void call(Long aLong) {
+                IdleHeartRequest idleHeartRequest=new IdleHeartRequest(IDLE_HEART_REQUEST) ;
+                idleHeartRequest.setUserID(AppConstants.USER_ID);
+                idleHeartRequest.setDeviceType(AppConstants.DEV_TYPE);
+                idleHeartRequest.setRequestID((byte)0x00);
+                invoke(TcpUtils.send(idleHeartRequest),new Callback<Void>() {
+                    @Override
+                    public void onCompleted() {
+                        super.onCompleted();
+                        System.out.println("心跳发送完成");
+                        this.unsubscribe();
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        this.unsubscribe();
                     }
                 });
             }
@@ -304,7 +338,6 @@ public class TcpUtils {
     }
     public static void fetchData()
     {
-        Log.e("error", "refetch");
         invoke(TcpUtils.receive(), new Callback<AbstractProtocol>() {
             @Override
             public void onError(Throwable e) {
@@ -317,7 +350,6 @@ public class TcpUtils {
                 //  buf.readBytes(req);
 //                int i=((ExerciseEquipmentDataResponse)data).getPatientId();
 //                Log.e("login",String.valueOf(i));
-                Log.e("10.40","2");
                 if(data==null)
                     return;
                 byte dataType=0;
@@ -342,10 +374,10 @@ public class TcpUtils {
                         {
                             RxBus.getDefault().post(AppConstants.SINGLE_DATA,patientDetail);
                         }
-                        if(hasMutiPatient.containsKey(patientDetail.getPatientID()))
-                        {
+                        //if(hasMutiPatient.containsKey(patientDetail.getPatientID()))
+                        //{
                             RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
-                        }
+                       // }
                         /*patientDetail.setPatientID(response.getPatientId());
                         patientDetail.setName(PATIENT_LIST_NAME_FORM.get(response.getPatientId()));
                         patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(response.getPatientId()));
@@ -514,6 +546,7 @@ public class TcpUtils {
                             String userName=((LoginAckResponse)data).getUserName();
                             System.out.println(userName);
                             AppConstants.USER_ID=((LoginAckResponse)data).getUserID();
+                            sendIdleHeart();
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
                         }
                         else

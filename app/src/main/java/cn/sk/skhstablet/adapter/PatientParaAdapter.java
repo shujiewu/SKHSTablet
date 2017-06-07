@@ -29,6 +29,7 @@ public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.
     {
         this.phyDevName=phyDevName;
         this.phyDevValue=phyDevValue;
+        //System.out.println("muti4");
     }
     @Override
     public PatientParaAdapter.PatientParaHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -51,6 +52,7 @@ public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.
         //private TextView tvParaName2;
         private TextView tvParaValue1;
         //private TextView tvParaValue2;
+
         public PatientParaHolder(View view)
         {
             super(view);
@@ -62,7 +64,7 @@ public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.
                 tvParaName1.setTextSize(18);
                 tvParaValue1.setTextSize(22);
             }
-
+            //System.out.println("muti5");
             //tvParaValue2=(TextView) view.findViewById(R.id.paravalue2);
         }
         public void bind(PatientParaHolder viewHolder, String paraName,String paraValue) {

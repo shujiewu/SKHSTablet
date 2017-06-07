@@ -28,6 +28,8 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
+import static java.lang.Long.MIN_VALUE;
+
 @Sharable
 public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 
@@ -264,11 +266,14 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 	}
 	private void encodeSportDevControlRequest(SportDevControlRequest request,  ByteBuf out) throws UnsupportedEncodingException {
 		//byte [] deviceID=new;
-		byte [] deviceID=new byte[8];
+		/*byte [] deviceID=new byte[8];
 		for(int i=0;i<8;i++)
 		{
 			deviceID[i]=Byte.parseByte(request.getDeviceID().substring(i*2,i*2+2));//这里需要判断
-		}
+			System.out.println(deviceID[i]);
+		}*/
+		long deviceNumber=parseUnsignedLong(request.getDeviceID(),16);
+
 
 		/*byte[] bytes=request.getDeviceID().getBytes("US-ASCII");
 		System.out.println(bytes.length);
@@ -278,12 +283,75 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		for(int i=0;i<bytes.length-1;i++){
 			System.out.print(bytes[i]);
 		}*/
-		out.writeBytes(deviceID);
+		//out.writeBytes(deviceID);
+		out.writeLong(deviceNumber);
 		out.writeByte(request.getParameterCode());
 		out.writeByte(request.getParaType());
 		//System.out.println(bytes);
 
 		if(request.getParameterCode()!=CommandTypeConstant.SPORT_DEV_START_STOP)
 			out.writeByte(request.getParaControlValue());
+
+	}
+
+
+	public static int compareUnsigned(long x, long y) {
+		return compare(x + MIN_VALUE, y + MIN_VALUE);
+	}
+	public static int compare(long x, long y) {
+		return (x < y) ? -1 : ((x == y) ? 0 : 1);
+	}
+	public static long parseUnsignedLong(String s, int radix)
+			throws NumberFormatException {
+		if (s == null)  {
+			throw new NumberFormatException("null");
+		}
+
+		int len = s.length();
+		if (len > 0) {
+			char firstChar = s.charAt(0);
+			if (firstChar == '-') {
+				throw new
+						NumberFormatException(String.format("Illegal leading minus sign " +
+						"on unsigned string %s.", s));
+			} else {
+				if (len <= 12 || // Long.MAX_VALUE in Character.MAX_RADIX is 13 digits
+						(radix == 10 && len <= 18) ) { // Long.MAX_VALUE in base 10 is 19 digits
+					return Long.parseLong(s, radix);
+				}
+
+				// No need for range checks on len due to testing above.
+				long first = Long.parseLong(s.substring(0, len - 1), radix);
+				int second = Character.digit(s.charAt(len - 1), radix);
+				if (second < 0) {
+					throw new NumberFormatException("Bad digit at end of " + s);
+				}
+				long result = first * radix + second;
+				if (compareUnsigned(result, first) < 0) {
+                    /*
+                     * The maximum unsigned value, (2^64)-1, takes at
+                     * most one more digit to represent than the
+                     * maximum signed value, (2^63)-1.  Therefore,
+                     * parsing (len - 1) digits will be appropriately
+                     * in-range of the signed parsing.  In other
+                     * words, if parsing (len -1) digits overflows
+                     * signed parsing, parsing len digits will
+                     * certainly overflow unsigned parsing.
+                     *
+                     * The compareUnsigned check above catches
+                     * situations where an unsigned overflow occurs
+                     * incorporating the contribution of the final
+                     * digit.
+                     */
+					throw new NumberFormatException(String.format("String value %s exceeds " +
+							"range of unsigned long.", s));
+				}
+				return result;
+			}
+		}
+		else
+		{
+			throw new NumberFormatException("Bad digit at end of " + s);
+		}
 	}
 }

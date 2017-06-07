@@ -139,16 +139,6 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
     protected abstract void initInject();
     protected abstract void loadData();
 
-
-
-
-
-
-
-
-
-
-
     private CompositeSubscription mCompositeSubscription;
     //用于添加rx的监听的在onDestroy中记得关闭不然会内存泄漏。
     @Override
@@ -161,9 +151,6 @@ public abstract class BaseFragment <P extends BasePresenter> extends Fragment im
     @Override
     public void onDetach() {
         super.onDetach();
-        //if (bind != null) {
-       //     bind.unbind();
-       // }
         if (this.mCompositeSubscription != null && mCompositeSubscription.hasSubscriptions()) {
             this.mCompositeSubscription.unsubscribe();
         }
