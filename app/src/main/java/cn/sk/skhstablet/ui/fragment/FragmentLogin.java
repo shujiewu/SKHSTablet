@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -99,6 +100,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         if (mPresenter!=null){
             mPresenter.setView(this);
         }
+       Log.e("login","succees1");
         initLogin();
         textListener();
     }
@@ -107,23 +109,15 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         userphone.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                String text = userphone.getText().toString();
-                if(CheckUtils.isMobile(text)){
-                    //抖动
-                    rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-
-                }
-
             }
         });
         userpass.addTextChangedListener(new TextWatcher() {
@@ -139,9 +133,6 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
 
             @Override
             public void afterTextChanged(Editable s) {
-
-                    //rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-
             }
         });
     }
@@ -151,6 +142,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         SharedPreferences userinfo = getActivity().getSharedPreferences("userinfo", 0);
         userphone.setText(userinfo.getString("username",null));
         userpass.setText(userinfo.getString("password",null));
+
         bt_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -158,86 +150,35 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 final String key = userpass.getText().toString();
                 final  View view= v;
 
-                /*if (TextUtils.isEmpty(phone)){
+                if (TextUtils.isEmpty(userID)){
                     rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
                     loginusericon.setAnimation(Tools.shakeAnimation(2));
-                    showSnackar(v,"IYO提示：请输入手机号码");
+                    showSnackar(v,"请输入登录名");
                     return;
                 }
-                if(!CheckUtils.isMobile(phone)){
-                    //抖动
-                    rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    loginusericon.setAnimation(Tools.shakeAnimation(2));
-                    showSnackar(v,"IYO提示：用户名不正确");
-
-
-                    return;
-                }
-                if (TextUtils.isEmpty(passwords)){
+                if (TextUtils.isEmpty(key)){
                     rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
                     codeicon.setAnimation(Tools.shakeAnimation(2));
-                    showSnackar(v,"IYO提示：请输入密码");
-
+                    showSnackar(v,"请输入密码");
                     return;
-                }*/
+                }
                 login_progress.setVisibility(View.VISIBLE);
-
-                /*Intent intent = new Intent(getActivity(), MainActivity.class);
-                startActivity(intent);
-                getActivity().overridePendingTransition(R.anim.fade,
-                        R.anim.my_alpha_action);*/
                 mPresenter.registerFetchResponse();
                 UserID=userID;
                 Key=key;
+                bt_login.setEnabled(false);
                 loadData();
 
-                bt_login.setEnabled(false);
-/*
-                BmobUser.loginByAccount(getActivity(), phone, passwords, new LogInListener<MyUser>() {
-
-                    @Override
-                    public void done(MyUser user, BmobException e) {
-                        // TODO Auto-generated method stub
-                        if(user!=null){
-                            rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-                            rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-                            showSnackar(view,"IYO提示：登陆成功");
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    login_progress.setVisibility(View.GONE);
-                                    Intent intent = new Intent(getActivity(), HomeActivity.class);
-                                    startActivity(intent);
-                                    getActivity().overridePendingTransition(R.anim.fade,
-                                            R.anim.my_alpha_action);
-
-
-                                }
-                            },1500);
-
-                        }else{
-                            login_progress.setVisibility(View.GONE);
-                            rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                            codeicon.setAnimation(Tools.shakeAnimation(2));
-                            showSnackar(view,"IYO提示：登陆失败");
-                        }
-                    }
-                });*/
             }
         });
-
-
-
-
     }
 
     @Override
     public void refreshView(Boolean mData) {
-        if(mData==true)
+        if(mData)
         {
             LOGIN_NAME=UserID;
             LOGIN_KEY=Key;
-            mPresenter.sendFormatRequest();
             login_progress.setVisibility(View.GONE);
             Intent intent = new Intent(getActivity(), MainActivity.class);
             startActivity(intent);
@@ -260,7 +201,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     @Override
     public void reSendRequest() {
         mPresenter.sendVerify(UserID,Key);
-    }
+    }//重新发送请求
 
     @Override
     protected void initInject() {
@@ -270,12 +211,15 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
 
     @Override
     protected void loadData() {
-        mPresenter.fetchStateData(UserID,Key);
+        mPresenter.sendVerify(UserID,Key);
     }
     @Override
     public void setLoginDisable() {
+        //bt_login.setEnabled(false);
+        showSnackar(getView(),"登录失败");
+        login_progress.setVisibility(View.GONE);
         bt_login.setEnabled(true);
-        login_progress.setVisibility(View.INVISIBLE);
+
     }
 }
 	

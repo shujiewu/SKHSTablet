@@ -61,8 +61,14 @@ import static cn.sk.skhstablet.app.AppConstants.STATE_EMPTY;
 import static cn.sk.skhstablet.app.AppConstants.STATE_LOADING;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
+import static cn.sk.skhstablet.app.AppConstants.mutiDatas;
+import static cn.sk.skhstablet.app.AppConstants.mutiPosition;
 import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SPORT_DEV_CONTORL_TO;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.closeConnection;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchScription;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.idleScription;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.logoutUnsubscribe;
 
 public class MainActivity extends BorderActivity implements IPatientListPresenter.View,LifeSubscription,Stateful {
     private RecyclerView mRecyclerView;
@@ -155,8 +161,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
 
-
         mPresenter.registerFetchResponse();
+        mPresenter.sendFormatRequest();
         initSearchView();
         loadData();
         //System.out.println(16.75);
@@ -303,9 +309,10 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public void loadSinglePatient(String singleID)
     {
         singleMonitorID=singleID;
+        //正常点击肯定会设置patient
         singleMonitorFragment.setPatient(patientListAdapter.mDatas.get(mPresenter.hasPatient.get(Integer.parseInt(singleMonitorID))));
         singleMonitorFragment.loadData(singleMonitorID);
-        singleMonitorFragment.getChangeDevPara().clear();
+        //singleMonitorFragment.getChangeDevPara().clear();
         isNewSingle=true;
     }
     public void showFragment(int index){
@@ -350,6 +357,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     singleMonitorFragment.loadData(singleMonitorID);
                     singleMonitorFragment.getChangeDevPara().clear();
                     isNewSingle=true;*/
+                    System.out.println("更换了单人监控对象");
                     loadSinglePatient(newSingleMonitorID);
                 }
                 else
@@ -475,6 +483,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                             @Override
                             public void onClick(SweetAlertDialog sDialog) {
                                 mPresenter.sendLogoutRequest();
+                                sDialog.dismissWithAnimation();
                             }
                         })
                         .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -502,7 +511,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     key = SPORT_DEV_FORM.get(devType).get(position).getChineseName();
                     val = (String)entry.getValue();
                     positonList.add(position);
-                    changeValueList.add(Integer.parseInt(val.substring(val.indexOf(val.indexOf("为")+1))));
+                    changeValueList.add(Integer.parseInt(val.substring(val.indexOf("为")+1)));
                     parameterCodeList.add(SPORT_DEV_FORM.get(devType).get(position).getParameterCode());
                     content=content+key+"   "+val+"\n";
                 }
@@ -574,11 +583,12 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         patientListAdapter.notifyItemChanged(position);
         if(singleMonitorFragment!=null&&singleMonitorFragment.getPatientDetail()!=null&&singleMonitorID!=null&&mData.getPatientID()==Integer.parseInt(singleMonitorID))
         {
-             singleMonitorFragment.refreshPatient(mData.getDevType(),mData.getDev(),mData.getDeviceNumber());
+             singleMonitorFragment.refreshPatient(mData);
+            //if(mData.getPhyConnectState())
         }//更新单人监控
-        if(mutiMonitorFragment.getPatientDetailList()!=null&&hasMutiPatient.containsKey(patientID))
+        if(mutiMonitorFragment.getPatientDetailList()!=null&&hasMutiPatient.containsKey(mData.getPatientID()))
         {
-             mutiMonitorFragment.refreshDevInfo(mData,hasMutiPatient.get(patientID));
+             mutiMonitorFragment.refreshDevInfo(mData,hasMutiPatient.get(mData.getPatientID()));
         }//更新多人监控
     }
 
@@ -611,38 +621,40 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             mutiMonitorFragment.setState(STATE_EMPTY);
             return;
         }//如果正在监控为0则页面设置为空
-        if(state==AppConstants.STATE_SUCCESS&&mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
+        if(state==AppConstants.STATE_SUCCESS)//&&mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS
         {
             mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
-            System.out.println("发送多人数据1");
-            if(hasMutiPatient.size()==0)
-            {
-                System.out.println("发送多人数据2");
-                for(Patient patient :patientListAdapter.mDatas)
-                {
-                    for(int number=0;number<lastMutiPatientID.size();number++)
-                    {
-                        if(patient.getPatientID()==lastMutiPatientID.get(number))
-                        {
-                            //patient.setSelectStatus(PATIENT_SELECT_STATUS_MONITOR);
-                            PatientDetail patientDetail=new PatientDetail();
-                            //patientDetail.setDevType(patient.getDevType());
-                            patientDetail.setDev(patient.getDev());
-                            patientDetail.setName(patient.getName());
-                            patientDetail.setPatientID(patient.getPatientID());
-                            patientDetail.setHospitalNumber(patient.getHospitalNumber());
-                            //patientDetail.setPercent("10");
-                            RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
-                            //patientID.add(patient.getPatientID());
-                        }
-                    }
+            mutiDatas.clear();
+            hasMutiPatient.clear();
+            mutiPosition=0;
+             for(Patient patient :patientListAdapter.mDatas)
+             {
+                 for(int number=0;number<lastMutiPatientID.size();number++)
+                 {
+                     if(patient.getPatientID()==lastMutiPatientID.get(number))
+                     {
+                         //patient.setSelectStatus(PATIENT_SELECT_STATUS_MONITOR);
+                         PatientDetail patientDetail=new PatientDetail();
+                         //patientDetail.setDevType(patient.getDevType());
+                         patientDetail.setDev(patient.getDev());
+                         patientDetail.setName(patient.getName());
+                         patientDetail.setPatientID(patient.getPatientID());
+                         patientDetail.setHospitalNumber(patient.getHospitalNumber());
+                         patientDetail.setPercent(null);
+                         patientDetail.setPhyDevValue(new ArrayList<String>());
+                         patientDetail.setPhyDevName(new ArrayList<String>());
+                         patientDetail.setSportDevName(new ArrayList<String>());
+                         patientDetail.setSportDevValue(new ArrayList<String>());
+                         RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
+                         //patientID.add(patient.getPatientID());
+                     }
+                 }
 
-                }
-            }
+             }
+           // }
             return;
             //List<PatientDetail> patientDetails=new
         }
-
         if(state==AppConstants.STATE_ERROR)
             mutiMonitorFragment.setState(AppConstants.STATE_ERROR);
     }
@@ -656,13 +668,43 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     @Override
     public void logoutSuccess(boolean b) {
         //退出
+
         if(b)
         {
             System.out.println("退出");
+            logoutUnsubscribe();
+            closeConnection();
             finish();
         }
         else
             System.out.println("未知错误");
+    }
+
+    @Override
+    public void loginOther(boolean b) {
+        if(b)
+        {
+            logoutUnsubscribe();//先关闭所有
+            new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("提示")
+                    .setContentText("你的账户已在其他设备登录")
+                    .setConfirmText("重新登录")
+                    .setCancelText("退出")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                        }
+                    })
+                    .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            closeConnection();
+                            finish();
+                        }
+                    })
+                    .show();
+        }
     }
 
     private CompositeSubscription mCompositeSubscription;

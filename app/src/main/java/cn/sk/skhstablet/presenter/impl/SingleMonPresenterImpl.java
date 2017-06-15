@@ -38,6 +38,7 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.isCancelSingle;
 import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
 import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
@@ -91,7 +92,16 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                     @Override
                     public void call(Byte b) {
                         if(b== CommandTypeConstant.SUCCESS)
-                            mView.setPageState(AppConstants.STATE_SUCCESS);
+                        {
+                            if(isCancelSingle)
+                            {
+                                mView.setPageState(AppConstants.STATE_EMPTY);
+                                isCancelSingle=false;
+                            }
+                            else
+                                mView.setPageState(AppConstants.STATE_SUCCESS);
+                        }
+
                         else if(b==CommandTypeConstant.NONE_FAIL)
                         {
                             System.out.println("单人获取未知错误");

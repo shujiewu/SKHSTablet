@@ -1,6 +1,7 @@
 package cn.sk.skhstablet.handler;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import cn.sk.skhstablet.protocol.down.DevNameResponse;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
 import cn.sk.skhstablet.protocol.down.LoginAckResponse;
+import cn.sk.skhstablet.protocol.down.LoginOtherResponse;
 import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
 import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
@@ -78,6 +80,10 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		}
 			case CommandTypeConstant.LOGIN_ACK_RESPONSE: {
 				request=decodeLoginAckResponse(reqBuf,CommandTypeConstant.LOGIN_ACK_RESPONSE);
+				break;
+			}
+			case CommandTypeConstant.LOGIN_OTHER_RESPONSE: {
+				request=decodeLoginOtherResponse(reqBuf,CommandTypeConstant.LOGIN_OTHER_RESPONSE);
 				break;
 			}
             case CommandTypeConstant.LOGOUT_ACK_RESPONSE:{
@@ -366,9 +372,12 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 					else
 						sportDevName.add(sportDevForm.getChineseName()+"("+sportDevForm.getDisplayUnit()+")");
 				}
-
 				if(sportDevForm.getRate()!=1.0)
-					sportDevValue.add(String.valueOf(value*sportDevForm.getRate()));///byte
+				{
+					BigDecimal bd = new BigDecimal(String.valueOf(value*sportDevForm.getRate()));
+					bd = bd.setScale(2,BigDecimal.ROUND_HALF_UP);
+					sportDevValue.add(bd.toString());///byte
+				}
 				else
 				{
 					if(sportDevForm.getDisplayUnit().equals("s"))
@@ -440,6 +449,13 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		}
 		return response;
 	}
+	private AbstractProtocol decodeLoginOtherResponse(ByteBuf resBuf,byte commandType)
+	{
+		LoginOtherResponse response=new LoginOtherResponse(commandType);
+		//response.setUserID(resBuf.readIntLE());
+		response.setState(resBuf.readByte());
+		return response;
+	}
 	private AbstractProtocol decodeChangeKeyAckResponse(ByteBuf resBuf,byte commandType)
 	{
 		LoginAckResponse response=new LoginAckResponse(commandType);
@@ -455,7 +471,9 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 	{
 		LoginAckResponse response=new LoginAckResponse(commandType);
 		//response.setUserID(resBuf.readIntLE());
-
+		response.setDeviceType(resBuf.readByte());
+		response.setUserID(resBuf.readIntLE());
+		response.setRequestID(resBuf.readByte());
 		response.setState(resBuf.readByte());
 		//response.setUserID(resBuf.readIntLE());
 		//byte length=resBuf.readByte();

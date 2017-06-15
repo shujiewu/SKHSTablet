@@ -30,6 +30,7 @@
         android:background="@null"
         android:text="10"
         />
+
     <cn.sk.skhstablet.component.QuantityView
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/changeQVValue"
@@ -41,6 +42,17 @@
         android:visibility="gone"
         app:qv_quantity="10" >
     </cn.sk.skhstablet.component.QuantityView>
+    <cn.sk.skhstablet.component.FloatQuantityView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/changeFloatQVValue"
+        android:layout_width="0dp"
+        android:layout_weight="0.9"
+        android:layout_height="match_parent"
+        android:paddingLeft="40dp"
+        android:paddingRight="60dp"
+        android:visibility="gone"
+        app:fqv_quantity="10" >
+    </cn.sk.skhstablet.component.FloatQuantityView>
 />
 </LinearLayout>
 

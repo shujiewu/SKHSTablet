@@ -31,6 +31,7 @@ public class PathView extends CardiographView {
             content[i]=0x10;
         }*/
         avgThread = new Thread(runnable);//定期更新平均值的线程启动
+        System.out.println("开始状态"+avgThread.getState());
     }
 
 
@@ -81,7 +82,7 @@ public class PathView extends CardiographView {
         /*drawPath(canvas);
         drawECG(canvas,content);
         scrollBy(5,0);*/
-       // postInvalidateDelayed(100);
+        // postInvalidateDelayed(100);
         if(change)
         {
             drawNewECG(canvas);
@@ -123,7 +124,21 @@ public class PathView extends CardiographView {
         if(stop)
         {
             stop=false;
-            avgThread.start();
+            while(true)
+            {
+                if(avgThread.getState()==Thread.State.NEW)
+                {
+                    avgThread.start();
+                    break;
+                }
+                System.out.println("现状状态"+avgThread.getState());
+                if(avgThread.getState()==Thread.State.TERMINATED)
+                {
+                    avgThread = new Thread(runnable);
+                    avgThread.start();
+                    break;
+                }
+            }
         }
         System.out.println("这里");
     }
@@ -131,6 +146,12 @@ public class PathView extends CardiographView {
     public void stop()
     {
         stop=true;
+        //avgThread.stop();
+        queue.clear();
+    }
+    public boolean getStop()
+    {
+        return stop;
     }
     public void drawNewECG(Canvas canvas)
     {
@@ -236,7 +257,10 @@ public class PathView extends CardiographView {
 
                 //视图更新，没有这一步，曲线不会呈现动态
                 //如果在非UI主线程中，需要调用postInvalidate()，具体参考api
+                System.out.println("运行状态"+avgThread.getState());
             }
+            System.out.println("线程已经退出");
+            System.out.println("退出状态"+avgThread.getState());
         }
     };
 

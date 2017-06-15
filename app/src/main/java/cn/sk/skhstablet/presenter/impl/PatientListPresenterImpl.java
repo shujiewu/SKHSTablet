@@ -16,10 +16,12 @@ import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.IPatientListPresenter;
 import cn.sk.skhstablet.protocol.up.LoginRequest;
 import cn.sk.skhstablet.protocol.up.LogoutRequest;
+import cn.sk.skhstablet.protocol.up.MonitorDevFormRequest;
 import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.protocol.up.PatientListRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
+import cn.sk.skhstablet.protocol.up.SportDevFormRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.Callback;
@@ -31,9 +33,12 @@ import rx.functions.Action1;
 import static cn.sk.skhstablet.app.AppConstants.CONTROL_REQ_ID;
 import static cn.sk.skhstablet.app.AppConstants.LOGIN_KEY;
 import static cn.sk.skhstablet.app.AppConstants.LOGIN_NAME;
+import static cn.sk.skhstablet.app.AppConstants.MON_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
+import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
+import static cn.sk.skhstablet.app.AppConstants.canModify;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.isCancelSingle;
 import static cn.sk.skhstablet.app.AppConstants.isLogout;
@@ -84,10 +89,11 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         invoke(TcpUtils.send(mutiMonitorRequest),new Callback<Void>() {
             @Override
             public void onError(Throwable e) {
-                Log.e("sendmuti","error");
+                System.out.println("多人监控发送失败");
                 mView.setMutiPageState(AppConstants.STATE_ERROR);
                 if(netState==AppConstants.STATE_DIS_CONN)
                     reconnect();
+                this.unsubscribe();
             }
             @Override
             public void onCompleted() {
@@ -113,6 +119,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                 Log.e("sendcancel","error");
                 if(netState==AppConstants.STATE_DIS_CONN)
                     reconnect();
+                this.unsubscribe();
             }
             @Override
             public void onCompleted() {
@@ -158,6 +165,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         {
                             int patientID;
                             //说明更改了数据，新数据为全局变量
+                            canModify=false;
                             for(Patient patient: PATIENT_LIST_DATA)
                             {
                                 patientID=patient.getPatientID();
@@ -178,8 +186,9 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                                     System.out.println(patient.getPatientID());
                                 }
                             }
+                            canModify=true;
                             mView.refreshView(mDatas);
-                            testPatientList();
+                            //testPatientList();
                         }
                         else if(b==CommandTypeConstant.PATIENT_LIST_NONE_FAIL)
                         {
@@ -190,25 +199,6 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         }
                     }
                 });
-        /*Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean b) {
-                        if(b==true)
-                            mView.setMutiPageState(AppConstants.STATE_SUCCESS);
-                    }
-                });
-        Subscription singlePageSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_REQ_STATE,Boolean.class)
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean b) {
-                        if(b==true)
-                            mView.setSinglePageState(AppConstants.STATE_SUCCESS);
-                    }
-                });
-        ((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
-        ((LifeSubscription)mView).bindSubscription(singlePageSubscription);*/
-
         ((LifeSubscription)mView).bindSubscription(listSubscription);
 
         Subscription logoutSubscription = RxBus.getDefault().toObservable(AppConstants.LOGOUT_STATE,Boolean.class)
@@ -216,7 +206,11 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                     @Override
                     public void call(Boolean b) {
                         if(b)
-                            mView.logoutSuccess(b);
+                        {
+                            System.out.println("退出3");
+                            mView.logoutSuccess(true);
+
+                        }
                     }
                 });
         ((LifeSubscription)mView).bindSubscription(logoutSubscription);
@@ -237,7 +231,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                             //mView.reSendRequest();
                     }
                 });
-
+        ((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
                     @Override
@@ -248,6 +242,11 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                             if(isLogout)
                             {
                                 sendLogoutRequest();
+                                return;
+                            }
+                            if(SPORT_DEV_FORM==null||MON_DEV_FORM==null)
+                            {
+                                sendFormatRequest();
                                 return;
                             }
                             sentPatientListRequest();
@@ -263,6 +262,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         }
                     }
                 });
+        ((LifeSubscription)mView).bindSubscription(mSubscription);
         Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Byte.class)
                 .subscribe(new Action1<Byte>() {
                     @Override
@@ -270,10 +270,6 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         if(b== CommandTypeConstant.SUCCESS)
                         {
                             mView.setMutiPageState(AppConstants.STATE_SUCCESS);
-                            //mDatas.clear();
-                            //hasMutiPatient.clear();
-                            //position=0;
-
                         }
                         else if(b==CommandTypeConstant.NONE_FAIL)
                         {
@@ -284,7 +280,20 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                         }
                     }
                 });
+        ((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
 
+
+        Subscription loginOtherSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_OTHER_STATE,Boolean.class)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean b) {
+                        if(b)
+                        {
+                            mView.loginOther(true);
+                        }
+                    }
+                });
+        ((LifeSubscription)mView).bindSubscription(loginOtherSubscription);
     }
     public void sendVerify()
     {
@@ -299,6 +308,14 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
             public void onCompleted() {
                 super.onCompleted();
                 System.out.println("重连验证发送完成");
+                this.unsubscribe();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("重连验证发送失败");
+                if(netState==AppConstants.STATE_DIS_CONN)
+                    reconnect();
                 this.unsubscribe();
             }
         });
@@ -327,6 +344,48 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
         }
     }
 
+    @Override
+    public void sendFormatRequest()
+    {
+        SportDevFormRequest sportDevFormRequest=new SportDevFormRequest(CommandTypeConstant.SPORT_DEV_FORM_REQUEST);
+        sportDevFormRequest.setUserID(AppConstants.USER_ID);
+        //System.out.println("AppConstants.USER_ID"+AppConstants.USER_ID);
+        sportDevFormRequest.setDeviceType(AppConstants.DEV_TYPE);
+        sportDevFormRequest.setRequestID(AppConstants.SPORT_FORM_REQ_ID);
+        MonitorDevFormRequest monitorDevFormRequest=new MonitorDevFormRequest(CommandTypeConstant.MONITOR_DEV_FORM_REQUEST);
+        monitorDevFormRequest.setUserID(AppConstants.USER_ID);
+        monitorDevFormRequest.setDeviceType(AppConstants.DEV_TYPE);
+        monitorDevFormRequest.setRequestID(AppConstants.PHY_FORM_REQ_ID);
+        invoke(TcpUtils.send(sportDevFormRequest), new Callback<Void>() {
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("运动设备格式发送完成");
+                this.unsubscribe();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                super.onError(e);
+                System.out.println("运动设备格式发送失败");
+                this.unsubscribe();
+            }
+        });
+        invoke(TcpUtils.send(monitorDevFormRequest), new Callback<Void>() {
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("监护格式发送完成");
+                this.unsubscribe();
+            }
+            @Override
+            public void onError(Throwable e) {
+                super.onError(e);
+                System.out.println("监护格式发送失败");
+                this.unsubscribe();
+            }
+        });
+    }
     @Inject
     public PatientListPresenterImpl()
     {

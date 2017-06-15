@@ -78,4 +78,22 @@
         <attr name="qv_maxQuantity" format="integer" />
         <attr name="qv_minQuantity" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="FloatQuantityView">
+        <attr name="fqv_addButtonText" format="string" />
+        <attr name="fqv_addButtonBackground" format="color|reference" />
+        <attr name="fqv_addButtonTextColor" format="color" />
+
+        <attr name="fqv_removeButtonText" format="string" />
+        <attr name="fqv_removeButtonBackground" format="color|reference" />
+        <attr name="fqv_removeButtonTextColor" format="color" />
+
+        <attr name="fqv_quantity" format="float" />
+        <attr name="fqv_quantityBackground" format="color|reference" />
+        <attr name="fqv_quantityTextColor" format="color" />
+        <attr name="fqv_quantityPadding" format="dimension" />
+
+        <attr name="fqv_maxQuantity" format="float" />
+        <attr name="fqv_minQuantity" format="float" />
+    </declare-styleable>
 </resources>

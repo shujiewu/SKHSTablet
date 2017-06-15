@@ -28,7 +28,7 @@ public class CommandTypeConstant {
 	/** 获取体外反博病人列表响应 **/
 	public static final byte ECP_PATIENT_LIST_RESPONSE = (byte) 0x45;
 
-
+	public static final byte LOGIN_OTHER = (byte) 0x00;
 	public static final byte LOGIN_SUCCESS = (byte) 0x00;
 	public static final byte LOGIN_MATCH_FAIL=(byte) 0x01;
 	public static final byte LOGIN_NONE_FAIL=(byte) 0xFF;
@@ -54,7 +54,9 @@ public class CommandTypeConstant {
 	public static final byte SPORT_DEV_CONNECT_ONLINE=(byte)0x00;  //已打卡
 
 	public static final byte PHY_DEV_CONNECT_ONLINE=(byte)0x00;     //生理仪在线
-	public static final byte PHY_DEV_CONNECT_OFFLINE=(byte)0x01;    //生理仪离线
+	public static final byte PHY_DEV_CONNECT_OFFLINE=(byte)0x01;    //生理仪掉线
+	public static final byte PHY_DEV_CONNECT_NONE=(byte)0x02;     //生理仪未连接
+	public static final byte PHY_DEV_NONE=(byte)0x03;    //生理仪无
 
 	public static final byte MON_DEV_CONNECT_ONLINE=(byte)0x00;     //监护设备在线
 	public static final byte MON_DEV_CONNECT_OFFLINE=(byte)0x01;    //监护设备离线
@@ -81,6 +83,7 @@ public class CommandTypeConstant {
 	public static final byte SPORT_DEV_FORM_REQUEST=(byte)0x09;
 
 	public static final byte LOGIN_ACK_RESPONSE=(byte)0x40;
+	public static final byte LOGIN_OTHER_RESPONSE=(byte)0x05;
 	public static final byte LOGOUT_ACK_RESPONSE=(byte)0x70;
 	public static final byte CHANGE_KEY_ACK_RESPONSE=(byte)0xB0;
 

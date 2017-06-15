@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -171,7 +172,8 @@ PaperButton nextBt;
     @Override
     protected void initView(View view)  {
         //下一步的点击事件
-        mPresenter.registerFetchResponse();
+
+        Log.e("login","succees3");
         nextBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -221,6 +223,7 @@ PaperButton nextBt;
                 loginName=name;
                 oldKey=password;
                 newKey=newpass;
+                mPresenter.registerFetchResponse();
                 loadData();
             }
         });

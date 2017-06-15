@@ -16,6 +16,10 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 			if (!(NetworkHelper.isNetworkConnected(context))) {
 				Toast.makeText(context, "无网络连接", Toast.LENGTH_LONG).show();
 			}
+			if(!(NetworkHelper.isAvailableByPing()))
+			{
+				Toast.makeText(context, "连接服务器失败", Toast.LENGTH_LONG).show();
+			}
 		}
 	}
 

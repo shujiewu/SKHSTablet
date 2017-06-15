@@ -35,6 +35,8 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
+import static cn.sk.skhstablet.app.AppConstants.mutiDatas;
+import static cn.sk.skhstablet.app.AppConstants.mutiPosition;
 import static cn.sk.skhstablet.utlis.Utils.secToTime;
 
 /**
@@ -47,9 +49,7 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
         //sendRequest();
     }
 
-    private List<PatientDetail> mDatas=new ArrayList<>();
 
-    private int position=0;
     @Override
     public void registerFetchResponse() {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_DATA,PatientDetail.class)
@@ -58,18 +58,17 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                     public void call(PatientDetail s) {
                         if(mView.getPageState()==AppConstants.STATE_SUCCESS)
                         {
-
                             int patientID=s.getPatientID();
                             if(hasMutiPatient.containsKey(patientID))
                             {
-                                mDatas.set(hasMutiPatient.get(patientID),s);
+                                mutiDatas.set(hasMutiPatient.get(patientID),s);
                                 mView.refreshView(s,hasMutiPatient.get(patientID));
                             }
                             else
                             {
-                                mDatas.add(s);
-                                hasMutiPatient.put(patientID,position++);
-                                mView.refreshView(mDatas);
+                                mutiDatas.add(s);
+                                hasMutiPatient.put(patientID,mutiPosition++);
+                                mView.refreshView(mutiDatas);
                                 System.out.println("收到多人数据");
                             }
                         }//成功界面才更新，否则抛弃
@@ -86,17 +85,16 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 });
 
 
-        Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Byte.class)
+        /*Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Byte.class)
                 .subscribe(new Action1<Byte>() {
                     @Override
                     public void call(Byte b) {
                         if(b== CommandTypeConstant.SUCCESS)
                         {
                             //mView.setPageState(AppConstants.STATE_SUCCESS);
-                            mDatas.clear();
+                            mutiDatas.clear();
                             hasMutiPatient.clear();
-                            position=0;
-
+                            mutiPosition=0;
                         }
                         else if(b==CommandTypeConstant.NONE_FAIL)
                         {
@@ -110,9 +108,9 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                         //testMutiData2();
                         //testMutiData3();
                     }
-                });
-        System.out.println("registermuti");
-        ((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
+                });*/
+        //System.out.println("registermuti");
+        //((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
 
         ((LifeSubscription)mView).bindSubscription(mSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
@@ -167,7 +165,7 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
 
     }
 
-    void testMutiData1()
+    /*void testMutiData1()
     {
         Patient patient=PatientList.PATIENTS.get(0);
         PatientDetail patientDetail=new PatientDetail();
@@ -312,5 +310,5 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 mView.refreshView(mDatas);
             }
         }//成功界面才更新，否则抛弃
-    }
+    }*/
 }

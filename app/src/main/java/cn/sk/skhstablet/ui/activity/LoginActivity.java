@@ -60,24 +60,16 @@ public class LoginActivity extends BaseActivity {
         //透明状态栏
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         setupViewPager();
-        //viewFade = findViewById(R.id.view_fade);
-        //ViewHelper.setAlpha(viewFade, 0);
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                rxNettyServerTest();
-            }
-        }).start();*/
-
+        //启动连接
         invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
             @Override
             public void onResponse(Boolean data) {
-                fetchData();
+                if(data)
+                {
+                    fetchData();//注册链路观察者
+                    this.unsubscribe();//取消订阅
+                }
             }
-            /*@Override
-            public void onError(Throwable e) {
-                super.onError(e);
-            }*/
         });
     }
 

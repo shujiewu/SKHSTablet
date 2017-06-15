@@ -195,7 +195,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     @Override
     public void refreshView(PatientDetail mData) {
 
-        if(patientDetail!=null&&patientDetail.getDevType()==mData.getDevType()&&patientDetail.getPatientID()==mData.getPatientID()&&patientDetail.getSportDevName()!=null)
+        if(patientDetail!=null&&patientDetail.getDevType()==mData.getDevType()&&patientDetail.getPatientID()==mData.getPatientID()&&patientDetail.getSportDevName()!=null&&patientDetail.getSportDevName().size()!=0)
         {
             devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
             devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
@@ -212,6 +212,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                  }
 
             }//局部更新
+            System.out.println("局部更新了单人监控的设备数据");
+            patientDetail= mData;//前面先更新了运动数据，后面全部更新
         }
         else
         {
@@ -220,17 +222,25 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
             devParaChangeAdapter.setDevType(patientDetail.getDevType());
             devParaChangeAdapter.notifyDataSetChanged();
+            System.out.println("更新了单人监控的设备数据");
         }
         patientParaAdapter.phyDevName=patientDetail.getPhyDevName();
         patientParaAdapter.phyDevValue=patientDetail.getPhyDevValue();
         patientParaAdapter.notifyDataSetChanged();
 
+        //设备改变
         if (patientDetail.getDeviceNumber()==null||!patientDetail.getDeviceNumber().equals(tvDevNumber.getText().toString()))
             changeDevPara.clear();
 
         name.setText(patientDetail.getName());
         dev.setText(patientDetail.getDev());
-        percent.setText(patientDetail.getPercent());
+        if(patientDetail.getPercent()!=null)
+        {
+            if(patientDetail.getPercent().isEmpty())
+                percent.setText(patientDetail.getPercent());
+            else
+                percent.setText(patientDetail.getPercent()+"%");
+        }
         tvDevNumber.setText(String.valueOf(patientDetail.getDeviceNumber()));
         tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
 
@@ -273,12 +283,31 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             patientDetail.setHospitalNumber(patient.getHospitalNumber());
             patientDetail.setName(patient.getName());
             patientDetail.setDevType(patient.getDevType());
+
+            patientDetail.setSportDevName(new ArrayList<String>());
+            patientDetail.setSportDevValue(new ArrayList<String>());
+            patientDetail.setPhyDevName(new ArrayList<String>());
+            patientDetail.setPhyDevValue(new ArrayList<String>());
+            patientParaAdapter.phyDevName=new ArrayList<String>();
+            patientParaAdapter.phyDevValue=new ArrayList<String>();
+            devParaChangeAdapter.sportDevName=new ArrayList<String>();
+            devParaChangeAdapter.sportDevValue=new ArrayList<String>();
+            devParaChangeAdapter.notifyDataSetChanged();
+            patientParaAdapter.notifyDataSetChanged();
+            if(!pathView.getStop())
+                pathView.stop();
             //patientDetail.set
             //patientDetail.setPercent(patient.get);
             // patientDetail.set
             name.setText(patientDetail.getName());
             dev.setText(patientDetail.getDev());
-            //percent.setText(patientDetail.getPercent());
+            if(patientDetail.getPercent()!=null)
+            {
+                if(patientDetail.getPercent().isEmpty())
+                    percent.setText(patientDetail.getPercent());
+                else
+                    percent.setText(patientDetail.getPercent()+"%");
+            }
             tvDevNumber.setText(patientDetail.getDeviceNumber());
             tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
         }
@@ -339,17 +368,50 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     }
 
-    public void refreshPatient(byte devType,String devName,String devNumber)
+    //根据病人状态更新
+    public void refreshPatient(Patient mData)
     {
+        byte devType=mData.getDevType();
+        String devName=mData.getDev();
+        String devNumber=mData.getDeviceNumber();
         if (devNumber==null||!devNumber.equals(patientDetail.getDeviceNumber()))
+        {
+            System.out.println("更新了单人监控的设备");
             changeDevPara.clear();
+            patientDetail.setSportDevName(new ArrayList<String>());//.clear();
+            patientDetail.setSportDevValue(new ArrayList<String>());//.clear();
+            patientDetail.setPercent("");
+            devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
+            devParaChangeAdapter.sportDevValue=patientDetail.getSportDevValue();
 
+            devParaChangeAdapter.notifyDataSetChanged();
+
+        }
+        if(!(mData.getPhyConnectState()==CommandTypeConstant.PHY_DEV_CONNECT_ONLINE&&mData.getMonConnectState()==CommandTypeConstant.MON_DEV_CONNECT_ONLINE))
+        {
+            patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
+            patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
+            patientParaAdapter.phyDevName=patientDetail.getPhyDevName();
+            patientParaAdapter.phyDevValue=patientDetail.getPhyDevValue();
+            patientParaAdapter.notifyDataSetChanged();
+            pathView.stop();
+        }
         patientDetail.setDev(devName);
         patientDetail.setDeviceNumber(devNumber);
         patientDetail.setDevType(devType);
+        //patientDetail.setPercent(pa);
         //patientDetail.setPercent(percentValue);
         dev.setText(devName);
         tvDevNumber.setText(devNumber);
+
+        if(patientDetail.getPercent()!=null)
+        {
+            if(patientDetail.getPercent().isEmpty())
+                percent.setText(patientDetail.getPercent());
+            else
+                percent.setText(patientDetail.getPercent()+"%");
+        }
+
         //percent.setText(percentValue);
     }
     /*public void registerFetchResponse()

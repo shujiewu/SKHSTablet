@@ -26,6 +26,7 @@ import cn.sk.skhstablet.protocol.down.DevNameResponse;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
 import cn.sk.skhstablet.protocol.down.LoginAckResponse;
+import cn.sk.skhstablet.protocol.down.LoginOtherResponse;
 import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
 import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
@@ -58,10 +59,12 @@ import static cn.sk.skhstablet.app.AppConstants.MON_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_DATA;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
+import static cn.sk.skhstablet.app.AppConstants.canModify;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 import static cn.sk.skhstablet.app.CommandTypeConstant.IDLE_HEART_REQUEST;
+import static cn.sk.skhstablet.app.CommandTypeConstant.LOGIN_OTHER;
 import static cn.sk.skhstablet.app.CommandTypeConstant.MUTI_MONITOR_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.model.PatientDetailList.phyValue;
@@ -82,11 +85,12 @@ public class TcpUtils {
                 .subscribe(callback);
         lifecycle.bindSubscription(subscription);
     }
-    public static  <T> void invoke(Observable<T> observable, Callback<T> callback)
+    public static  <T> Subscription invoke(Observable<T> observable, Callback<T> callback)
     {
         Subscription subscription = observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback);
+        return subscription;
     }
     public static <T> void invoke(LifeSubscription lifecycle, Observable<T> observable, Callback<T> callback) {
         Stateful target = null;
@@ -108,7 +112,6 @@ public class TcpUtils {
             }
             return;
         }*/
-
         Subscription subscription = observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback);
@@ -116,7 +119,7 @@ public class TcpUtils {
 
     }
     static Connection<AbstractProtocol,AbstractProtocol> mConnection;
-
+    static boolean isFirst=true;
     public static Observable<Boolean> connect(final String url, final int port) {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
@@ -155,7 +158,7 @@ public class TcpUtils {
                         .channelOption(ChannelOption.SO_KEEPALIVE, true)
                         //.channelOption(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000) //服务器掉线还要等五秒，自己掉线直接重连
                         //.readTimeOut(5, TimeUnit.SECONDS) //5秒未读到数据
-                        .readTimeOut(15, TimeUnit.SECONDS) //15秒未读到数据
+                        .readTimeOut(6, TimeUnit.SECONDS) //15秒未读到数据
                         .createConnectionRequest()
 
                         .subscribe(new Observer<Connection<AbstractProtocol, AbstractProtocol>>() {
@@ -163,6 +166,7 @@ public class TcpUtils {
                             public void onCompleted() {
                                 subscriber.onCompleted();
                                 subscriber.unsubscribe();
+                                System.out.println("连接完成");
                             }
 
                             @Override
@@ -170,6 +174,7 @@ public class TcpUtils {
                                 subscriber.onError(e);
                                 subscriber.unsubscribe();
                                 e.printStackTrace();
+                                System.out.println("连接失败");
                              }
 
                             @Override
@@ -177,6 +182,13 @@ public class TcpUtils {
                                 mConnection = connection;
                                 subscriber.onNext(true);
                                 netState=AppConstants.STATE_CONN;
+                                System.out.println("连接成功");
+                                if(isFirst)
+                                {
+                                    System.out.println("首次连接成功");
+                                    sendIdleHeart();
+                                    isFirst=false;
+                                }
                             }
                         });
             }
@@ -262,6 +274,14 @@ public class TcpUtils {
     /**
      * 断开自动重新连接
      */
+    public static void closeConnection()
+    {
+
+        if (mConnection != null)
+        {
+            mConnection.closeNow();
+        }
+    }
     private static int reconnectTime=0;
     public static void reconnect() {
         reconnectTime++;
@@ -287,6 +307,7 @@ public class TcpUtils {
                     public void onResponse(Boolean data) {
                         fetchData();
                         RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(true));
+                        System.out.println("重新连接成功");
                         reconnectTime=0;
                     }
                     @Override
@@ -298,18 +319,19 @@ public class TcpUtils {
                     @Override
                     public void onError(Throwable e) {
                         System.out.println("尝试重新连接");
-                        reconnect();
                         this.unsubscribe();
+                        reconnect();
+
                     }
                 });
             }
         }));
     }
-
-    private static int heartTime =5;
+    public static Subscription idleScription;
+    private static int heartTime =3;
     public static void sendIdleHeart()
     {
-        Observable.interval(heartTime, TimeUnit.SECONDS).subscribe((new Action1<Long>() {
+        idleScription=Observable.interval(heartTime, TimeUnit.SECONDS).subscribe((new Action1<Long>() {
             @Override
             public void call(Long aLong) {
                 IdleHeartRequest idleHeartRequest=new IdleHeartRequest(IDLE_HEART_REQUEST) ;
@@ -325,6 +347,7 @@ public class TcpUtils {
                     }
                     @Override
                     public void onError(Throwable e) {
+                        //reconnect();  //心跳失败重连
                         this.unsubscribe();
                     }
                 });
@@ -336,23 +359,40 @@ public class TcpUtils {
         System.arraycopy(src, begin, bs, 0, count);
         return bs;
     }
+    public static void logoutUnsubscribe()
+    {
+        idleScription.unsubscribe();
+        if(idleScription.isUnsubscribed())
+        {
+            System.out.println("取消了心跳订阅");
+        }
+        else
+        {
+            System.out.println("未取消了心跳订阅");
+        }
+        fetchScription.unsubscribe();
+        if(fetchScription.isUnsubscribed())
+        {
+            System.out.println("取消了读取数据订阅");
+        }
+        else
+        {
+            System.out.println("未取消了读取数据订阅");
+        }
+    }
+    public static Subscription fetchScription;
     public static void fetchData()
     {
-        invoke(TcpUtils.receive(), new Callback<AbstractProtocol>() {
+        fetchScription=invoke(TcpUtils.receive(), new Callback<AbstractProtocol>() {
             @Override
             public void onError(Throwable e) {
                 super.onError(e);
+                this.unsubscribe();
             }
             @Override
             public void onResponse(final AbstractProtocol data) {
-                // ByteBuf buf = (ByteBuf)data;
-                // byte[] req = new byte[buf.readableBytes()];
-                //  buf.readBytes(req);
-//                int i=((ExerciseEquipmentDataResponse)data).getPatientId();
-//                Log.e("login",String.valueOf(i));
                 if(data==null)
                     return;
-                byte dataType=0;
                 byte state;
                 byte reqID;
                 byte devType;
@@ -363,7 +403,7 @@ public class TcpUtils {
                         //dataType=(byte)((ExercisePhysiologicalDataResponse)data).getDeviceId().getDeviceType();
                         //ExercisePhysiologicalDataResponse response=(ExercisePhysiologicalDataResponse) data;
                         RxBus.getDefault().post(AppConstants.PHY_DATA,((ExercisePhysiologicalDataResponse) data).getPatientPhyData());
-                        System.out.println("生理數據發送");
+                        System.out.println("生理数据发送");
                         break;
                     }
                     case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
@@ -374,62 +414,27 @@ public class TcpUtils {
                         {
                             RxBus.getDefault().post(AppConstants.SINGLE_DATA,patientDetail);
                         }
-                        //if(hasMutiPatient.containsKey(patientDetail.getPatientID()))
-                        //{
-                            RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
-                       // }
-                        /*patientDetail.setPatientID(response.getPatientId());
-                        patientDetail.setName(PATIENT_LIST_NAME_FORM.get(response.getPatientId()));
-                        patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(response.getPatientId()));
-                        DeviceId deviceId=response.getDeviceId();
-                        patientDetail.setDev(DEV_NAME.get(deviceId.deviceType));
-                        patientDetail.setDevType(deviceId.deviceType);
-                        patientDetail.setDeviceNumber(deviceId.deviceNumber);
-                        patientDetail.setPercent(String.valueOf(response.getExercisePlanCompletionRate()));
-                        byte[]physiologicalData=response.getPhysiologicalData();
-                        int size=physiologicalData[0];
-                        List<String> sportDevName=new ArrayList<String>();  //指的是参数名称，而不是设备名称
-                        List<String> phyDevName=new ArrayList<String>();
-                        List<String> sportDevValue=new ArrayList<String>();
-                        List<String> phyDevValue=new ArrayList<String>();
-                        for(int i=0,j=1;i<size;i++)
-                        {
-                            //phyDevName.set(i,MON_DEV_FORM.get(physiologicalData[j]));
-                            List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(physiologicalData[j]);
-                            int paraValue=0;
-                            int paraLength;
-                            j++;
-                            for(int k=0;k<monitorDevForms.size();k++)
-                            {
-                                paraLength=monitorDevForms.get(k).getLength();
-                                //取出值
-                                //paraValue=subBytes(physiologicalData,j,paraLength);
-                                //phyDevName.set(k,monitorDevForms.get(k).getName());
-                                phyDevValue.set(k,String.valueOf(paraValue)+monitorDevForms.get(k).getUnit());
-                            }
-                        }*/
+                        RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
                         break;
                     }
                     case CommandTypeConstant.DOCTOR_ADVICE_RESPONSE:
                         break;
-
-
                     case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:
                     case CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE:
                         state=((PatientListResponse)data).getState();
+                        /*while (!canModify)
+                        {
+                        }*/
                         AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
                         int size=AppConstants.PATIENT_LIST_DATA.size();
-                        //if(size>1)//新数据
-                        //{
-                            for(int i=0;i<size;i++)
+                        for(int i=0;i<size;i++)
+                        {
+                            if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
                             {
-                                if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
-                                {
-                                    PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
-                                    PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
-                                }
+                                PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
+                                PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
                             }
-                        //}
+                        }
                         RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Byte(state));//通知数据改变
                         break;
                     case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:  //完成注册
@@ -441,19 +446,19 @@ public class TcpUtils {
                             return;
                         if(state==CommandTypeConstant.PATIENT_LIST_SUCCESS)
                         {
+                            /*while (!canModify)
+                            {
+                            }*/
                             AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
                             int number=AppConstants.PATIENT_LIST_DATA.size();
-                            //if(size>1)//新数据
-                            //{
-                                for(int i=0;i<number;i++)
+                            for(int i=0;i<number;i++)
+                            {
+                                if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
                                 {
-                                    if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
-                                    {
-                                        PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
-                                        PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
-                                    }
+                                    PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
+                                    PATIENT_LIST_NUMBER_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getHospitalNumber());
                                 }
-                            //}
+                            }
                         }
                         RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Byte(state));//通知数据改变
                         AppConstants.PATIENT_LIST_REQ_ID++;
@@ -487,7 +492,6 @@ public class TcpUtils {
                         reqID=((PushAckResponse)data).getRequestID();
                         devType=((PushAckResponse)data).getDeviceType();
                         state=((PushAckResponse)data).getState();
-
                         if(userID!=AppConstants.USER_ID||devType!=AppConstants.DEV_TYPE)
                         {
                             return;
@@ -496,17 +500,6 @@ public class TcpUtils {
                         {
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
                         }
-                        //else
-                        //{
-
-                        //}
-                        /*if(state==SUCCESS)
-                        {
-                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
-                        }
-                        else
-                            RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));*/
-                        //AppConstants.MUTI_REQ_ID++;
                         break;
                     /*case CommandTypeConstant.PATIENT_LIST_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
@@ -546,25 +539,35 @@ public class TcpUtils {
                             String userName=((LoginAckResponse)data).getUserName();
                             System.out.println(userName);
                             AppConstants.USER_ID=((LoginAckResponse)data).getUserID();
-                            sendIdleHeart();
+                            //sendIdleHeart();
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
                         }
                         else
                             RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(false));
                         AppConstants.LOGIN_REQ_ID++;
                         break;
+                    case  CommandTypeConstant.LOGIN_OTHER_RESPONSE:
+                        state=((LoginOtherResponse)data).getState();
+                        if(state==LOGIN_OTHER)
+                            RxBus.getDefault().post(AppConstants.LOGIN_OTHER_STATE,new Boolean(true));
                     case CommandTypeConstant.LOGOUT_ACK_RESPONSE:
                         userID=((LoginAckResponse)data).getUserID();
                         reqID=((LoginAckResponse)data).getRequestID();
                         devType=((LoginAckResponse)data).getDeviceType();
                         state=((LoginAckResponse)data).getState();
-                        if(userID!=AppConstants.USER_ID||reqID!=AppConstants.LOGOUT_REQ_ID||devType!=AppConstants.DEV_TYPE)
-                            return;
+                        System.out.println("退出1");
+                       // if(userID!=AppConstants.USER_ID||reqID!=AppConstants.LOGOUT_REQ_ID||devType!=AppConstants.DEV_TYPE)
+                      //      return;
+
                         if(state==SUCCESS)
+                        {
+                            System.out.println("退出7");
                             RxBus.getDefault().post(AppConstants.LOGOUT_STATE,new Boolean(true));
+                        }
                         else
                             RxBus.getDefault().post(AppConstants.LOGOUT_STATE,new Boolean(false));
                         AppConstants.LOGOUT_REQ_ID++;
+                       // System.out.println("退出3");
                         break;
 
                     //格式名称对照表响应
@@ -617,34 +620,6 @@ public class TcpUtils {
                         break;
                     }
                 }
-
-                /*switch (dataType)
-                {
-                    case CommandTypeConstant.LOGIN_SUCCESS:
-                        RxBus.getDefault().post(AppConstants.LOGIN_STATE,new Boolean(true));
-                        break;
-                    case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_REQUEST:
-                        ExercisePhysiologicalDataResponse exercisePhysiologicalDataResponse=(ExercisePhysiologicalDataResponse)data;
-                        PatientDetail patientDetail1=new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue);
-                        patientDetail1.setId(String.valueOf(data.getDeviceId().getDeviceNumber()));
-                        //String id=String.valueOf(data.getDeviceId().getDeviceNumber());
-
-                        RxBus.getDefault().post(AppConstants.SINGLE_DATA,patientDetail1);
-                        break;
-                    case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_REQUEST:
-                        ExerciseEquipmentDataResponse exercisedata=(ExerciseEquipmentDataResponse)data;
-                        PatientDetail patientDetail=new PatientDetail("张er1", "1", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue);
-                        patientDetail.setId(String.valueOf(exercisedata.getPatientId()));
-                        patientDetail.setPercent(String.valueOf(exercisedata.getExercisePlanCompletionRate()));
-                        //for(int i=0;i<8;i++)
-                        //{
-                         //   patientDetail.setId(String.valueOf(i));
-                            RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
-
-                       // }
-                        // RxBus.getDefault().post(AppConstants.MUTI_DATA, new PatientDetail("张er2", "2", "跑步机","10%   第一段",PatientDetailList.phyName,phyValue,sportName,sportValue));
-                        break;
-                }*/
             }
         });
     }

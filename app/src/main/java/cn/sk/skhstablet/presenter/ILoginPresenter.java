@@ -9,8 +9,7 @@ public interface ILoginPresenter {
         void setLoginDisable();
     }
     interface Presenter{
-        void fetchStateData(String userID,String key);
+        //void fetchStateData(String userID,String key);
         void registerFetchResponse();
-        void sendFormatRequest();
     }
 }

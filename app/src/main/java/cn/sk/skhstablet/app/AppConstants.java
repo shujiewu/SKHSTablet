@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import cn.sk.skhstablet.model.Patient;
+import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.protocol.MonitorDevForm;
 import cn.sk.skhstablet.protocol.SportDevForm;
 
@@ -25,6 +26,7 @@ public class AppConstants {
     public static  final int LOGIN_STATE=1001;
     public static  final int LOGOUT_STATE=1002;
     public static  final int CHANGE_KEY_STATE=1003;
+    public static  final int LOGIN_OTHER_STATE=1004;
 
     public static  final int MUTI_DATA=2000;
     public static  final int MUTI_REQ_STATE=2001;
@@ -69,12 +71,15 @@ public class AppConstants {
     public static HashMap<Byte,List<MonitorDevForm>> MON_DEV_FORM=new HashMap<>();
     //public static HashMap<String,>
 
+    public static boolean canModify=true;
     public static List<Patient> PATIENT_LIST_DATA=new ArrayList<>();//新到的病人列表信息
     public static HashMap<Integer,String> PATIENT_LIST_NAME_FORM=new HashMap<>();
     public static HashMap<Integer,String> PATIENT_LIST_NUMBER_FORM=new HashMap<>();
 
     public static HashMap<Integer,Integer> hasMutiPatient=new HashMap<>();//id和位置
     public static String singleMonitorID;
+    public static List<PatientDetail> mutiDatas=new ArrayList<>();
+    public static int mutiPosition=0;
 
     public static List<Integer> lastMutiPatientID;
     public static String lastSinglePatientID;

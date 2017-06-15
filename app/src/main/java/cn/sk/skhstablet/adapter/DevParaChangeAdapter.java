@@ -18,6 +18,7 @@ import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.app.AppConstants;
 import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.component.EditTextWithDel;
+import cn.sk.skhstablet.component.FloatQuantityView;
 import cn.sk.skhstablet.component.QuantityView;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.protocol.MonitorDevForm;
@@ -72,6 +73,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
         private TextView tvSportParaValue;
         //private SeekBar sbSportParaValue;
         private QuantityView qvSportParaValue;
+        private FloatQuantityView qvSportParaFloatValue;
         public DevParaChangeHolder(View view) {
             super(view);
             tvSportParaName = (TextView) view.findViewById(R.id.changeParaSportName);
@@ -80,7 +82,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
             //tvParaValue2=(TextView) view.findViewById(R.id.paravalue2);
             //sbSportParaValue=(SeekBar)view.findViewById(R.id.changeSeekBarValue);
             qvSportParaValue=(QuantityView)view.findViewById(R.id.changeQVValue);
-
+            qvSportParaFloatValue=(FloatQuantityView)view.findViewById(R.id.changeFloatQVValue);
         }
         public void bind(final DevParaChangeHolder viewHolder, String paraName, String paraValue,int position) {
             viewHolder.tvSportParaName.setText(paraName);
@@ -93,40 +95,77 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
             SportDevForm sportDevForm= AppConstants.SPORT_DEV_FORM.get(devType).get(position);
             if(sportDevForm.getCanControl()== true)
             {
-                viewHolder.qvSportParaValue.setQuantity(Integer.valueOf(paraValue));
-                viewHolder.qvSportParaValue.setMaxQuantity(250);
-                viewHolder.qvSportParaValue.setVisibility(View.VISIBLE);
-                TextWatcher textWatcher = new TextWatcher() {
+                if(sportDevForm.getRate()!=1.0)
+                {
+                    viewHolder.qvSportParaFloatValue.setQuantity(Float.parseFloat(paraValue));
+                    viewHolder.qvSportParaFloatValue.setMaxQuantity(250);
+                    viewHolder.qvSportParaFloatValue.setVisibility(View.VISIBLE);
+                    TextWatcher textWatcher = new TextWatcher() {
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        // TODO Auto-generated method stub
-                    }
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count,
-                                                  int after) {
-                        // TODO Auto-generated method stub
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if(!s.toString().isEmpty())
-                        {
-                            if (mOnEditChangeListener != null&&!s.toString().equals(viewHolder.tvSportParaValue.getText().toString())) {
-                                //注意这里使用getTag方法获取数据
-                                mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getmTextViewQuantity().getTag(),s.toString());
-                            }
-                            Log.e("textchange","1");
-                            //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            // TODO Auto-generated method stub
                         }
-                    }
-                };
-                viewHolder.qvSportParaValue.getmTextViewQuantity().addTextChangedListener(textWatcher);
+
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count,
+                                                      int after) {
+                            // TODO Auto-generated method stub
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            if(!s.toString().isEmpty())
+                            {
+                                if (mOnEditChangeListener != null&&!s.toString().equals(viewHolder.tvSportParaValue.getText().toString())) {
+                                    //注意这里使用getTag方法获取数据
+                                    mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getmTextViewQuantity().getTag(),s.toString());
+                                }
+                                Log.e("textchange","1");
+                                //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
+                            }
+                        }
+                    };
+                    viewHolder.qvSportParaValue.getmTextViewQuantity().addTextChangedListener(textWatcher);
+                }
+                else
+                {
+                    viewHolder.qvSportParaValue.setQuantity(Integer.valueOf(paraValue));
+                    viewHolder.qvSportParaValue.setMaxQuantity(250);
+                    viewHolder.qvSportParaValue.setVisibility(View.VISIBLE);
+                    TextWatcher textWatcher = new TextWatcher() {
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            // TODO Auto-generated method stub
+                        }
+
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count,
+                                                      int after) {
+                            // TODO Auto-generated method stub
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            if(!s.toString().isEmpty())
+                            {
+                                if (mOnEditChangeListener != null&&!s.toString().equals(viewHolder.tvSportParaValue.getText().toString())) {
+                                    //注意这里使用getTag方法获取数据
+                                    mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getmTextViewQuantity().getTag(),s.toString());
+                                }
+                                Log.e("textchange","2");
+                                //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
+                            }
+                        }
+                    };
+                    viewHolder.qvSportParaValue.getmTextViewQuantity().addTextChangedListener(textWatcher);
+                }
             }
             else
             {
                 viewHolder.qvSportParaValue.setVisibility(View.GONE);
+                viewHolder.qvSportParaFloatValue.setVisibility(View.GONE);
             }
             /*if (!paraName.equals("坡度"))
             {

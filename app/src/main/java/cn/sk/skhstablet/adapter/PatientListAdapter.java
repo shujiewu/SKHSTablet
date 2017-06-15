@@ -272,15 +272,27 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                     viewHolder.tvMonState.setText(context.getResources().getString(R.string.patient_offline));
                 }
             }
+            else if (patient.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_OFFLINE)
+            {
+                viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                viewHolder.tvPhyState.setText("离线");
+                viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
+            }
+            else if(patient.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_NONE)
+            {
+                viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                viewHolder.tvPhyState.setText("未连接");
+                viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
+            }
             else
             {
                 viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
                 viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.patient_offline));
+                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.none));
             }
-
-
 
             viewHolder.gender.setText(patient.getGender());
         }

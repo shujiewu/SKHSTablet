@@ -111,13 +111,19 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         }
 
         public void bind(MutiMonitorHolder viewHolder, PatientDetail patient) {
-            System.out.println("muti1");
+            //System.out.println("muti1");
             viewHolder.name.setText(patient.getName());
             viewHolder.dev.setText(patient.getDev());
-            viewHolder.percent.setText(patient.getPercent());
+            if(patient.getPercent()!=null)
+            {
+                if(patient.getPercent().isEmpty())
+                    viewHolder.percent.setText(patient.getPercent());
+                else
+                    viewHolder.percent.setText(patient.getPercent()+"%");
+            }
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
             viewHolder. tvDevNumber.setText(patient.getDeviceNumber());
-            System.out.println("muti2");
+            //System.out.println("muti2");
 
             recyclerPhyParaView.setLayoutManager(new GridLayoutManager(context,2));
             ViewGroup.LayoutParams layoutParams = recyclerPhyParaView.getLayoutParams();
@@ -131,7 +137,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
             recyclerSportParaView.setLayoutManager(new GridLayoutManager(context,2));
             if(patient.getSportDevName()!=null)
                 recyclerSportParaView.setAdapter(new SportDevParaAdapter(patient.getSportDevName(),patient.getSportDevValue()));
-            System.out.println("muti3");
+            //System.out.println("muti3");
             //TracksItemDecorator itemDecorator = new TracksItemDecorator(
              //       context.getResources().getDimensionPixelSize(R.dimen.decoration_size));
             //recyclerSportParaView.addItemDecoration(itemDecorator);

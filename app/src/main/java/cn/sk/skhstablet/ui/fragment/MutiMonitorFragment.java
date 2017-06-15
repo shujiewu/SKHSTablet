@@ -24,6 +24,7 @@ import javax.inject.Inject;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 import cn.sk.skhstablet.app.AppConstants;
 //import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.component.LoadingPage;
 import cn.sk.skhstablet.injector.component.fragment.DaggerMutiMonitorComponent;
 import cn.sk.skhstablet.injector.module.fragment.MutiMonitorModule;
@@ -162,11 +163,24 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         mutiMonitorAdapter.notifyItemChanged(position);
     }
 
+    //根据病人状态更新
     public void refreshDevInfo(Patient mData, int position) {
         PatientDetail patientDetail=mutiMonitorAdapter.patientDetailList.get(position);
-        patientDetail.setDeviceNumber(mData.getDeviceNumber());
-        patientDetail.setDev(mData.getDev());
-        patientDetail.setDevType(mData.getDevType());
+        if(mData.getDeviceNumber()==null||!mData.getDeviceNumber().equals(patientDetail.getDeviceNumber()))
+        {
+            System.out.println("更新了设备");
+            patientDetail.setSportDevName(new ArrayList<String>());
+            patientDetail.setSportDevValue(new ArrayList<String>());
+            patientDetail.setPercent("");
+            patientDetail.setDeviceNumber(mData.getDeviceNumber());
+            patientDetail.setDev(mData.getDev());
+            patientDetail.setDevType(mData.getDevType());
+        }
+        if(!(mData.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_ONLINE&&mData.getMonConnectState()==CommandTypeConstant.MON_DEV_CONNECT_ONLINE))
+        {
+            patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
+            patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
+        }
         mutiMonitorAdapter.patientDetailList.set(position,patientDetail);
         mutiMonitorAdapter.notifyItemChanged(position);
     }

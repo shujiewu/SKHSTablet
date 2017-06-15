@@ -76,7 +76,7 @@ public class PatientDetail {
     }
 
     public String getPercent() {
-        return percent+"%";
+        return percent;
     }
 
     public void setDev(String dev) {

@@ -24,13 +24,13 @@ import cn.sk.skhstablet.R;
  * Created by ldkobe on 2017/5/3.
  */
 
-public class QuantityView extends LinearLayout implements View.OnClickListener {
+public class FloatQuantityView extends LinearLayout implements View.OnClickListener {
 
     private Drawable quantityBackground, addButtonBackground, removeButtonBackground;
 
     private String addButtonText, removeButtonText;
 
-    private int quantity, maxQuantity, minQuantity;
+    //private int quantity, maxQuantity, minQuantity;
     private float fquantity, fmaxQuantity, fminQuantity;
 
     private int quantityPadding;
@@ -41,62 +41,62 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
     private TextView mTextViewQuantity;
 
     public interface OnQuantityChangeListener {
-        void onQuantityChanged(int newQuantity, boolean programmatically);
+        void onQuantityChanged(float newQuantity, boolean programmatically);
 
         void onLimitReached();
     }
 
     private OnQuantityChangeListener onQuantityChangeListener;
 
-    public QuantityView(Context context) {
+    public FloatQuantityView(Context context) {
         super(context);
         init(null, 0);
     }
 
-    public QuantityView(Context context, AttributeSet attrs) {
+    public FloatQuantityView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs, 0);
     }
 
-    public QuantityView(Context context, AttributeSet attrs, int defStyle) {
+    public FloatQuantityView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(attrs, defStyle);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void init(AttributeSet attrs, int defStyle) {
-        final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.QuantityView, defStyle, 0);
+        final TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.FloatQuantityView, defStyle, 0);
 
         addButtonText = getResources().getString(R.string.qv_add);
-        if (a.hasValue(R.styleable.QuantityView_qv_addButtonText)) {
-            addButtonText = a.getString(R.styleable.QuantityView_qv_addButtonText);
+        if (a.hasValue(R.styleable.FloatQuantityView_fqv_addButtonText)) {
+            addButtonText = a.getString(R.styleable.FloatQuantityView_fqv_addButtonText);
         }
         addButtonBackground = ContextCompat.getDrawable(getContext(), R.drawable.qv_btn_selector);
-        if (a.hasValue(R.styleable.QuantityView_qv_addButtonBackground)) {
-            addButtonBackground = a.getDrawable(R.styleable.QuantityView_qv_addButtonBackground);
+        if (a.hasValue(R.styleable.FloatQuantityView_fqv_addButtonBackground)) {
+            addButtonBackground = a.getDrawable(R.styleable.FloatQuantityView_fqv_addButtonBackground);
         }
-        addButtonTextColor = a.getColor(R.styleable.QuantityView_qv_addButtonTextColor, Color.WHITE);
+        addButtonTextColor = a.getColor(R.styleable.FloatQuantityView_fqv_addButtonTextColor, Color.WHITE);
 
         removeButtonText = getResources().getString(R.string.qv_remove);
-        if (a.hasValue(R.styleable.QuantityView_qv_removeButtonText)) {
-            removeButtonText = a.getString(R.styleable.QuantityView_qv_removeButtonText);
+        if (a.hasValue(R.styleable.FloatQuantityView_fqv_removeButtonText)) {
+            removeButtonText = a.getString(R.styleable.FloatQuantityView_fqv_removeButtonText);
         }
         removeButtonBackground = ContextCompat.getDrawable(getContext(), R.drawable.qv_btn_selector);
-        if (a.hasValue(R.styleable.QuantityView_qv_removeButtonBackground)) {
-            removeButtonBackground = a.getDrawable(R.styleable.QuantityView_qv_removeButtonBackground);
+        if (a.hasValue(R.styleable.FloatQuantityView_fqv_removeButtonBackground)) {
+            removeButtonBackground = a.getDrawable(R.styleable.FloatQuantityView_fqv_removeButtonBackground);
         }
-        removeButtonTextColor = a.getColor(R.styleable.QuantityView_qv_removeButtonTextColor, Color.WHITE);
+        removeButtonTextColor = a.getColor(R.styleable.FloatQuantityView_fqv_removeButtonTextColor, Color.WHITE);
 
-        quantity = a.getInt(R.styleable.QuantityView_qv_quantity, 0);
-        maxQuantity = a.getInt(R.styleable.QuantityView_qv_maxQuantity, Integer.MAX_VALUE);
-        minQuantity = a.getInt(R.styleable.QuantityView_qv_minQuantity, 0);
+        fquantity = a.getFloat(R.styleable.FloatQuantityView_fqv_quantity, 0);
+        fmaxQuantity = a.getFloat(R.styleable.FloatQuantityView_fqv_maxQuantity, Integer.MAX_VALUE);
+        fminQuantity = a.getFloat(R.styleable.FloatQuantityView_fqv_minQuantity, 0);
 
 
-        quantityPadding = (int) a.getDimension(R.styleable.QuantityView_qv_quantityPadding, pxFromDp(24));
-        quantityTextColor = a.getColor(R.styleable.QuantityView_qv_quantityTextColor, getResources().getColor(R.color.maincolor));
+        quantityPadding = (int) a.getDimension(R.styleable.FloatQuantityView_fqv_quantityPadding, pxFromDp(24));
+        quantityTextColor = a.getColor(R.styleable.FloatQuantityView_fqv_quantityTextColor, getResources().getColor(R.color.maincolor));
         quantityBackground = ContextCompat.getDrawable(getContext(), R.drawable.qv_bg_selector);
-        if (a.hasValue(R.styleable.QuantityView_qv_quantityBackground)) {
-            quantityBackground = a.getDrawable(R.styleable.QuantityView_qv_quantityBackground);
+        if (a.hasValue(R.styleable.FloatQuantityView_fqv_quantityBackground)) {
+            quantityBackground = a.getDrawable(R.styleable.FloatQuantityView_fqv_quantityBackground);
         }
 
         a.recycle();
@@ -128,7 +128,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         mTextViewQuantity.setGravity(Gravity.CENTER);
         mTextViewQuantity.setTextSize(20);
         setQuantityTextColor(quantityTextColor);
-        setQuantity(quantity);
+        setQuantity(fquantity);
         setQuantityBackground(quantityBackground);
         setQuantityPadding(quantityPadding);
 
@@ -151,22 +151,22 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v == mButtonAdd) {
-            if (quantity + 1 > maxQuantity) {
+            if (fquantity + 0.1 > fmaxQuantity) {
                 if (onQuantityChangeListener != null) onQuantityChangeListener.onLimitReached();
             } else {
-                quantity += 1;
-                mTextViewQuantity.setText(String.valueOf(quantity));
+                fquantity += 0.1;
+                mTextViewQuantity.setText(String.valueOf(fquantity));
                 if (onQuantityChangeListener != null)
-                    onQuantityChangeListener.onQuantityChanged(quantity, false);
+                    onQuantityChangeListener.onQuantityChanged(fquantity, false);
             }
         } else if (v == mButtonRemove) {
-            if (quantity - 1 < minQuantity) {
+            if (fquantity - 0.1 < fminQuantity) {
                 if (onQuantityChangeListener != null) onQuantityChangeListener.onLimitReached();
             } else {
-                quantity -= 1;
-                mTextViewQuantity.setText(String.valueOf(quantity));
+                fquantity -= 0.1;
+                mTextViewQuantity.setText(String.valueOf(fquantity));
                 if (onQuantityChangeListener != null)
-                    onQuantityChangeListener.onQuantityChanged(quantity, false);
+                    onQuantityChangeListener.onQuantityChanged(fquantity, false);
             }
         } else if (v == mTextViewQuantity) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -174,7 +174,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
 
             View inflate = LayoutInflater.from(getContext()).inflate(R.layout.qv_dialog_changequantity, null, false);
             final EditText et = (EditText) inflate.findViewById(R.id.qv_et_change_qty);
-            et.setText(String.valueOf(quantity));
+            et.setText(String.valueOf(fquantity));
 
             builder.setView(inflate);
             builder.setPositiveButton("确定更改", new DialogInterface.OnClickListener() {
@@ -182,7 +182,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
                 public void onClick(DialogInterface dialog, int which) {
                     String newQuantity = et.getText().toString();
                     if (isNumber(newQuantity)) {
-                        int intNewQuantity = Integer.parseInt(newQuantity);
+                        float intNewQuantity = Float.parseFloat(newQuantity);
                         setQuantity(intNewQuantity);
                     }
                 }
@@ -257,46 +257,46 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         mButtonRemove.setText(removeButtonText);
     }
 
-    public int getQuantity() {
-        return quantity;
+    public float getQuantity() {
+        return fquantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(float fquantity) {
         boolean limitReached = false;
 
-        if (quantity > maxQuantity) {
-            quantity = maxQuantity;
+        if (fquantity > fmaxQuantity) {
+            fquantity = fmaxQuantity;
             limitReached = true;
             if (onQuantityChangeListener != null) onQuantityChangeListener.onLimitReached();
         }
-        if (quantity < minQuantity) {
-            quantity = minQuantity;
+        if (fquantity < fminQuantity) {
+            fquantity = fminQuantity;
             limitReached = true;
             if (onQuantityChangeListener != null) onQuantityChangeListener.onLimitReached();
         }
 
 
         if (!limitReached && onQuantityChangeListener != null)
-            onQuantityChangeListener.onQuantityChanged(quantity, true);
+            onQuantityChangeListener.onQuantityChanged(fquantity, true);
 
-        this.quantity = quantity;
-        mTextViewQuantity.setText(String.valueOf(this.quantity));
+        this.fquantity = fquantity;
+        mTextViewQuantity.setText(String.valueOf(this.fquantity));
     }
 
-    public int getMaxQuantity() {
-        return maxQuantity;
+    public float getMaxQuantity() {
+        return fmaxQuantity;
     }
 
-    public void setMaxQuantity(int maxQuantity) {
-        this.maxQuantity = maxQuantity;
+    public void setMaxQuantity(float maxQuantity) {
+        this.fmaxQuantity = maxQuantity;
     }
 
-    public int getMinQuantity() {
-        return minQuantity;
+    public float getMinQuantity() {
+        return fminQuantity;
     }
 
-    public void setMinQuantity(int minQuantity) {
-        this.minQuantity = minQuantity;
+    public void setMinQuantity(float minQuantity) {
+        this.fminQuantity = minQuantity;
     }
 
     public int getQuantityPadding() {
@@ -361,7 +361,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
 
     private boolean isNumber(String string) {
         try {
-            Integer.parseInt(string);
+            Float.parseFloat(string);
             return true;
         } catch (Exception e) {
             return false;

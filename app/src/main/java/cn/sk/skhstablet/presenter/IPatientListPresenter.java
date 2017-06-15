@@ -14,6 +14,7 @@ public interface IPatientListPresenter {
         void setMutiPageState(int state);
         void setSinglePageState(int state);
         void logoutSuccess(boolean b);
+        void loginOther(boolean b);
         void loadSinglePatient(String singleID);
     }
     interface Presenter{
@@ -23,5 +24,6 @@ public interface IPatientListPresenter {
         void sendLogoutRequest();
         void registerFetchResponse();
         void sendControl(String deviceID,byte parameterCode,byte paraType,byte paraControlValue);
+        void sendFormatRequest();
     }
 }
