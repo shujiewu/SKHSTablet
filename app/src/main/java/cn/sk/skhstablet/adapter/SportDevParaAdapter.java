@@ -13,6 +13,7 @@ import cn.sk.skhstablet.R;
 
 /**
  * Created by wyb on 2017/4/21.
+ * 患者运动设备数据列表的适配器
  */
 
 public class SportDevParaAdapter extends RecyclerView.Adapter<SportDevParaAdapter.SportDevParaHolder> {

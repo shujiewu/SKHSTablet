@@ -21,6 +21,7 @@
     <color name="main_textcolor">#717272</color>
     <color name="maincolor">#6699ff</color>
     <color name="maincutalph">#50ff7474</color>
+    <color name="fontblue">#1E88E5</color>
     <!-- 横细线的颜色  -->
     <color name="viewcolor">#d2d2d2</color>
 

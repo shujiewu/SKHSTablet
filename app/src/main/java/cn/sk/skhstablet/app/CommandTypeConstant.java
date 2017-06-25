@@ -9,16 +9,10 @@ public class CommandTypeConstant {
 	public static final byte DOCTOR_ADVICE_RESPONSE = (byte) 0x42;
 	public static final byte EXERCISE_EQUIPMENT_DATA_REQUEST = (byte) 0x43;
 	public static final byte REMOTE_CONTROL_REQUEST = (byte) 0x44;
-	// public static final byte PHYSIOLOGICAL_INSTRUMENT_BINGDING_RESPONSE =
-	// (byte) 0x50;
 	public static final byte RF_PARAMETERS_RESPONSE = (byte) 0xB2;
 	public static final byte HEART_BEAT_REQUEST = (byte) 0xA0;
 	public static final byte EQUIPMENT_STATUS_REQUEST = (byte) 0xA1;
-	public static final byte EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE = (byte) 0xB1;
-	public static final byte EXERCISE_EQUIPMENT_DATA_RESPONSE = (byte) 0xC3;
 	public static final byte DOCTOR_ADVICE_REQUEST = (byte) 0xC2;
-	// public static final byte PHYSIOLOGICAL_INSTRUMENT_BINGDING_REQUEST =
-	// (byte) 0xD0;
 	public static final byte REMOTE_CONTROL_RESPONSE = (byte) 0xC4;
 	public static final byte RF_PARAMETERS_APPLICATION_REQUEST = (byte) 0xC0;
 	public static final byte RF_PARAMETERS_REQUEST = (byte) 0xC1;
@@ -28,25 +22,36 @@ public class CommandTypeConstant {
 	/** 获取体外反博病人列表响应 **/
 	public static final byte ECP_PATIENT_LIST_RESPONSE = (byte) 0x45;
 
+
+	//生理数据响应
+	public static final byte EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE = (byte) 0xB1;
+	//运动设备数据响应
+	public static final byte EXERCISE_EQUIPMENT_DATA_RESPONSE = (byte) 0xC3;
+	//在其他地方登录状态
 	public static final byte LOGIN_OTHER = (byte) 0x00;
+	//登录状态
 	public static final byte LOGIN_SUCCESS = (byte) 0x00;
 	public static final byte LOGIN_MATCH_FAIL=(byte) 0x01;
 	public static final byte LOGIN_NONE_FAIL=(byte) 0xFF;
 
+	//通用状态
 	public static final byte SUCCESS = (byte) 0x00;
 	public static final byte NONE_FAIL = (byte) 0xFF;
 	public static final byte NO_LOGIN = (byte) 0xFE;
 	public static final byte OLD_KEY_FALSE = (byte) 0xFD;
 
+	//病人列表响应的状态
 	public static final byte PATIENT_LIST_SUCCESS= (byte) 0x00;
 	public static final byte PATIENT_LIST_NONE_FAIL= (byte) 0xff;
 	public static final byte PATIENT_LIST_NO_LOGIN= (byte) 0xfe;
 
+	//生理仪状态
 	public static final byte PHY_CONN_ONLINE= (byte) 0x00;
 	public static final byte PHY_CONN_OFFLINE= (byte) 0x01;
 	public static final byte PHY_NO_CONN= (byte) 0x03;  //未连接
 	public static final byte PHY_CONN_NONE= (byte) 0x04;//无
 
+	//监护设备状态
 	public static final byte MON_CONN_ONLINE= (byte) 0x00;
 	public static final byte MON_CONN_OFFLINE= (byte) 0x01;
 
@@ -58,8 +63,9 @@ public class CommandTypeConstant {
 	public static final byte PHY_DEV_CONNECT_NONE=(byte)0x02;     //生理仪未连接
 	public static final byte PHY_DEV_NONE=(byte)0x03;    //生理仪无
 
-	public static final byte MON_DEV_CONNECT_ONLINE=(byte)0x00;     //监护设备在线
-	public static final byte MON_DEV_CONNECT_OFFLINE=(byte)0x01;    //监护设备离线
+	public static final byte MON_DEV_CONNECT_ONLINE=(byte)0x00;     //监护设备正常
+	public static final byte MON_DEV_CONNECT_OFFLINE=(byte)0x01;    //监护设备异常
+	public static final byte MON_DEV_CONNECT_READY=(byte)0x02;    //监护设备准备中
 
 	//运动状态
 	public static final byte SPORT_NOMAL=(byte)0x01;                  //正常运动
@@ -131,7 +137,11 @@ public class CommandTypeConstant {
 	public static final byte SPORT_DEV_CANNOT_CONTROL=0x00;
 	public static final byte SPORT_DEV_CAN_CONTROL=0x01;
 
+	//心跳命令
 	public static final byte IDLE_HEART_REQUEST=(byte)0x06;
 	public static final byte IDLE_HEART_RESPONSE=(byte)0x60;
 
+	//医嘱命令
+	public static final byte EXERCISE_PLAN_REQUEST=(byte)0x0E;
+	public static final byte EXERCISE_PLAN_RESPONSE=(byte)0xE0;
 }

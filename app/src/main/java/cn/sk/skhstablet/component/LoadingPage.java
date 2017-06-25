@@ -19,9 +19,9 @@ import static cn.sk.skhstablet.app.AppConstants.STATE_SUCCESS;
 import static cn.sk.skhstablet.app.AppConstants.STATE_UNKNOWN;
 
 /**
- * Created by quantan.liu on 2017/3/2.
+ * Created by ldkobe on 2017/5/3.
  */
-
+//四种界面
 public abstract class LoadingPage extends FrameLayout {
     private View loadingView;                 // 加载中的界面
     private View errorView;                   // 错误界面

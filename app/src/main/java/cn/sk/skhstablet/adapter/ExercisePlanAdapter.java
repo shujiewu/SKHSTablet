@@ -16,19 +16,13 @@ import java.util.List;
 
 /**
  * Created by ldkobe on 2017/4/21.
+ * 医嘱列表适配器
  */
 
 public class ExercisePlanAdapter extends BaseExpandableListAdapter {
-   /* public String[] armTypes = new String[]{
-            "运动方案1：在跑步机上运动10分钟", "运动方案2：在椭圆机上运动200米", "运动方案3：在跑步机上运动5分钟", "运动方案4"
-    };
-    public String[][] arms = new String[][]{
-            {"第一段：以2米每秒的速度在跑步机上运动1分钟", "第二段：以1米每秒的速度运动1分钟"},
-            {"第一段：以2米每秒的速度在跑步机上运动2分钟", "第二段：以1米每秒的速度运动2分钟"},
-            {"第一段：以2米每秒的速度在跑步机上运动3分钟", "第二段：以1米每秒的速度运动3分钟"},
-            {"第一段：以2米每秒的速度在跑步机上运动4分钟", "第二段：以1米每秒的速度运动4分钟"},
-    };*/
+    //医嘱方案总量
     public List<String> armTypes;
+    //医嘱分段内容
     public List<List<String>> arms;
     Context context;
     public ExercisePlanAdapter(List<String> armTypes,List<List<String>> arms)
@@ -82,6 +76,7 @@ public class ExercisePlanAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
+    //设置医嘱总量的显示格式
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         context=parent.getContext();
@@ -102,6 +97,7 @@ public class ExercisePlanAdapter extends BaseExpandableListAdapter {
         return ll;
     }
 
+    //设置医嘱分段的显示格式
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         context=parent.getContext();

@@ -31,7 +31,7 @@ public class NetworkHelper {
 		return false;
 	}
 	public static boolean isAvailableByPing() {
-		ShellUtils.CommandResult result = ShellUtils.execCmd("ping -c 1 -w 1 192.168.2.180:10000", false);
+		ShellUtils.CommandResult result = ShellUtils.execCmd("ping -c 1 -w 1 192.168.2.180", false);
 		boolean ret = result.result == 0;
 		if (result.errorMsg != null) {
 			LogUtils.d("isAvailableByPing errorMsg", result.errorMsg);

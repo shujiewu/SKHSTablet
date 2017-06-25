@@ -33,6 +33,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.adapter.PatientListAdapter;
 import cn.sk.skhstablet.app.AppConstants;
+import cn.sk.skhstablet.app.CommandTypeConstant;
 import cn.sk.skhstablet.component.IconItem;
 import cn.sk.skhstablet.component.TextItem;
 import cn.sk.skhstablet.component.TracksItemDecorator;
@@ -60,6 +61,7 @@ import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.STATE_EMPTY;
 import static cn.sk.skhstablet.app.AppConstants.STATE_LOADING;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.isLoginOther;
 import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
 import static cn.sk.skhstablet.app.AppConstants.mutiDatas;
 import static cn.sk.skhstablet.app.AppConstants.mutiPosition;
@@ -69,22 +71,26 @@ import static cn.sk.skhstablet.tcp.utils.TcpUtils.closeConnection;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchScription;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.idleScription;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.logoutUnsubscribe;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.reconnect;
 
 public class MainActivity extends BorderActivity implements IPatientListPresenter.View,LifeSubscription,Stateful {
+    //全局病人列表
     private RecyclerView mRecyclerView;
-    final int COPY = 0;
-    final int PASTE = 1;
+    //全部选择按钮
     final int MONITORALL = 2;
-    final int ORDER = 3;
+    //显示全局病人列表按钮
     final int SHOWALL = 4;
-    final int  CREATE = 5;
+    //多人监控界面切换按钮
     final static int MUTIMOITOR=6;
+    //单人监控界面切换按钮
     final static int SINGLEMONITOR=7;
+    //开始监控按钮
     final int STARTMONITOR=8;
+    //保存修改按钮
     public final int SAVE_EDIT=9;
+    //退出登录按钮
     final  int LOG_OUT=10;
-    public final int CLOSE_SINGLE=11;
-    //private List<Patient> mDatas;
+    //取消单人监控按钮
     public  final int CANCEL_SINGLE_MON=12;
     @Inject
     public PatientListAdapter patientListAdapter;
@@ -95,65 +101,50 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     private SingleMonitorFragment singleMonitorFragment;
     private MutiMonitorFragment mutiMonitorFragment;
 
+    //新选择的单人监控患者ID
     public String newSingleMonitorID;
     public Boolean isNewSingle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //mDatas=new ArrayList<>();
         initInject();
         if (mPresenter!=null){
             mPresenter.setView(this);}
 
-        //mDatas= PatientList.PATIENTS;
+        //初始化顶部按钮
         IconItem iconItem2 = new IconItem(this,SHOWALL , R.drawable.messenger);
         addTopItem(iconItem2);
         iconItem2.show();
-
+        //初始化左侧按钮
         IconItem  iconItem = new IconItem(this,MUTIMOITOR , R.drawable.ic_content_copy_white_24dp);
         addLeftItem(iconItem);
         iconItem = new IconItem(this,SINGLEMONITOR , R.drawable.ic_content_paste_white_24dp);
         addLeftItem(iconItem);
-
-        iconItem = new IconItem(this,LOG_OUT, R.drawable.ic_create_white_24dp);
+        iconItem = new IconItem(this,LOG_OUT, R.drawable.exit_app);
         addLeftItem(iconItem);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.left_recycler);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-
         mRecyclerView.setAdapter(patientListAdapter);
-
+        //全局患者监控列表的行间距设置
         TracksItemDecorator itemDecorator = new TracksItemDecorator(
                 getResources().getDimensionPixelSize(R.dimen.decoration_size));
         mRecyclerView.addItemDecoration(itemDecorator);
+        //长按全局患者监控列表的患者单击事件
         patientListAdapter.setOnItemLongClickListener(new PatientListAdapter.OnPatientItemLongClickListener(){
             @Override
             public void onItemLongClick(final View view , int data){
-                //Toast.makeText(getActivity(), data, Toast.LENGTH_SHORT).show();
-                //MainActivity mainActivity=(MainActivity) getActivity();
                 view.setPressed(true);
-                //Toast.makeText(view.getContext(),"long click "+data,Toast.LENGTH_SHORT).show();
-                //Snackbar.make(view, "开始监控"+data, Snackbar.LENGTH_LONG)
-                //        .show();
-      /*         view.postDelayed(() -> {
-                    view.setPressed(false);
-                    hidePatientList();
-                    showFragment(FRAGMENT_SINGLE);
-                    //callback.onClick(holder.getAdapterPosition());
-                }, 200);*/
+                //data是病人ID
                 newSingleMonitorID=String.valueOf(data);
                 view.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         view.setPressed(false);
                         hidePatientList();
-
-
                     }
                 }, 200);
                 showFragment(FRAGMENT_SINGLE);
-
             }
         });
 
@@ -161,16 +152,16 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
 
+        //注册MainActivity的观察者
         mPresenter.registerFetchResponse();
+        //发送解析格式请求
         mPresenter.sendFormatRequest();
         initSearchView();
         loadData();
-        //System.out.println(16.75);
-
     }
+    //搜索框相关的函数
     private void initSearchView()
     {
-
         searchView=(SearchView)findViewById(R.id.searchView);
         int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text",null,null);
         //searchView.setQueryHint("搜索");
@@ -207,11 +198,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
         final List<Patient> filteredModelList = new ArrayList<>();
         for (Patient people : peoples) {
-
             final String nameEn = people.getName();
-            //final String desEn = people.getDescription().toLowerCase();
-            //final String name = people.getName();
-            //final String des = people.getDescription();
             if (nameEn.contains(query)) {
 
                 filteredModelList.add(people);
@@ -257,6 +244,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         //     findViewById(R.id.btn_menu).performClick();
     }
 
+    //弹出全局患者监控列表
     public void showPatientList()
     {
         // show RIGHT menu
@@ -269,7 +257,6 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             float origin = ViewHelper.getX(containerRight);
             ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
                     .setDuration(ANIMATIONDURATION).start();
-            Log.e("dd",String.valueOf(origin));
             setPatientShow(true);
         }
         else
@@ -278,11 +265,10 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             float origin = ViewHelper.getX(containerRight);
             ObjectAnimator.ofFloat(containerRight, "x", origin+ containerRight.getWidth())
                     .setDuration(ANIMATIONDURATION).start();
-            Log.e("dd",String.valueOf(origin));
             setPatientShow(true);
         }
-
     }
+    //隐藏全局患者监控列表
     public void hidePatientList()
     {
         float origin = ViewHelper.getX(containerRight);
@@ -540,7 +526,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
                             public void onClick(SweetAlertDialog sDialog) {
-                                sDialog.cancel();
+                                sDialog.dismissWithAnimation();
                             }
                         })
                         .show();
@@ -571,9 +557,18 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
     @Override
     public void refreshView(List<Patient> mData) {
-        //mDatas=mData;
         patientListAdapter.mDatas= mData;
         patientListAdapter.notifyDataSetChanged();
+        //mDatas=mData;
+        int postion=0;
+        for(Patient patient:mData)
+        {
+            if(patient.getSportState()== CommandTypeConstant.SPORT_WARNING)
+            {
+                patientWarning(patient.getName(),postion);
+            }
+            postion++;
+        }
     }
 
     @Override
@@ -581,6 +576,10 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     {
         patientListAdapter.mDatas.set(position,mData);
         patientListAdapter.notifyItemChanged(position);
+        if(mData.getSportState()== CommandTypeConstant.SPORT_WARNING)
+        {
+            patientWarning(mData.getName(),position);
+        }
         if(singleMonitorFragment!=null&&singleMonitorFragment.getPatientDetail()!=null&&singleMonitorID!=null&&mData.getPatientID()==Integer.parseInt(singleMonitorID))
         {
              singleMonitorFragment.refreshPatient(mData);
@@ -592,7 +591,24 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         }//更新多人监控
     }
 
-
+    public void patientWarning(String name, final int position)
+    {
+          Alerter.create(this)
+          .setTitle("病人预警")
+          .setText(name+"生理参数预警！")
+          .setBackgroundColor(R.color.yal_ms_colorPrimary)
+          .setDuration(5000)
+          .setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                  if(!getPatientShow()) {
+                      showPatientList();
+                  }
+                  mRecyclerView.getLayoutManager().scrollToPosition(position);
+              }
+          })
+          .show();
+    }
 
     @Override
     public void reSendRequest() {
@@ -684,7 +700,9 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public void loginOther(boolean b) {
         if(b)
         {
+            isLoginOther=true;
             logoutUnsubscribe();//先关闭所有
+            closeConnection();
             new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                     .setTitleText("提示")
                     .setContentText("你的账户已在其他设备登录")
@@ -694,12 +712,14 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         @Override
                         public void onClick(SweetAlertDialog sDialog) {
                             sDialog.dismissWithAnimation();
+                            reconnect();
+                            isLoginOther=false;
                         }
                     })
                     .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
                         @Override
                         public void onClick(SweetAlertDialog sDialog) {
-                            closeConnection();
+                            sDialog.dismissWithAnimation();
                             finish();
                         }
                     })

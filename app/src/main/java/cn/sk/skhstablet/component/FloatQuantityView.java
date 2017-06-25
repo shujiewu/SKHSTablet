@@ -23,7 +23,7 @@ import cn.sk.skhstablet.R;
 /**
  * Created by ldkobe on 2017/5/3.
  */
-
+//浮点数的增加和减少框
 public class FloatQuantityView extends LinearLayout implements View.OnClickListener {
 
     private Drawable quantityBackground, addButtonBackground, removeButtonBackground;

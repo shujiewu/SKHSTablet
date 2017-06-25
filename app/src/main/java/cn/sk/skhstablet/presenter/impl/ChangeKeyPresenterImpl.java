@@ -15,13 +15,16 @@ import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import rx.Subscription;
 import rx.functions.Action1;
 
+import static cn.sk.skhstablet.app.AppConstants.netState;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.setConnDisable;
+
 /**
  * Created by wyb on 2017/4/25.
  */
 
 public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.View> implements IChangekeyPresenter.Presenter {
 
-
+    //发送修改密码请求
     @Override
     public void sendRequest(String loginName,String oldKey,String newKey) {
         ChangeKeyRequest request=new ChangeKeyRequest(CommandTypeConstant.CHANGE_KEY_REQUEST);
@@ -31,27 +34,39 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
         request.setLoginName(loginName);
         request.setUserOldKey(oldKey);
         request.setUserNewKey(newKey);
-        invoke(TcpUtils.send(request), new Callback<Void>() {
-            @Override
-            public void onError(Throwable e) {
-                System.out.println("修改密码发送失败");
-                mView.refreshView(CommandTypeConstant.NONE_FAIL);
-                this.unsubscribe();
-            }
-            @Override
-            public void onCompleted() {
-                System.out.println("修改密码发送完成");
-                this.unsubscribe();
-            }
-        });
+        if(TcpUtils.send(request)==null)
+        {
+            mView.refreshView(CommandTypeConstant.NO_LOGIN);
+        }
+        else
+        {
+            invoke(TcpUtils.send(request), new Callback<Void>() {
+                @Override
+                public void onError(Throwable e) {
+                    e.printStackTrace();
+                    System.out.println("修改密码发送失败");
+                    //发送失败直接弹出未知错误
+                    mView.refreshView(CommandTypeConstant.NO_LOGIN);
+                    //netState= AppConstants.STATE_DIS_CONN;
+                    this.unsubscribe();
+                    setConnDisable();
+                }
+                @Override
+                public void onCompleted() {
+                    System.out.println("修改密码发送完成");
+                    this.unsubscribe();
+                }
+            });
+        }
     }
-
+    //注册修改密码的观察者
     @Override
     public void registerFetchResponse() {
         Subscription changkeySubscription = RxBus.getDefault().toObservable(AppConstants.CHANGE_KEY_STATE,Byte.class)
                 .subscribe(new Action1<Byte>() {
                     @Override
                     public void call(Byte s) {
+                        //System.out.println("接收到修改密码的状态");
                         mView.refreshView(s);
                     }
                 });

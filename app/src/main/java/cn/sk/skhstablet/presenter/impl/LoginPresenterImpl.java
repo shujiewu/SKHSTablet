@@ -21,7 +21,9 @@ import cn.sk.skhstablet.tcp.utils.TcpUtils;
 import rx.Subscription;
 import rx.functions.Action1;
 
+import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.setConnDisable;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -31,7 +33,7 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
 
     @Override
     public void registerFetchResponse() {
-        Log.e("login","succees2");
+        //注册登录状态的观察者
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.LOGIN_STATE,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
                     @Override
@@ -41,20 +43,21 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
 
                     }
                 });
+        /*//注册重连状态的观察者
         Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean s) {
                         if(s)
-                            mView.reSendRequest();
+                            mView.reSendRequest();//接收到重连成功的状态
                         else
                         {
-                            mView.setLoginDisable();
+                            mView.setLoginDisable();//重连失败
                         }
                     }
-                });
+                });*/
         ((LifeSubscription)mView).bindSubscription(mSubscription);
-        ((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
+        //((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
     }
 
     public void sendVerify(String loginName, String key)
@@ -74,15 +77,18 @@ public class LoginPresenterImpl extends BasePresenter<ILoginPresenter.View> impl
             invoke(TcpUtils.send(request),  new Callback<Void>() {
                 @Override
                 public void onCompleted() {
-                    super.onCompleted();
+                    //super.onCompleted();
                     System.out.println("登录验证发送完成");
                     this.unsubscribe();
                 }
                 @Override
                 public void onError(Throwable e) {
-                    super.onError(e);
+                    //super.onError(e);
+                    //netState= AppConstants.STATE_DIS_CONN;
                     System.out.println("登录验证发送失败");
+                    mView.setLoginDisable();
                     this.unsubscribe();
+                    setConnDisable();
                 }
             });
         }

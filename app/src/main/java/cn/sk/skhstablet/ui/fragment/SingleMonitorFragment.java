@@ -101,7 +101,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             //Log.e("single ID1",singleMonitorID);
         }
         initInject();
-        mPresenter.registerFetchResponse();
+        if (mPresenter!=null){
+            mPresenter.setView(this);
+            mPresenter.registerFetchResponse();
+        }
         //Log.e("single ID1","1212");
     }
     //View view;
@@ -270,7 +273,10 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
     public void setPageState(int state) {
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
         {
+
             this.setState(AppConstants.STATE_SUCCESS);
+            if(!pathView.getStop())
+                pathView.stop();
             mPresenter.fetchExercisePlan();
 
             if (patient.getDeviceNumber()==null||!patient.getDeviceNumber().equals(patientDetail.getDeviceNumber()))
@@ -294,8 +300,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             devParaChangeAdapter.sportDevValue=new ArrayList<String>();
             devParaChangeAdapter.notifyDataSetChanged();
             patientParaAdapter.notifyDataSetChanged();
-            if(!pathView.getStop())
-                pathView.stop();
+
             //patientDetail.set
             //patientDetail.setPercent(patient.get);
             // patientDetail.set
@@ -312,11 +317,18 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
         }
         else if(state==AppConstants.STATE_ERROR)
+        {
+            if(!pathView.getStop())
+                pathView.stop();
             this.setState(AppConstants.STATE_ERROR);
+        }
+
         else if(state==AppConstants.STATE_EMPTY)
         {
             this.setState(AppConstants.STATE_EMPTY);
             //还需要清空数据
+            if(!pathView.getStop())
+                pathView.stop();
         }
 
     }
@@ -354,12 +366,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             }*/
             Short i=1;
             List<Short> ecgData=map.get(i);
-            //if(ecgData==null)
-            //{
-                System.out.println("weikong");
-           // }
-            //for(int i=0;i<255;i++)
-            //    System.out.println(ecgData.get(i));
             pathView.setECG(ecgData);
         }
 
@@ -567,15 +573,6 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         btnChange.setVisibility(View.GONE);
 
         pathView=(PathView) view.findViewById(R.id.ecgView);
-        //pathView.setECG(null);
-        /*byte [] content=new byte[255];
-        for(int i=0;i<content.length;i++)
-        {
-            content[i]=127;
-        }
-        pathView.setContent(content);
-        */
-       // btnChange.setVisibility(View.GONE);
     }
     private PathView pathView;
     public PatientDetail getPatientDetail()

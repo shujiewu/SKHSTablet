@@ -37,6 +37,7 @@ import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
 import static cn.sk.skhstablet.app.AppConstants.mutiDatas;
 import static cn.sk.skhstablet.app.AppConstants.mutiPosition;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.setConnDisable;
 import static cn.sk.skhstablet.utlis.Utils.secToTime;
 
 /**
@@ -46,7 +47,7 @@ import static cn.sk.skhstablet.utlis.Utils.secToTime;
 public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> implements IMutiMonPresenter.Presenter {
     @Override
     public void fetchPatientDetailData() {
-        //sendRequest();
+        sendRequest();
     }
 
 
@@ -75,14 +76,14 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                     }
                 });
 
-        Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
+        /*Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean s) {
                         if(s==true)
                             mView.reSendRequest();
                     }
-                });
+                });*/
 
 
         /*Subscription mutiPageSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_REQ_STATE,Byte.class)
@@ -113,7 +114,7 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
         //((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
 
         ((LifeSubscription)mView).bindSubscription(mSubscription);
-        ((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
+        //((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
 
     }
 
@@ -140,6 +141,13 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 super.onCompleted();
                 System.out.println("重新发送多人监控发送完成");
                 this.unsubscribe();
+            }
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("重新多人监控发送失败");
+                mView.setPageState(AppConstants.STATE_ERROR);
+                this.unsubscribe();
+                setConnDisable();
             }
         });
     }

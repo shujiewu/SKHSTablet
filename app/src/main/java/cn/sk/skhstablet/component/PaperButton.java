@@ -27,10 +27,7 @@ import android.widget.Button;
 
 import cn.sk.skhstablet.R;
 
-/**
- * Date: 14-10-9.
- * Time: 17:04.
- */
+
 public class PaperButton extends Button {
 
     private static final String TAG = PaperButton.class.getSimpleName();

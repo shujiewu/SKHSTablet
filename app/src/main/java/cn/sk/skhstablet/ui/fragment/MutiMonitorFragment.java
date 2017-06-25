@@ -56,7 +56,11 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initInject();
-        mPresenter.registerFetchResponse();
+        if (mPresenter!=null){
+            mPresenter.setView(this);
+            mPresenter.registerFetchResponse();
+        }
+        //mPresenter.registerFetchResponse();
     }
     View view;
     /*public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -175,12 +179,14 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
             patientDetail.setDeviceNumber(mData.getDeviceNumber());
             patientDetail.setDev(mData.getDev());
             patientDetail.setDevType(mData.getDevType());
-        }
-        if(!(mData.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_ONLINE&&mData.getMonConnectState()==CommandTypeConstant.MON_DEV_CONNECT_ONLINE))
-        {
             patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
             patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
         }
+       /* if(!(mData.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_ONLINE&&mData.getMonConnectState()==CommandTypeConstant.MON_DEV_CONNECT_ONLINE))
+        {
+            patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
+            patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
+        }*/
         mutiMonitorAdapter.patientDetailList.set(position,patientDetail);
         mutiMonitorAdapter.notifyItemChanged(position);
     }

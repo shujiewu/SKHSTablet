@@ -15,6 +15,7 @@ import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
 import cn.sk.skhstablet.protocol.up.ChangeKeyRequest;
 import cn.sk.skhstablet.protocol.up.DevNameRequest;
+import cn.sk.skhstablet.protocol.up.ExercisePlanRequest;
 import cn.sk.skhstablet.protocol.up.LoginRequest;
 import cn.sk.skhstablet.protocol.up.LogoutRequest;
 import cn.sk.skhstablet.protocol.up.MonitorDevFormRequest;
@@ -106,14 +107,14 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 				encodeSportDevControlRequest((SportDevControlRequest)request, out);
 				break;
 			}
+			case CommandTypeConstant.EXERCISE_PLAN_REQUEST:
+			{
+
+			}
 		}
 		out.writeShortLE(0);
 		out.setShortLE(startIndex, out.writerIndex() - startIndex - 2);
 		accumulation(out);
-		// System.out.println("response :" + ByteBufUtil.hexDump(out));
-		// System.out.println("response type:" + response.getCommand());
-		// System.out.println("response length:" + (out.writerIndex() -
-		// startIndex - 2));
 	}
 	private byte[] toBytes(String str)
 	{
@@ -183,6 +184,7 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		out.writeIntLE((int) response.getDataPacketNumber());
 	}
 
+
 	/*private void encodeDeviceId(DeviceId deviceId, ByteBuf out) {
 		out.writeByte(deviceId.deviceType);
 		out.writeByte(deviceId.deviceModel);
@@ -193,7 +195,9 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		cause.printStackTrace();
 	}
-
+	private void encodeExercisePlanRequest(ExercisePlanRequest request, ByteBuf out) {
+		out.writeIntLE(request.getPatientID());
+	}
 	private void encodeLoginRequest(LoginRequest request,ByteBuf out)
 	{
 		byte[] name=toBytes(request.getLoginName());

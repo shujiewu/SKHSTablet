@@ -26,14 +26,15 @@ import cn.sk.skhstablet.protocol.SportDevForm;
 
 /**
  * Created by ldkobe on 2017/4/21.
+ * 改变运动设备参数的列表适配器
  */
 
 public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdapter.DevParaChangeHolder>{
 
-    public List<String> sportDevName;
-    public List<String> sportDevValue;
-    private SaveEditListener mOnEditChangeListener = null;
-    public byte devType;
+    public List<String> sportDevName;//列表显示的运动设备名称
+    public List<String> sportDevValue;//列表显示的运动设备值
+    private SaveEditListener mOnEditChangeListener = null; //保存修改参数的监听器
+    public byte devType;//设备类型
 
     public byte getDevType() {
         return devType;
@@ -61,6 +62,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
     public void onBindViewHolder(DevParaChangeHolder holder, int position) {
         holder.bind(holder, sportDevName.get(position), sportDevValue.get(position),position);
         holder.qvSportParaValue.getmTextViewQuantity().setTag(position);
+        holder.qvSportParaFloatValue.getmTextViewQuantity().setTag(position);
     }
 
     @Override
@@ -69,37 +71,38 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
     }
 
     public class DevParaChangeHolder extends RecyclerView.ViewHolder {
-        private TextView tvSportParaName;
-        private TextView tvSportParaValue;
+        private TextView tvSportParaName;//运动设备名称
+        private TextView tvSportParaValue;//运动设备值
         //private SeekBar sbSportParaValue;
-        private QuantityView qvSportParaValue;
-        private FloatQuantityView qvSportParaFloatValue;
+        private QuantityView qvSportParaValue;//整数参数修改框
+        private FloatQuantityView qvSportParaFloatValue;//浮点数参数修改框
         public DevParaChangeHolder(View view) {
             super(view);
             tvSportParaName = (TextView) view.findViewById(R.id.changeParaSportName);
-            //tvParaName2 = (TextView) view.findViewById(R.id.paraname2);
             tvSportParaValue = (TextView) view.findViewById(R.id.changeParaSportValue);
-            //tvParaValue2=(TextView) view.findViewById(R.id.paravalue2);
-            //sbSportParaValue=(SeekBar)view.findViewById(R.id.changeSeekBarValue);
             qvSportParaValue=(QuantityView)view.findViewById(R.id.changeQVValue);
             qvSportParaFloatValue=(FloatQuantityView)view.findViewById(R.id.changeFloatQVValue);
         }
         public void bind(final DevParaChangeHolder viewHolder, String paraName, String paraValue,int position) {
             viewHolder.tvSportParaName.setText(paraName);
             viewHolder.tvSportParaValue.setText(paraValue);
-            //viewHolder.sbSportParaValue.setMax(50);
-           // viewHolder.sbSportParaValue.setProgress(Integer.valueOf(paraValue));
-           // viewHolder.qvSportParaValue.setQuantity(Integer.valueOf(paraValue));
-            //viewHolder.qvSportParaValue.setMaxQuantity(50);
 
+            //获取该参数的解析格式
             SportDevForm sportDevForm= AppConstants.SPORT_DEV_FORM.get(devType).get(position);
-            if(sportDevForm.getCanControl()== true)
+            //如果参数可以调节
+            if(sportDevForm.getCanControl())
             {
+                //倍率不为1,说明是浮点数
                 if(sportDevForm.getRate()!=1.0)
                 {
+                    //设置显示值
                     viewHolder.qvSportParaFloatValue.setQuantity(Float.parseFloat(paraValue));
-                    viewHolder.qvSportParaFloatValue.setMaxQuantity(250);
+                    //设置最大最小值和可见
+                    viewHolder.qvSportParaFloatValue.setMaxQuantity((float)((double)sportDevForm.getControlMaxValue()/sportDevForm.getRate()));
+                    viewHolder.qvSportParaFloatValue.setMinQuantity((float)((double)sportDevForm.getControlMinValue()/sportDevForm.getRate()));
                     viewHolder.qvSportParaFloatValue.setVisibility(View.VISIBLE);
+
+                    //增加值改变的观察者
                     TextWatcher textWatcher = new TextWatcher() {
 
                         @Override
@@ -119,19 +122,19 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                             {
                                 if (mOnEditChangeListener != null&&!s.toString().equals(viewHolder.tvSportParaValue.getText().toString())) {
                                     //注意这里使用getTag方法获取数据
-                                    mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getmTextViewQuantity().getTag(),s.toString());
+                                    mOnEditChangeListener.SaveEdit((int)qvSportParaFloatValue.getmTextViewQuantity().getTag(),s.toString());
                                 }
-                                Log.e("textchange","1");
                                 //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
                             }
                         }
                     };
-                    viewHolder.qvSportParaValue.getmTextViewQuantity().addTextChangedListener(textWatcher);
+                    viewHolder.qvSportParaFloatValue.getmTextViewQuantity().addTextChangedListener(textWatcher);
                 }
                 else
                 {
                     viewHolder.qvSportParaValue.setQuantity(Integer.valueOf(paraValue));
-                    viewHolder.qvSportParaValue.setMaxQuantity(250);
+                    viewHolder.qvSportParaValue.setMaxQuantity((int)(double)sportDevForm.getControlMaxValue());
+                    viewHolder.qvSportParaValue.setMinQuantity((int)(double)sportDevForm.getControlMinValue());
                     viewHolder.qvSportParaValue.setVisibility(View.VISIBLE);
                     TextWatcher textWatcher = new TextWatcher() {
 
@@ -154,8 +157,6 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                                     //注意这里使用getTag方法获取数据
                                     mOnEditChangeListener.SaveEdit((int)qvSportParaValue.getmTextViewQuantity().getTag(),s.toString());
                                 }
-                                Log.e("textchange","2");
-                                //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
                             }
                         }
                     };
@@ -167,34 +168,10 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                 viewHolder.qvSportParaValue.setVisibility(View.GONE);
                 viewHolder.qvSportParaFloatValue.setVisibility(View.GONE);
             }
-            /*if (!paraName.equals("坡度"))
-            {
-                //viewHolder.tvSportParaValue.setFocusableInTouchMode(false);
-                viewHolder.qvSportParaValue.setVisibility(View.GONE);
-            }*/
-
-            /*sbSportParaValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                    viewHolder.etSportParaValue.setText(String.valueOf(i));
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
-            });*/
-
         }
     }
 
     public interface SaveEditListener{
-        void SaveEdit(int position, String string);
+        void SaveEdit(int position, String string);//参数为修改参数的位置，以及修改后的值
     }
 }

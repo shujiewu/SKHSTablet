@@ -19,10 +19,13 @@ import cn.sk.skhstablet.utlis.Utils;
 
 /**
  * Created by ldkobe on 2017/4/18.
+ * 多患者监控界面的适配器
  */
 
 public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.MutiMonitorHolder>{
+    //多患者列表
     public List<PatientDetail> patientDetailList;
+    //长按动作的监听，长按之后进入单人监控
     private OnRecyclerViewItemLongClickListener mOnItemLongClickListener = null;
     Context context;
     public MutiMonitorAdapter(List<PatientDetail> datas)
@@ -42,13 +45,6 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         //view.setOnClickListener(this);
         return new MutiMonitorHolder(context,view);
     }
-    /*@Override
-    public void onClick(View v) {
-        if (mOnItemClickListener != null) {
-            //注意这里使用getTag方法获取数据
-            mOnItemClickListener.onItemClick(v,(String)v.getTag());
-        }
-    }*/
     public void setOnItemLongClickListener(OnRecyclerViewItemLongClickListener listener) {
         this.mOnItemLongClickListener = listener;
     }
@@ -88,13 +84,13 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     {
 
         TextView name;
-        //TextView id;
         TextView dev;
         TextView percent;
         TextView tvHospitalNumber;
         TextView tvDevNumber;
+        //生理参数列表
         RecyclerView recyclerPhyParaView;
-
+        //运动设备参数列表
         RecyclerView recyclerSportParaView;
         Context context;
         public MutiMonitorHolder(Context context,View view) {
@@ -123,14 +119,11 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
             }
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
             viewHolder. tvDevNumber.setText(patient.getDeviceNumber());
-            //System.out.println("muti2");
 
+            //网格形式，一行两个
             recyclerPhyParaView.setLayoutManager(new GridLayoutManager(context,2));
-            ViewGroup.LayoutParams layoutParams = recyclerPhyParaView.getLayoutParams();
-            //int lineNumber = patient.getPhyDevName().size()%2;
-            //layoutParams.height =200;
-            recyclerPhyParaView.setLayoutParams(layoutParams);
-            //recyclerPhyParaView.setLayoutManager(new LinearLayoutManager(context));
+
+            //如果参数不为null,才可以显示,既是值为空也可以
             if(patient.getPhyDevName()!=null)
                 recyclerPhyParaView.setAdapter(new PatientParaAdapter(patient.getPhyDevName(),patient.getPhyDevValue()));
 
@@ -139,12 +132,18 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
                 recyclerSportParaView.setAdapter(new SportDevParaAdapter(patient.getSportDevName(),patient.getSportDevValue()));
             //System.out.println("muti3");
             //TracksItemDecorator itemDecorator = new TracksItemDecorator(
-             //       context.getResources().getDimensionPixelSize(R.dimen.decoration_size));
+             //context.getResources().getDimensionPixelSize(R.dimen.decoration_size));
             //recyclerSportParaView.addItemDecoration(itemDecorator);
            // recyclerPhyParaView.addItemDecoration(itemDecorator);
+
+            // ViewGroup.LayoutParams layoutParams = recyclerPhyParaView.getLayoutParams();
+            //int lineNumber = patient.getPhyDevName().size()%2;
+            //layoutParams.height =200;
+            //recyclerPhyParaView.setLayoutParams(layoutParams);
+            //recyclerPhyParaView.setLayoutManager(new LinearLayoutManager(context));
         }
     }
     public static interface OnRecyclerViewItemLongClickListener {
-        void onItemLongClick(View view ,Integer data);
+        void onItemLongClick(View view ,Integer data);//参数为患者di
     }
 }

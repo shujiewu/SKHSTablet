@@ -8,7 +8,7 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.View;
 
-
+//心电图的背景
 public class CardiographView extends View {
     //画笔
     protected Paint mPaint;
@@ -31,7 +31,7 @@ public class CardiographView extends View {
 
     //心电图折现
     protected Path mPath ;
-
+    protected Path mPath2 ;
     public CardiographView(Context context) {
         this(context,null);
     }

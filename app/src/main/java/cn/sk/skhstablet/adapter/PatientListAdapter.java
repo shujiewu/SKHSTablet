@@ -25,11 +25,14 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
 
 /**
  * Created by ldkobe on 2017/4/18.
+ * 全局患者监测界面的列表适配器
  */
 
 public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.PatientListHolder>
 {
+    //全局患者列表
     public List<Patient> mDatas;
+    //长按动作的监听，长按之后进入单人监控
     private OnPatientItemLongClickListener mOnItemLongClickListener = null;
     public PatientListAdapter(List<Patient> datas)
     {
@@ -53,6 +56,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     {
         holder.bind(holder, mDatas.get(position));
         holder.itemView.setTag( mDatas.get(position).getPatientID());
+        //每个项的单击监听,已选择变为未选择，未选择变为已选择，正在监控变为未选择
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -81,10 +85,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                 }, 200);
             }
         });
-            //int position1 = holder.getLayoutPosition();
-           // Log.e("position1",String.valueOf(position1));
-           // Log.e("position",String.valueOf(position));
-
+        //每个项的长按事件
        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
            @Override
            public boolean onLongClick(final View view) {
@@ -95,15 +96,10 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                        view.setPressed(false);
                    }
                },200);
-
-                   //callback.onClick(holder.getAdapterPosition());
-               //Log.e("longclick", "text1");
                if (mOnItemLongClickListener != null) {
                    //注意这里使用getTag方法获取数据
                    mOnItemLongClickListener.onItemLongClick(view, (Integer) view.getTag());
-                   //Log.e("longclick", "text");
                }
-               //Toast.makeText(view.getContext(),"long click "+mDatas.get(position),Toast.LENGTH_SHORT).show();
                return true;
            }
        });
@@ -116,8 +112,9 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     }
     public void setOnItemLongClickListener(OnPatientItemLongClickListener listener) {
         this.mOnItemLongClickListener = listener;
-        Log.e("longclick","text2");
     }
+
+    //以下函数是搜索功能的辅助函数
     public void setFilter(List<Patient> peoples) {
         mDatas = new ArrayList<>();
         mDatas.addAll(peoples);
@@ -144,7 +141,6 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             }
         }
     }
-
     private void applyAndAnimateMovedItems(List<Patient> peoples) {
         for (int toPosition = peoples.size() - 1; toPosition >= 0; toPosition--) {
             final Patient people = peoples.get(toPosition);
@@ -154,15 +150,11 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             }
         }
     }
-
-
     public Patient removeItem(int position) {
         final Patient people = mDatas.remove(position);
         notifyItemRemoved(position);
         return people;
     }
-
-
     public void addItem(int position, Patient people) {
         mDatas.add(position, people);
         notifyItemInserted(position);
@@ -178,8 +170,6 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     {
 
         TextView name;
-        //TextView rfid;
-        //TextView idcard;
         TextView tvHospitalNumber;
         TextView gender;
         TextView tvSelectStatus;
@@ -212,6 +202,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
                 @Override
                 public void afterTextChanged(Editable s) {
+                    //根据选中状态来改变颜色
                     if (s.toString().equals(PATIENT_SELECT_STATUS_FALSE))
                         tvSelectStatus.setTextColor(Color.parseColor("#1E88E5"));
                     else if(s.toString().equals(PATIENT_SELECT_STATUS_TRUE))
@@ -228,16 +219,21 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             viewHolder.tvSelectStatus.setText(patient.getSelectStatus());
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
 
+            //设置患者运动状态，也就是圆形的颜色以及设备的值和颜色
             if(patient.getSportState()!=CommandTypeConstant.SPORT_DEV_CONNECT_OFFLINE)   //运动状态不为未打卡
             {
                 if(patient.getSportState()== CommandTypeConstant.SPORT_NOMAL)
                     viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_green));//正常运动
                 else if(patient.getSportState()== CommandTypeConstant.SPORT_WARNING)
+                {
                     viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_orange));//预警运动
+                }
                 else
                 {
                     viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_white));  //未运动
                 }
+
+                //设置运动设备名称
                 if(patient.getConnectState()== CommandTypeConstant.SPORT_CONN_ONLINE)//设备在线
                 {
                     viewHolder.tvSportState.setTextColor(context.getResources().getColor(R.color.textgreen));
@@ -256,7 +252,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                 viewHolder.tvSportState.setText(context.getResources().getString(R.string.none));
             }
 
-
+            //设置生理仪和监护设备的值和颜色
             if(patient.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_ONLINE)
             {
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(R.color.textgreen));
@@ -264,12 +260,17 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                 if(patient.getMonConnectState()== CommandTypeConstant.MON_DEV_CONNECT_ONLINE)
                 {
                     viewHolder.tvMonState.setTextColor(context.getResources().getColor(R.color.textgreen));
-                    viewHolder.tvMonState.setText(context.getResources().getString(R.string.patient_online));
+                    viewHolder.tvMonState.setText("正常");
+                }
+                else if(patient.getMonConnectState()== CommandTypeConstant.MON_DEV_CONNECT_OFFLINE)
+                {
+                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                    viewHolder.tvMonState.setText("异常");
                 }
                 else
                 {
-                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                    viewHolder.tvMonState.setText(context.getResources().getString(R.string.patient_offline));
+                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.white));
+                    viewHolder.tvMonState.setText("准备采集");
                 }
             }
             else if (patient.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_OFFLINE)
@@ -277,21 +278,21 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
                 viewHolder.tvPhyState.setText("离线");
                 viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
+                viewHolder.tvMonState.setText("");
             }
             else if(patient.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_NONE)
             {
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
                 viewHolder.tvPhyState.setText("未连接");
                 viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
+                viewHolder.tvMonState.setText("");
             }
             else
             {
                 viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
                 viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.none));
+                viewHolder.tvPhyState.setText("");
             }
 
             viewHolder.gender.setText(patient.getGender());

@@ -46,6 +46,7 @@ import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
 import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
 import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.reconnect;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.setConnDisable;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -56,23 +57,25 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
     public HashMap<Integer,Integer> hasPatient=new HashMap<>();
     public List<Patient> mDatas=new ArrayList<>();
     private int position=0;
+    //发送全局病人列表请求
     @Override
     public void sentPatientListRequest() {
-        //mDatas= PatientList.PATIENTS;
-        //mView.refreshView(mDatas);
-
-        //在这里写发送
         PatientListRequest patientListRequest=new PatientListRequest(CommandTypeConstant.PATIENT_LIST_REQUEST);
         patientListRequest.setUserID(AppConstants.USER_ID);
         patientListRequest.setDeviceType(AppConstants.DEV_TYPE);
         patientListRequest.setRequestID(AppConstants.PATIENT_LIST_REQ_ID);
-        //System.out.println("send patientListRequest!");
         invoke(TcpUtils.send(patientListRequest), new Callback<Void>() {
             @Override
             public void onCompleted() {
                 super.onCompleted();
                 System.out.println("病人列表发送完成");
                 this.unsubscribe();
+            }
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("病人列表发送失败");
+                this.unsubscribe();
+                setConnDisable();
             }
         });
     }
@@ -91,9 +94,8 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
             public void onError(Throwable e) {
                 System.out.println("多人监控发送失败");
                 mView.setMutiPageState(AppConstants.STATE_ERROR);
-                if(netState==AppConstants.STATE_DIS_CONN)
-                    reconnect();
                 this.unsubscribe();
+                setConnDisable();
             }
             @Override
             public void onCompleted() {
@@ -117,9 +119,8 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
             @Override
             public void onError(Throwable e) {
                 Log.e("sendcancel","error");
-                if(netState==AppConstants.STATE_DIS_CONN)
-                    reconnect();
                 this.unsubscribe();
+                setConnDisable();
             }
             @Override
             public void onCompleted() {
@@ -141,8 +142,8 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
             @Override
             public void onError(Throwable e) {
                 Log.e("sendlogout","error");
-                if(netState==AppConstants.STATE_DIS_CONN)
-                    reconnect();
+                this.unsubscribe();
+                setConnDisable();
             }
             @Override
             public void onCompleted() {
@@ -207,9 +208,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                     public void call(Boolean b) {
                         if(b)
                         {
-                            System.out.println("退出3");
                             mView.logoutSuccess(true);
-
                         }
                     }
                 });
@@ -250,15 +249,15 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                                 return;
                             }
                             sentPatientListRequest();
-                            if(lastMutiPatientID!=null)
-                                sendMutiMonitorRequest(lastMutiPatientID);
+                            /*if(lastMutiPatientID!=null)
+                                sendMutiMonitorRequest(lastMutiPatientID);*/
                             if(isCancelSingle)
                             {
                                 sendCancelSingleMonitorReq();
                                 return;
                             }
-                            if(lastSinglePatientID!=null)
-                                mView.loadSinglePatient(lastSinglePatientID);
+                            /*if(lastSinglePatientID!=null)
+                                mView.loadSinglePatient(lastSinglePatientID);*/
                         }
                     }
                 });
@@ -314,9 +313,8 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
             @Override
             public void onError(Throwable e) {
                 System.out.println("重连验证发送失败");
-                if(netState==AppConstants.STATE_DIS_CONN)
-                    reconnect();
                 this.unsubscribe();
+                setConnDisable();
             }
         });
     }
@@ -339,6 +337,12 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                     super.onCompleted();
                     System.out.println("参数修改发送完成");
                     this.unsubscribe();
+                }
+                @Override
+                public void onError(Throwable e) {
+                    System.out.println("参数修改发送失败");
+                    this.unsubscribe();
+                    setConnDisable();
                 }
             });
         }
@@ -369,6 +373,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                 super.onError(e);
                 System.out.println("运动设备格式发送失败");
                 this.unsubscribe();
+                setConnDisable();
             }
         });
         invoke(TcpUtils.send(monitorDevFormRequest), new Callback<Void>() {
@@ -383,6 +388,7 @@ public class PatientListPresenterImpl extends BasePresenter<IPatientListPresente
                 super.onError(e);
                 System.out.println("监护格式发送失败");
                 this.unsubscribe();
+                setConnDisable();
             }
         });
     }

@@ -121,6 +121,7 @@ public class TcpUtils {
     static Connection<AbstractProtocol,AbstractProtocol> mConnection;
     static boolean isFirst=true;
     public static Observable<Boolean> connect(final String url, final int port) {
+        netState=AppConstants.STATE_IN_CONN;
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {
@@ -158,9 +159,8 @@ public class TcpUtils {
                         .channelOption(ChannelOption.SO_KEEPALIVE, true)
                         //.channelOption(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000) //服务器掉线还要等五秒，自己掉线直接重连
                         //.readTimeOut(5, TimeUnit.SECONDS) //5秒未读到数据
-                        .readTimeOut(6, TimeUnit.SECONDS) //15秒未读到数据
+                        .readTimeOut(6, TimeUnit.SECONDS) //6秒未读到数据
                         .createConnectionRequest()
-
                         .subscribe(new Observer<Connection<AbstractProtocol, AbstractProtocol>>() {
                             @Override
                             public void onCompleted() {
@@ -176,19 +176,18 @@ public class TcpUtils {
                                 e.printStackTrace();
                                 System.out.println("连接失败");
                              }
-
                             @Override
                             public void onNext(Connection<AbstractProtocol, AbstractProtocol> connection) {
                                 mConnection = connection;
                                 subscriber.onNext(true);
-                                netState=AppConstants.STATE_CONN;
+                                netState=AppConstants.STATE_CONN;  //网络状态设置为已连接
                                 System.out.println("连接成功");
-                                if(isFirst)
-                                {
+                                //if(isFirst)
+                                //{
                                     System.out.println("首次连接成功");
-                                    sendIdleHeart();
-                                    isFirst=false;
-                                }
+                                    sendIdleHeart();//首次连接成功开始发送心跳
+                                //    isFirst=false;
+                               // }
                             }
                         });
             }
@@ -276,16 +275,24 @@ public class TcpUtils {
      */
     public static void closeConnection()
     {
-
+        netState=AppConstants.STATE_DIS_CONN;
         if (mConnection != null)
         {
             mConnection.closeNow();
         }
     }
+    public static void setConnDisable()
+    {
+        netState=AppConstants.STATE_DIS_CONN;
+        logoutUnsubscribe();
+        closeConnection();
+        /*if(netState==AppConstants.STATE_DIS_CONN)
+             reconnect();*/
+    }
     private static int reconnectTime=0;
     public static void reconnect() {
         reconnectTime++;
-        if(reconnectTime==10)
+        if(reconnectTime==3)
         {
             RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
             reconnectTime=0;
@@ -300,6 +307,7 @@ public class TcpUtils {
             public void call(Long aLong) {
                 if (mConnection != null)
                 {
+                    logoutUnsubscribe();
                     mConnection.closeNow();
                 }
                 invoke(TcpUtils.connect(AppConstants.url, AppConstants.port), new Callback<Boolean>() {
@@ -321,7 +329,6 @@ public class TcpUtils {
                         System.out.println("尝试重新连接");
                         this.unsubscribe();
                         reconnect();
-
                     }
                 });
             }
@@ -361,23 +368,29 @@ public class TcpUtils {
     }
     public static void logoutUnsubscribe()
     {
-        idleScription.unsubscribe();
-        if(idleScription.isUnsubscribed())
+        if(idleScription!=null)
         {
-            System.out.println("取消了心跳订阅");
+            idleScription.unsubscribe();
+            if(idleScription.isUnsubscribed())
+            {
+                System.out.println("取消了心跳订阅");
+            }
+            else
+            {
+                System.out.println("未取消了心跳订阅");
+            }
         }
-        else
+        if(fetchScription!=null)
         {
-            System.out.println("未取消了心跳订阅");
-        }
-        fetchScription.unsubscribe();
-        if(fetchScription.isUnsubscribed())
-        {
-            System.out.println("取消了读取数据订阅");
-        }
-        else
-        {
-            System.out.println("未取消了读取数据订阅");
+            fetchScription.unsubscribe();
+            if(fetchScription.isUnsubscribed())
+            {
+                System.out.println("取消了读取数据订阅");
+            }
+            else
+            {
+                System.out.println("未取消了读取数据订阅");
+            }
         }
     }
     public static Subscription fetchScription;
@@ -417,8 +430,6 @@ public class TcpUtils {
                         RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
                         break;
                     }
-                    case CommandTypeConstant.DOCTOR_ADVICE_RESPONSE:
-                        break;
                     case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:
                     case CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE:
                         state=((PatientListResponse)data).getState();
@@ -550,6 +561,7 @@ public class TcpUtils {
                         state=((LoginOtherResponse)data).getState();
                         if(state==LOGIN_OTHER)
                             RxBus.getDefault().post(AppConstants.LOGIN_OTHER_STATE,new Boolean(true));
+                        break;
                     case CommandTypeConstant.LOGOUT_ACK_RESPONSE:
                         userID=((LoginAckResponse)data).getUserID();
                         reqID=((LoginAckResponse)data).getRequestID();

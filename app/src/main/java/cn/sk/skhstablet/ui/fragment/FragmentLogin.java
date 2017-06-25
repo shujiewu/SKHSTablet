@@ -71,11 +71,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     RelativeLayout rela_name;
     @ViewInject(R.id.rela_pass)
     RelativeLayout rela_pass;
-    private Handler handler = new Handler(){};
-
-
-
-
+    //private Handler handler = new Handler(){};
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return x.view().inject(this,inflater,container);
@@ -90,21 +86,18 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     protected void initView(View view)  {
 
     }
-
-
    @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         initInject();
         if (mPresenter!=null){
             mPresenter.setView(this);
+            mPresenter.registerFetchResponse();
         }
-       Log.e("login","succees1");
         initLogin();
         textListener();
     }
-
+    //增加文字改变监听器
     private void textListener() {
         userphone.addTextChangedListener(new TextWatcher() {
             @Override
@@ -138,6 +131,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
     }
     private String UserID;
     private String Key;
+    //初始化登录
     private void initLogin() {
         SharedPreferences userinfo = getActivity().getSharedPreferences("userinfo", 0);
         userphone.setText(userinfo.getString("username",null));
@@ -150,31 +144,38 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 final String key = userpass.getText().toString();
                 final  View view= v;
 
+                //判断输入为空
                 if (TextUtils.isEmpty(userID)){
                     rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
                     loginusericon.setAnimation(Tools.shakeAnimation(2));
                     showSnackar(v,"请输入登录名");
                     return;
                 }
+                //判断输入为空
                 if (TextUtils.isEmpty(key)){
                     rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
                     codeicon.setAnimation(Tools.shakeAnimation(2));
                     showSnackar(v,"请输入密码");
                     return;
                 }
+                //开始登录
                 login_progress.setVisibility(View.VISIBLE);
-                mPresenter.registerFetchResponse();
+
                 UserID=userID;
                 Key=key;
                 bt_login.setEnabled(false);
                 loadData();
-
             }
         });
     }
-
+    @Override
+    protected void loadData() {
+        mPresenter.sendVerify(UserID,Key);
+    }
+    //根据返回的登录状态刷新界面
     @Override
     public void refreshView(Boolean mData) {
+        //登录成功
         if(mData)
         {
             LOGIN_NAME=UserID;
@@ -186,8 +187,10 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                     R.anim.my_alpha_action);
             getActivity().finish();
         }
+        //登录失败
         else
         {
+            //提示用户名或密码错误
             login_progress.setVisibility(View.GONE);
             rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
             codeicon.setAnimation(Tools.shakeAnimation(2));
@@ -195,12 +198,12 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
             loginusericon.setAnimation(Tools.shakeAnimation(2));
             bt_login.setEnabled(true);
         }
-        //userphone.setText(mData);
     }
 
+    //重连
     @Override
     public void reSendRequest() {
-        mPresenter.sendVerify(UserID,Key);
+        //mPresenter.sendVerify(UserID,Key);
     }//重新发送请求
 
     @Override
@@ -209,17 +212,12 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 .build().injectLogin(this);
     }
 
-    @Override
-    protected void loadData() {
-        mPresenter.sendVerify(UserID,Key);
-    }
+    //提示登录失败后将按钮和进度条还原
     @Override
     public void setLoginDisable() {
-        //bt_login.setEnabled(false);
-        showSnackar(getView(),"登录失败");
+        showSnackar(getView(),"连接服务器失败");
         login_progress.setVisibility(View.GONE);
         bt_login.setEnabled(true);
-
     }
 }
 	

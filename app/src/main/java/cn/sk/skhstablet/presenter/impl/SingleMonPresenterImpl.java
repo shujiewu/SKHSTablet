@@ -20,6 +20,7 @@ import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.protocol.ControlState;
 import cn.sk.skhstablet.protocol.SportDevForm;
+import cn.sk.skhstablet.protocol.up.ExercisePlanRequest;
 import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SportDevControlRequest;
@@ -39,10 +40,12 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
 import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.isCancelSingle;
+import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
 import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
 import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.reconnect;
+import static cn.sk.skhstablet.tcp.utils.TcpUtils.setConnDisable;
 
 /**
  * Created by wyb on 2017/4/25.
@@ -65,6 +68,8 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动3分钟", "第二段：以1米每秒的速度运动3分钟")));
         //arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动4分钟", "第二段：以1米每秒的速度运动4分钟")));
         mView.refreshExercisePlan(armTypes,arms);
+
+
     }
 
     @Override
@@ -120,6 +125,14 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                         mView.setControlState(b.getResultState(),b.getControlState());
                     }
                 });
+
+        Subscription planSubscription = RxBus.getDefault().toObservable(AppConstants.EXERCISE_PLAN_STATE,Byte.class)
+                .subscribe(new Action1<Byte>() {
+                    @Override
+                    public void call(Byte b) {
+                        //mView.setControlState(b.getResultState(),b.getControlState());
+                    }
+                });
         ((LifeSubscription)mView).bindSubscription(singlePageSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscription);
         ((LifeSubscription)mView).bindSubscription(controlSubscription);
@@ -145,6 +158,13 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                     System.out.println("启停控制发送完成");
                     this.unsubscribe();
                 }
+
+                @Override
+                public void onError(Throwable e) {
+                    System.out.println("启停控制发送失败");
+                    this.unsubscribe();
+                    setConnDisable();
+                }
             });
         }
     }
@@ -163,39 +183,59 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
             public void onError(Throwable e) {
                 Log.e("sendsingle","error");
                 mView.setPageState(AppConstants.STATE_ERROR);
-                if(netState==AppConstants.STATE_DIS_CONN)
-                    reconnect();
+                this.unsubscribe();
+                setConnDisable();
             }
             @Override
             public void onCompleted() {
                 super.onCompleted();
-                System.out.println("重新发送单人监控生理仪发送完成");
+                System.out.println("发送单人监控生理仪发送完成");
                 this.unsubscribe();
             }
         });
 
+        ExercisePlanRequest exercisePlanRequest=new ExercisePlanRequest(CommandTypeConstant.EXERCISE_PLAN_REQUEST);
+        exercisePlanRequest.setUserID(AppConstants.USER_ID);
+        exercisePlanRequest.setDeviceType(AppConstants.DEV_TYPE);
+        exercisePlanRequest.setRequestID(AppConstants.SINGLE_REQ_ID);
+        exercisePlanRequest.setPatientID(Integer.parseInt(ID));
+        invoke(TcpUtils.send(exercisePlanRequest), new Callback<Void>() {
+            @Override
+            public void onError(Throwable e) {
+                Log.e("sendsingle","error");
+                mView.setPageState(AppConstants.STATE_ERROR);
+                this.unsubscribe();
+                setConnDisable();
+            }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("发送单人监控医嘱完成");
+                this.unsubscribe();
+            }
+        });
 
-        List<Integer> patientIDList=new ArrayList<>();
-        patientIDList.add(Integer.parseInt(ID));
+        //List<Integer> patientIDList=new ArrayList<>();
+        lastMutiPatientID.add(Integer.parseInt(ID));
+        //patientIDList.add(Integer.parseInt(ID));
         MutiMonitorRequest mutiMonitorRequest=new MutiMonitorRequest(CommandTypeConstant.MUTI_MONITOR_REQUEST);
         mutiMonitorRequest.setUserID(AppConstants.USER_ID);
         mutiMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
         mutiMonitorRequest.setRequestID(AppConstants.SINGLE_SPORT_REQ_ID);
         mutiMonitorRequest.setPatientNumber((short)1);
-        mutiMonitorRequest.setPatientID(patientIDList);//zhiyouyige
+        mutiMonitorRequest.setPatientID(lastMutiPatientID);//zhiyouyige
         invoke(TcpUtils.send(mutiMonitorRequest), new Callback<Void>() {
             @Override
             public void onError(Throwable e) {
                 Log.e("sendsingle","error");
                 mView.setPageState(AppConstants.STATE_ERROR);
-                if(netState==AppConstants.STATE_DIS_CONN)
-                    reconnect();
-
+                this.unsubscribe();
+                setConnDisable();
             }
             @Override
             public void onCompleted() {
                 super.onCompleted();
-                System.out.println("重新发送单人监控康复设备发送完成");
+                System.out.println("发送单人监控康复设备发送完成");
                 this.unsubscribe();
             }
         });

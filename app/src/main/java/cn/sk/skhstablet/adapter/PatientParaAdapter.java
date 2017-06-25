@@ -14,11 +14,14 @@ import cn.sk.skhstablet.model.PatientDetail;
 
 /**
  * Created by wyb on 2017/4/21.
+ * 患者生理参数列表的适配器
  */
 
 public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.PatientParaHolder> {
     public List<String> phyDevName;
     public List<String> phyDevValue;
+
+    //根据这个值来判断是多人监控页面采用此适配器还是单人监控页面采用,单人监控页面的字体要大一些
     private int pageState= AppConstants.MUTI_DATA;
 
     public void setPageState(int pageState) {
@@ -29,7 +32,6 @@ public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.
     {
         this.phyDevName=phyDevName;
         this.phyDevValue=phyDevValue;
-        //System.out.println("muti4");
     }
     @Override
     public PatientParaAdapter.PatientParaHolder onCreateViewHolder(ViewGroup parent, int viewType) {

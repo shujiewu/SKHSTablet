@@ -90,6 +90,8 @@ public class SportDevForm {
     private Boolean mainControl;
     private int length;
     private byte paraType;
+    public Double controlMaxValue;
+    public Double controlMinValue;
 
     public byte getParaType() {
         return paraType;
@@ -219,5 +221,21 @@ public class SportDevForm {
 
     public void setDisplayUnit(String displayUnit) {
         this.displayUnit = displayUnit;
+    }
+
+    public Double getControlMaxValue() {
+        return controlMaxValue;
+    }
+
+    public Double getControlMinValue() {
+        return controlMinValue;
+    }
+
+    public void setControlMaxValue(Double controlMaxValue) {
+        this.controlMaxValue = controlMaxValue;
+    }
+
+    public void setControlMinValue(Double controlMinValue) {
+        this.controlMinValue = controlMinValue;
     }
 }

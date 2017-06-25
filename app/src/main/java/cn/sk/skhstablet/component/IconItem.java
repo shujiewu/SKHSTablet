@@ -7,7 +7,7 @@ import android.widget.RelativeLayout;
 
 import cn.sk.skhstablet.ui.activity.BorderActivity;
 import cn.sk.skhstablet.utlis.Utils;
-
+//图标按钮
 public class IconItem extends MenuItem {
 	
 	ImageView icon;

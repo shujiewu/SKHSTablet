@@ -12,7 +12,7 @@ import android.widget.EditText;
 
 import cn.sk.skhstablet.R;
 
-
+//带删除按钮文本框
 public class EditTextWithDel extends EditText {
 	private final static String TAG = "EditTextWithDel";
 	private Drawable imgInable;
@@ -59,7 +59,6 @@ public class EditTextWithDel extends EditText {
 		setDrawable();
 	}
 
-	// ����ɾ��ͼƬ
 	private void setDrawable() {
 		if (length() < 1)
 			setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
@@ -73,7 +72,7 @@ public class EditTextWithDel extends EditText {
 		if (imgInable != null && event.getAction() == MotionEvent.ACTION_UP) {
 			int eventX = (int) event.getRawX();
 			int eventY = (int) event.getRawY();
-			Log.e(TAG, "eventX = " + eventX + "; eventY = " + eventY);
+			//Log.e(TAG, "eventX = " + eventX + "; eventY = " + eventY);
 			Rect rect = new Rect();
 			getGlobalVisibleRect(rect);
 			rect.left = rect.right - 50;

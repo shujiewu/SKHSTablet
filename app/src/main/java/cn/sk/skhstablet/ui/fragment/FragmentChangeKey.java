@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import org.xutils.view.annotation.ContentView;
 import org.xutils.view.annotation.ViewInject;
@@ -42,8 +43,6 @@ PaperButton nextBt;
     EditTextWithDel newpassword;
     @ViewInject(R.id.renewpassword)
     EditTextWithDel renewpassword;
-
-
     @ViewInject(R.id.re_loginname)
     RelativeLayout re_loginname;
     @ViewInject(R.id.re_oldpass)
@@ -52,7 +51,6 @@ PaperButton nextBt;
     RelativeLayout re_newpass;
     @ViewInject(R.id.re_renewpass)
     RelativeLayout re_renewpass;
-
     @ViewInject(R.id.usericon)
     ImageView loginnameIv;
     @ViewInject(R.id.rekeyicon)
@@ -75,8 +73,14 @@ PaperButton nextBt;
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initInject();
+        if (mPresenter!=null){
+            mPresenter.setView(this);
+            mPresenter.registerFetchResponse();
+        }
         initView(view);
         TextListener();
+
     }
 
     private void TextListener() {
@@ -84,7 +88,7 @@ PaperButton nextBt;
         loginname.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
             }
 
             @Override
@@ -94,19 +98,14 @@ PaperButton nextBt;
 
             @Override
             public void afterTextChanged(Editable s) {
-                String text =loginname.getText().toString();
-                /*if(CheckUtils.isMobile(text)){
-                    //抖动
-                    re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
 
-                }*/
-                re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
             }
         });
+        //旧密码改变背景
         userpassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                re_oldpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
             }
 
             @Override
@@ -117,17 +116,13 @@ PaperButton nextBt;
             @Override
             public void afterTextChanged(Editable s) {
 
-                re_oldpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-
-
-
             }
         });
-        //密码改变背景变
+        //新密码改变背景
         newpassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                re_newpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
             }
 
             @Override
@@ -137,19 +132,15 @@ PaperButton nextBt;
 
             @Override
             public void afterTextChanged(Editable s) {
-
-                re_newpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-
-
 
             }
         });
 
-        //密码改变背景变
+        ///重新输入新密码改变背景
         renewpassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                re_renewpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
             }
 
             @Override
@@ -159,9 +150,6 @@ PaperButton nextBt;
 
             @Override
             public void afterTextChanged(Editable s) {
-
-                re_renewpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_black));
-
             }
         });
     }
@@ -171,9 +159,8 @@ PaperButton nextBt;
     private String newKey;
     @Override
     protected void initView(View view)  {
-        //下一步的点击事件
 
-        Log.e("login","succees3");
+        //确认修改密码的点击事件
         nextBt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -223,32 +210,19 @@ PaperButton nextBt;
                 loginName=name;
                 oldKey=password;
                 newKey=newpass;
-                mPresenter.registerFetchResponse();
                 loadData();
             }
         });
 
 
     }
-//回收timer
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-    }
+    //根据返回的密码修改状态刷新界面
     @Override
     public void refreshView(Byte mData) {
         if(mData== CommandTypeConstant.SUCCESS)
         {
             new SweetAlertDialog(this.getContext(), SweetAlertDialog.SUCCESS_TYPE)
                     .setTitleText("密码修改成功")
-                    .setConfirmText("确定")
-                    .show();
-        }
-        else if(mData== CommandTypeConstant.OLD_KEY_FALSE)
-        {
-            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
-                    .setTitleText("原密码错误")
                     .setConfirmText("确定")
                     .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                         @Override
@@ -257,9 +231,22 @@ PaperButton nextBt;
                         }
                     })
                     .show();
-            //System.out.println("密码修改失败");
         }
-        else
+        else if(mData== CommandTypeConstant.OLD_KEY_FALSE)
+        {
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("用户名或密码错误")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            //System.out.println("接收到修改密码的状态1");
+                        }
+                    })
+                    .show();
+        }
+        else if(mData==CommandTypeConstant.NONE_FAIL)
         {
             new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
                     .setTitleText("修改失败，未知错误")
@@ -271,13 +258,17 @@ PaperButton nextBt;
                         }
                     })
                     .show();
-            //System.out.println("密码修改失败");
+        }
+        else
+        {
+            showSnackar(getView(),"连接服务器失败");
         }
     }
 
     @Override
     public void reSendRequest() {
 
+        //mPresenter.sendRequest(loginName,oldKey,newKey);
     }
 
     @Override
