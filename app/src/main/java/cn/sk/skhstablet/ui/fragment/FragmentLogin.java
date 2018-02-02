@@ -34,8 +34,7 @@ import cn.sk.skhstablet.R;
 import cn.sk.skhstablet.component.EditTextWithDel;
 import cn.sk.skhstablet.component.PaperButton;
 import cn.sk.skhstablet.ui.base.BaseFragment;
-import cn.sk.skhstablet.utlis.CheckUtils;
-import cn.sk.skhstablet.utlis.Tools;
+import cn.sk.skhstablet.utlis.Utils;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
@@ -97,8 +96,9 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         initLogin();
         textListener();
     }
-    //增加文字改变监听器
+    //文字改变监听器
     private void textListener() {
+        //用户名背景改变
         userphone.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -113,6 +113,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
             public void afterTextChanged(Editable s) {
             }
         });
+        //用户密码背景改变
         userpass.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -147,14 +148,14 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 //判断输入为空
                 if (TextUtils.isEmpty(userID)){
                     rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    loginusericon.setAnimation(Tools.shakeAnimation(2));
+                    loginusericon.setAnimation(Utils.shakeAnimation(2));
                     showSnackar(v,"请输入登录名");
                     return;
                 }
                 //判断输入为空
                 if (TextUtils.isEmpty(key)){
                     rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    codeicon.setAnimation(Tools.shakeAnimation(2));
+                    codeicon.setAnimation(Utils.shakeAnimation(2));
                     showSnackar(v,"请输入密码");
                     return;
                 }
@@ -162,7 +163,7 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
                 login_progress.setVisibility(View.VISIBLE);
 
                 UserID=userID;
-                Key=key;
+                Key=Encrypt(key);
                 bt_login.setEnabled(false);
                 loadData();
             }
@@ -193,9 +194,9 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
             //提示用户名或密码错误
             login_progress.setVisibility(View.GONE);
             rela_pass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-            codeicon.setAnimation(Tools.shakeAnimation(2));
+            codeicon.setAnimation(Utils.shakeAnimation(2));
             rela_name.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-            loginusericon.setAnimation(Tools.shakeAnimation(2));
+            loginusericon.setAnimation(Utils.shakeAnimation(2));
             bt_login.setEnabled(true);
         }
     }
@@ -219,5 +220,28 @@ public class FragmentLogin extends BaseFragment<LoginPresenterImpl> implements I
         login_progress.setVisibility(View.GONE);
         bt_login.setEnabled(true);
     }
+    //加密
+    public static String Encrypt(String s)
+    {
+        String EncryptString = "";//定义。
+        for (int i = 0; i < s.length(); i++)//遍历。
+        {
+            int j;
+            byte[] b = new byte[1];
+            j =Integer.valueOf(s.charAt(i));//49
+            if (j % 2 == 0)
+            {
+                j += 5;//j为奇数
+            }
+            else j += 7; //j为偶数
+            if (j > 127)
+            {
+                j = j - 127 + 31;
+            }
+            EncryptString = EncryptString + (char) j; ;//显示。
+        }
+        return EncryptString;
+    }
+
 }
 	

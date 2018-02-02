@@ -33,7 +33,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
 
     public List<String> sportDevName;//列表显示的运动设备名称
     public List<String> sportDevValue;//列表显示的运动设备值
-    private SaveEditListener mOnEditChangeListener = null; //保存修改参数的监听器
+    private SaveEditListener mOnEditChangeListener = null; //参数改变的监听器
     public byte devType;//设备类型
 
     public byte getDevType() {
@@ -88,20 +88,20 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
             viewHolder.tvSportParaValue.setText(paraValue);
 
             //获取该参数的解析格式
-            SportDevForm sportDevForm= AppConstants.SPORT_DEV_FORM.get(devType).get(position);
+            final SportDevForm sportDevForm= AppConstants.SPORT_DEV_FORM.get(devType).get(position);
             //如果参数可以调节
             if(sportDevForm.getCanControl())
             {
-                //倍率不为1,说明是浮点数
+                //倍率不为1,说明是浮点数修改
                 if(sportDevForm.getRate()!=1.0)
                 {
                     //设置显示值
                     viewHolder.qvSportParaFloatValue.setQuantity(Float.parseFloat(paraValue));
                     //设置最大最小值和可见
-                    viewHolder.qvSportParaFloatValue.setMaxQuantity((float)((double)sportDevForm.getControlMaxValue()/sportDevForm.getRate()));
-                    viewHolder.qvSportParaFloatValue.setMinQuantity((float)((double)sportDevForm.getControlMinValue()/sportDevForm.getRate()));
+                    viewHolder.qvSportParaFloatValue.setMaxQuantity((float)((double)sportDevForm.getControlMaxValue()));
+                    viewHolder.qvSportParaFloatValue.setMinQuantity((float)((double)sportDevForm.getControlMinValue()));
                     viewHolder.qvSportParaFloatValue.setVisibility(View.VISIBLE);
-
+                    viewHolder.qvSportParaValue.setVisibility(View.GONE);
                     //增加值改变的观察者
                     TextWatcher textWatcher = new TextWatcher() {
 
@@ -118,11 +118,19 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
 
                         @Override
                         public void afterTextChanged(Editable s) {
+                            //参数改变之后回调SaveEditListener接口
                             if(!s.toString().isEmpty())
                             {
+                                float value;
                                 if (mOnEditChangeListener != null&&!s.toString().equals(viewHolder.tvSportParaValue.getText().toString())) {
                                     //注意这里使用getTag方法获取数据
-                                    mOnEditChangeListener.SaveEdit((int)qvSportParaFloatValue.getmTextViewQuantity().getTag(),s.toString());
+                                    try {
+                                        value=Float.parseFloat(s.toString());
+                                        //intValue=(int)(value*sportDevForm.getRate());
+                                    } catch (Exception e) {
+                                        return;
+                                    }
+                                    mOnEditChangeListener.SaveEdit((int)qvSportParaFloatValue.getmTextViewQuantity().getTag(),String.valueOf(value));
                                 }
                                 //viewHolder.sbSportParaValue.setProgress(Integer.valueOf(s.toString()));
                             }
@@ -136,6 +144,7 @@ public class DevParaChangeAdapter extends RecyclerView.Adapter<DevParaChangeAdap
                     viewHolder.qvSportParaValue.setMaxQuantity((int)(double)sportDevForm.getControlMaxValue());
                     viewHolder.qvSportParaValue.setMinQuantity((int)(double)sportDevForm.getControlMinValue());
                     viewHolder.qvSportParaValue.setVisibility(View.VISIBLE);
+                    viewHolder.qvSportParaFloatValue.setVisibility(View.GONE);
                     TextWatcher textWatcher = new TextWatcher() {
 
                         @Override

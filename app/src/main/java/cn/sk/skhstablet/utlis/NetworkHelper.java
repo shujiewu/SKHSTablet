@@ -11,6 +11,9 @@ import android.net.NetworkInfo;
 import com.blankj.utilcode.utils.LogUtils;
 import com.blankj.utilcode.utils.ShellUtils;
 
+import cn.sk.skhstablet.app.AppConstants;
+
+//网上找的网络连接辅助类，我只用了ping命令
 public class NetworkHelper {
 	private static ConnectivityManager connManager = null;
 
@@ -31,7 +34,8 @@ public class NetworkHelper {
 		return false;
 	}
 	public static boolean isAvailableByPing() {
-		ShellUtils.CommandResult result = ShellUtils.execCmd("ping -c 1 -w 1 192.168.2.180", false);
+		String cmd="ping -c 1 -w 1 "+ AppConstants.url;
+		ShellUtils.CommandResult result = ShellUtils.execCmd(cmd, false);
 		boolean ret = result.result == 0;
 		if (result.errorMsg != null) {
 			LogUtils.d("isAvailableByPing errorMsg", result.errorMsg);

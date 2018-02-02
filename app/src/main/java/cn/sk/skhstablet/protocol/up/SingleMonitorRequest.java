@@ -16,7 +16,9 @@ public class SingleMonitorRequest extends AbstractProtocol {
     private int userID;
     private byte requestID;
     private short patientNumber;
-    private int patientID;
+
+
+    private List<Integer> patientID;
 
     public void setUserID(int userID) {
         this.userID = userID;
@@ -26,7 +28,7 @@ public class SingleMonitorRequest extends AbstractProtocol {
         this.patientNumber = patientNumber;
     }
 
-    public void setPatientID(int patientID) {
+    public void setPatientID(List<Integer> patientID) {
         this.patientID = patientID;
     }
 
@@ -42,7 +44,7 @@ public class SingleMonitorRequest extends AbstractProtocol {
         return requestID;
     }
 
-    public int getPatientID() {
+    public List<Integer> getPatientID() {
         return patientID;
     }
 

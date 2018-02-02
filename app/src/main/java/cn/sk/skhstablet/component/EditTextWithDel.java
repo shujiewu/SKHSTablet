@@ -66,7 +66,6 @@ public class EditTextWithDel extends EditText {
 			setCompoundDrawablesWithIntrinsicBounds(null, null, imgInable, null);
 	}
 
-	// ����ɾ���¼�
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if (imgInable != null && event.getAction() == MotionEvent.ACTION_UP) {

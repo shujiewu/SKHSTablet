@@ -2,6 +2,7 @@ package cn.sk.skhstablet.protocol;
 
 /**
  * Created by wyb on 2017/5/9.
+ * 运动设备协议解析格式
  */
 
 public class SportDevForm {

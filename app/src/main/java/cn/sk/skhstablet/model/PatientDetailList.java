@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * Created by ldkobe on 2017/4/18.
+ * 测试类，可删除
  */
 
 public class PatientDetailList {

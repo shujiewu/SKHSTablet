@@ -14,7 +14,6 @@ import cn.sk.skhstablet.protocol.Version;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
 import cn.sk.skhstablet.protocol.up.ChangeKeyRequest;
-import cn.sk.skhstablet.protocol.up.DevNameRequest;
 import cn.sk.skhstablet.protocol.up.ExercisePlanRequest;
 import cn.sk.skhstablet.protocol.up.LoginRequest;
 import cn.sk.skhstablet.protocol.up.LogoutRequest;
@@ -30,7 +29,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 import static java.lang.Long.MIN_VALUE;
-
+//发送命令的编码
 @Sharable
 public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 
@@ -54,6 +53,7 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		out.writeByte(msg.getDeviceType());
 		out.writeIntLE(msg.getUserID());
 		out.writeByte(msg.getRequestID());
+		System.out.println("上行命令："+ msg.getCommand());
 		switch (msg.getCommand()) {
 		/*case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
 			encodeExercisePhysiologicalDataResponse((ExercisePhysiologicalDataResponse) request, out);
@@ -77,16 +77,12 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
                 encodeLogoutRequest((LogoutRequest) request, out);
                 break;
             }
-
-            /*case CommandTypeConstant.DEV_NAME_REQUEST:{
-                encodeDevNameRequest((DevNameRequest) request,out);
-                break;
-            }*/
             case CommandTypeConstant.SPORT_DEV_FORM_REQUEST:{
                 encodeSportDevFormRequest((SportDevFormRequest) request, out);
                 break;
             }
             case CommandTypeConstant.MONITOR_DEV_FORM_REQUEST:{
+				System.out.println("请求监护参数0x0A");
                 encodeMonitorDevFormRequest((MonitorDevFormRequest) request, out);
 				break;
             }
@@ -96,9 +92,9 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
                 break;
             }
             case CommandTypeConstant.SINGLE_MONITOR_REQUEST:{
-                encodeSingleMonitorRequest((SingleMonitorRequest) request,out);
-                break;
-            }
+				encodeSingleMonitorRequest((SingleMonitorRequest) request,out);
+				break;
+			}
 			case CommandTypeConstant.MUTI_MONITOR_REQUEST: {
 				encodeMutiMonitorRequest((MutiMonitorRequest)request, out);
 				break;
@@ -109,12 +105,15 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 			}
 			case CommandTypeConstant.EXERCISE_PLAN_REQUEST:
 			{
-
+				System.out.println("请求医嘱0x0E");
+				encodeExercisePlanRequest((ExercisePlanRequest)request, out);
+				break;
 			}
 		}
 		out.writeShortLE(0);
 		out.setShortLE(startIndex, out.writerIndex() - startIndex - 2);
 		accumulation(out);
+
 	}
 	private byte[] toBytes(String str)
 	{
@@ -175,29 +174,16 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		out.writeShortLE(version.reviseVersionNumber);
 	}
 
-
-	private void encodeExerciseEquipmentDataResponse(ExerciseEquipmentDataResponse response, ByteBuf out) {
-		out.writeIntLE((int) response.getDataPacketNumber());
-	}
-
-	private void encodeExercisePhysiologicalDataResponse(ExercisePhysiologicalDataResponse response, ByteBuf out) {
-		out.writeIntLE((int) response.getDataPacketNumber());
-	}
-
-
-	/*private void encodeDeviceId(DeviceId deviceId, ByteBuf out) {
-		out.writeByte(deviceId.deviceType);
-		out.writeByte(deviceId.deviceModel);
-		out.write(deviceId.deviceNumber);
-	}*/
-
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		cause.printStackTrace();
 	}
+
+	//医嘱请求的编码
 	private void encodeExercisePlanRequest(ExercisePlanRequest request, ByteBuf out) {
 		out.writeIntLE(request.getPatientID());
 	}
+	//登录请求的编码
 	private void encodeLoginRequest(LoginRequest request,ByteBuf out)
 	{
 		byte[] name=toBytes(request.getLoginName());
@@ -208,10 +194,12 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		out.writeByte(key.length);
 		out.writeBytes(key);
 	}
+	//退出请求的编码
 	private void encodeLogoutRequest(LogoutRequest request,ByteBuf out)
 	{
 		//out.writeIntLE(request.getUserID());
 	}
+	//修改密码请求的编码
 	private void encodeChangeKeyRequest(ChangeKeyRequest request,ByteBuf out)
 	{
 		byte[] name=toBytes(request.getLoginName());
@@ -232,73 +220,60 @@ public class ProtocolEncoder extends MessageToByteEncoder<AbstractProtocol> {
 		//out.writeIntLE(request.getUserID());
 		//out.writeByte(request.getRequestID());
 	}
+	//多人监控请求的编码
 	private void encodeMutiMonitorRequest(MutiMonitorRequest request,ByteBuf out)
 	{
 		//out.writeByte(request.getDeviceType());
 		//out.writeIntLE(request.getUserID());
 		//out.writeByte(request.getRequestID());
 		out.writeShortLE(request.getPatientNumber());
+		System.out.print("运动数据请求的患者id");
 		for (Integer patientID:request.getPatientID())
 		{
 			out.writeIntLE(patientID);
+			System.out.print(patientID);
 		}
 	}
-
+	//单人监控请求的编码
 	private void encodeSingleMonitorRequest(SingleMonitorRequest request, ByteBuf out)
 	{
 		//out.writeByte(request.getDeviceType());
 		//out.writeIntLE(request.getUserID());
 		//out.writeByte(request.getRequestID());
 		out.writeShortLE(request.getPatientNumber());
-		if(request.getPatientNumber()!=0)
-			out.writeIntLE(request.getPatientID());
+		System.out.print("生理数据请求的患者id");
+		for (Integer patientID:request.getPatientID())
+		{
+			out.writeIntLE(patientID);
+			System.out.print(patientID);
+		}
 	}
 
-	/*private void encodeDevNameRequest(DevNameRequest request, ByteBuf out)
-	{
-		out.writeIntLE(request.getUserID());
-	}*/
+	//运动设备解析格式请求
 	private void encodeSportDevFormRequest(SportDevFormRequest request, ByteBuf out)
 	{
-		System.out.println("sport"+request.getUserID());
+		//System.out.println("sport"+request.getUserID());
 		//out.writeIntLE(request.getUserID());
 	}
 	private void encodeMonitorDevFormRequest(MonitorDevFormRequest request, ByteBuf out)
 	{
-		System.out.println("sport"+request.getUserID());
-		//out.writeIntLE(request.getUserID());
+		System.out.println("sport："+request.getUserID());
+		out.writeIntLE(request.getUserID());
 	}
+	//控制命令请求
 	private void encodeSportDevControlRequest(SportDevControlRequest request,  ByteBuf out) throws UnsupportedEncodingException {
-		//byte [] deviceID=new;
-		/*byte [] deviceID=new byte[8];
-		for(int i=0;i<8;i++)
-		{
-			deviceID[i]=Byte.parseByte(request.getDeviceID().substring(i*2,i*2+2));//这里需要判断
-			System.out.println(deviceID[i]);
-		}*/
 		long deviceNumber=parseUnsignedLong(request.getDeviceID(),16);
-
-
-		/*byte[] bytes=request.getDeviceID().getBytes("US-ASCII");
-		System.out.println(bytes.length);
-		for(int i=bytes.length-1;i>=0;i--){
-			bytes[i]-=(byte)'0';
-		}
-		for(int i=0;i<bytes.length-1;i++){
-			System.out.print(bytes[i]);
-		}*/
-		//out.writeBytes(deviceID);
 		out.writeLong(deviceNumber);
 		out.writeByte(request.getParameterCode());
 		out.writeByte(request.getParaType());
 		//System.out.println(bytes);
 
 		if(request.getParameterCode()!=CommandTypeConstant.SPORT_DEV_START_STOP)
-			out.writeByte(request.getParaControlValue());
+			out.writeShortLE(request.getParaControlValue());
 
 	}
 
-
+	//控制命令用到的辅助方法，主要是用于设备编号转换
 	public static int compareUnsigned(long x, long y) {
 		return compare(x + MIN_VALUE, y + MIN_VALUE);
 	}

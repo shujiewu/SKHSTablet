@@ -16,6 +16,8 @@ public interface IPatientListPresenter {
         void logoutSuccess(boolean b);
         void loginOther(boolean b);
         void loadSinglePatient(String singleID);
+        void refreshMutiView();
+        void refreshSinlgeView();
     }
     interface Presenter{
         void sentPatientListRequest();
@@ -23,7 +25,7 @@ public interface IPatientListPresenter {
         void sendCancelSingleMonitorReq();
         void sendLogoutRequest();
         void registerFetchResponse();
-        void sendControl(String deviceID,byte parameterCode,byte paraType,byte paraControlValue);
+        void sendControl(String deviceID,byte parameterCode,byte paraType,short paraControlValue);
         void sendFormatRequest();
     }
 }

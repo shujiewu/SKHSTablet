@@ -1,17 +1,18 @@
 package cn.sk.skhstablet.domain;
 
+//心电
 public class ECG {
-	private byte[] content;
+	private short[] content;
 
 	public ECG(int length) {
-		this.content = new byte[length];
+		this.content = new short[length];
 	}
 
-	public byte[] getContent() {
+	public short[] getContent() {
 		return content;
 	}
 
-	public void setContent(byte[] content) {
+	public void setContent(short[] content) {
 		this.content = content;
 	}
 

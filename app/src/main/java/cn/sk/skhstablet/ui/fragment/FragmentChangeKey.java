@@ -27,8 +27,7 @@ import cn.sk.skhstablet.injector.component.fragment.DaggerLoginComponent;
 import cn.sk.skhstablet.presenter.IChangekeyPresenter;
 import cn.sk.skhstablet.presenter.impl.ChangeKeyPresenterImpl;
 import cn.sk.skhstablet.ui.base.BaseFragment;
-import cn.sk.skhstablet.utlis.CheckUtils;
-import cn.sk.skhstablet.utlis.Tools;
+import cn.sk.skhstablet.utlis.Utils;
 
 
 @ContentView(R.layout.fragment_change_key)
@@ -173,13 +172,13 @@ PaperButton nextBt;
                 if (TextUtils.isEmpty(name)){
                    // fg_regist.setBackgroundResource(R.color.colorAccent);
                     re_loginname.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    loginnameIv.setAnimation(Tools.shakeAnimation(2));
+                    loginnameIv.setAnimation(Utils.shakeAnimation(2));
                     showSnackar(view,"请输入登录名");
                     return;
                 }
                 if (TextUtils.isEmpty(password)){
                     re_oldpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    passIv.setAnimation(Tools.shakeAnimation(2));
+                    passIv.setAnimation(Utils.shakeAnimation(2));
                    // fg_regist.setBackgroundResource(R.color.colorAccent);
                     showSnackar(view,"请输入旧密码");
                     return;
@@ -187,34 +186,32 @@ PaperButton nextBt;
                 }
                 if (TextUtils.isEmpty(newpass)){
                     re_newpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    newKeyIv.setAnimation(Tools.shakeAnimation(2));
+                    newKeyIv.setAnimation(Utils.shakeAnimation(2));
                    // fg_regist.setBackgroundResource(R.color.colorAccent);
                     showSnackar(view,"请输入新密码");
                     return;
                 }
                 if (TextUtils.isEmpty(renewpass)){
                    re_renewpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                   rekeyIV.setAnimation(Tools.shakeAnimation(2));
+                   rekeyIV.setAnimation(Utils.shakeAnimation(2));
                     // fg_regist.setBackgroundResource(R.color.colorAccent);
                     showSnackar(view,"请再次输入新密码");
                     return;
                 }
                 if(!renewpass.equals(newpass)){
                     re_newpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    newKeyIv.setAnimation(Tools.shakeAnimation(2));
+                    newKeyIv.setAnimation(Utils.shakeAnimation(2));
                     re_renewpass.setBackground(getResources().getDrawable(R.drawable.bg_border_color_cutmaincolor));
-                    rekeyIV.setAnimation(Tools.shakeAnimation(2));
+                    rekeyIV.setAnimation(Utils.shakeAnimation(2));
                     showSnackar(view,"两次输入的密码不一致");
                     return;
                 }
                 loginName=name;
-                oldKey=password;
-                newKey=newpass;
+                oldKey=FragmentLogin.Encrypt(password);
+                newKey=FragmentLogin.Encrypt(newpass);
                 loadData();
             }
         });
-
-
     }
     //根据返回的密码修改状态刷新界面
     @Override
@@ -276,6 +273,7 @@ PaperButton nextBt;
         DaggerLoginComponent.builder()
                 .build().injectChangeKey(this);
     }
+
 
     @Override
     protected void loadData() {

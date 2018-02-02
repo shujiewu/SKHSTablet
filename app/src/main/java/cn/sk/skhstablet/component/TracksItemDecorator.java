@@ -4,9 +4,7 @@ import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-/**
- * Created by Artem Kholodnyi on 9/6/16.
- */
+//自定义列表项之间的距离
 public class TracksItemDecorator extends RecyclerView.ItemDecoration {
 
     private int size;

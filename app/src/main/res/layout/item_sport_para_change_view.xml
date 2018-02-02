@@ -7,11 +7,10 @@
             android:id="@+id/changeParaSportName"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:textSize="18sp"
+            android:textSize="14sp"
             android:textColor="@android:color/darker_gray"
             android:layout_weight="0.2"
             android:gravity="center"
-            android:text="坡度"
             />
 <LinearLayout
     android:layout_width="0dp"
@@ -23,8 +22,8 @@
         android:id="@+id/changeParaSportValue"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:textSize="20sp"
-        android:layout_weight="0.1"
+        android:textSize="18sp"
+        android:layout_weight="0.15"
         android:textColor="@color/maincolor"
         android:gravity="center"
         android:background="@null"
@@ -35,10 +34,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/changeQVValue"
         android:layout_width="0dp"
-        android:layout_weight="0.9"
+        android:layout_weight="0.85"
         android:layout_height="match_parent"
-        android:paddingLeft="40dp"
-        android:paddingRight="60dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:visibility="gone"
         app:qv_quantity="10" >
     </cn.sk.skhstablet.component.QuantityView>
@@ -46,10 +45,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/changeFloatQVValue"
         android:layout_width="0dp"
-        android:layout_weight="0.9"
+        android:layout_weight="0.85"
         android:layout_height="match_parent"
-        android:paddingLeft="40dp"
-        android:paddingRight="60dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:visibility="gone"
         app:fqv_quantity="10" >
     </cn.sk.skhstablet.component.FloatQuantityView>

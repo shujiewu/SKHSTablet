@@ -97,7 +97,7 @@ public abstract class LoadingPage extends FrameLayout {
             public void onClick(View view) {
                 state = STATE_LOADING;
                 showPage();
-                loadData();
+                loadData();//错误界面点击空白处重新加载数据，此时调用子类也就是single和muifragment的loaddata函数
             }
         });
         return errorView;
@@ -155,7 +155,7 @@ public abstract class LoadingPage extends FrameLayout {
         }
     }
 
-    /** 3
+    /**
      * 子类关于View的操作(如setAdapter)都必须在这里面，会因为页面状态不为成功，而binding还没创建就引用而导致空指针。
      */
     protected abstract void initView();

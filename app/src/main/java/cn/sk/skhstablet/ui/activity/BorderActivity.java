@@ -32,6 +32,7 @@ import cn.sk.skhstablet.utlis.Utils;
 
 /**
  * Created by ldkobe on 2017/4/17.
+ * MainActivity的父类，主要用于主界面左侧和上方的边框
  */
 
 public abstract class BorderActivity extends BaseActivity<PatientListPresenterImpl> {

@@ -15,10 +15,12 @@ import cn.sk.skhstablet.model.Patient;
 import cn.sk.skhstablet.model.PatientDetail;
 import cn.sk.skhstablet.model.PatientDetailList;
 import cn.sk.skhstablet.model.PatientList;
+import cn.sk.skhstablet.model.PatientPhyData;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.IMutiMonPresenter;
 import cn.sk.skhstablet.protocol.SportDevForm;
 import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
+import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
 import cn.sk.skhstablet.rx.RxBus;
 import cn.sk.skhstablet.tcp.LifeSubscription;
 import cn.sk.skhstablet.tcp.utils.Callback;
@@ -42,40 +44,73 @@ import static cn.sk.skhstablet.utlis.Utils.secToTime;
 
 /**
  * Created by wyb on 2017/4/25.
+ * 多人监控的Presenter实现，对应于MutiMonitorFragment
  */
 
 public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> implements IMutiMonPresenter.Presenter {
+    //发送多人监控请求
     @Override
     public void fetchPatientDetailData() {
         sendRequest();
     }
 
-
+    //注册观察者
     @Override
     public void registerFetchResponse() {
+        //注册多人监控运动数据返回的观察者
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_DATA,PatientDetail.class)
                 .subscribe(new Action1<PatientDetail>() {
                     @Override
                     public void call(PatientDetail s) {
+                        //如果多人监控界面是成功界面，则判断界面是否包含此患者，如果包含该患者，则直接局部更新患者数据，否则重新刷新整个页面
+
                         if(mView.getPageState()==AppConstants.STATE_SUCCESS)
                         {
                             int patientID=s.getPatientID();
                             if(hasMutiPatient.containsKey(patientID))
                             {
-                                mutiDatas.set(hasMutiPatient.get(patientID),s);
-                                mView.refreshView(s,hasMutiPatient.get(patientID));
+
+                                int pos=hasMutiPatient.get(patientID);
+                                System.out.println("患者"+patientID+"准备在多人界面更新运动数据"+pos);
+                                s.setPhyDevValue(mutiDatas.get(pos).getPhyDevValue());
+                                s.setPhyDevName(mutiDatas.get(pos).getPhyDevName());
+                                mutiDatas.set(pos,s);
+                                mView.refreshView(s,pos);
                             }
                             else
                             {
                                 mutiDatas.add(s);
                                 hasMutiPatient.put(patientID,mutiPosition++);
+                                //System.out.println(hasMutiPatient);
+                               // System.out.println("mtu"+mutiDatas.get(0).getName());
                                 mView.refreshView(mutiDatas);
-                                System.out.println("收到多人数据");
+
                             }
-                        }//成功界面才更新，否则抛弃
+                        }//是成功界面才更新，否则抛弃
                     }
                 });
+        //注册多人监控生理数据返回的观察者
+        Subscription mSubscription1 = RxBus.getDefault().toObservable(AppConstants.MUTI_PHY_DATA,PatientPhyData.class)
+                .subscribe(new Action1<PatientPhyData>() {
+                    @Override
+                    public void call(PatientPhyData s) {
+                        //如果多人监控界面是成功界面，则判断界面是否包含此患者，如果包含该患者，则直接局部更新患者数据，否则重新刷新整个页面
+                        if(mView.getPageState()==AppConstants.STATE_SUCCESS)
+                        {
+                            int patientID=s.getPatientID();
+                            if(hasMutiPatient.containsKey(patientID))
+                            {
+                                int position=hasMutiPatient.get(patientID);
+                                System.out.println("患者"+patientID+"准备在多人界面更新生理数据"+position);
+                                //更新生理数据
 
+                                mutiDatas.get(position).setPhyDevName(s.getPhyDevName());
+                                mutiDatas.get(position).setPhyDevValue(s.getPhyDevValue());
+                                mView.refreshView(mutiDatas.get(position),position);
+                            }
+                        }//是成功界面才更新，否则抛弃
+                    }
+                });
         /*Subscription mSubscriptionRequest = RxBus.getDefault().toObservable(AppConstants.RE_SEND_REQUEST,Boolean.class)
                 .subscribe(new Action1<Boolean>() {
                     @Override
@@ -114,18 +149,14 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
         //((LifeSubscription)mView).bindSubscription(mutiPageSubscription);
 
         ((LifeSubscription)mView).bindSubscription(mSubscription);
+        ((LifeSubscription)mView).bindSubscription(mSubscription1);
         //((LifeSubscription)mView).bindSubscription(mSubscriptionRequest);
 
     }
 
+    //这个函数主要是用于用户在加载失败界面空白处重新点击刷新之后才发送命令，用户在主界面上方点击“开始监控”按钮发送命令是在PatientListPresenterImpl中实现的，因为“开始监控”按钮属于Mainactivity而不是具体MutiFragment
     public void sendRequest()
     {
-        /*invoke(TcpUtils.send("hello worldx!"), new Action1<Void>() {
-            @Override
-            public void call(Void aVoid) {
-                System.out.println("send success!");
-            }
-        });*/
         if(lastMutiPatientID==null)
             return;
         MutiMonitorRequest mutiMonitorRequest=new MutiMonitorRequest(CommandTypeConstant.MUTI_MONITOR_REQUEST);
@@ -150,8 +181,30 @@ public class MutiMonPresenterImpl extends BasePresenter<IMutiMonPresenter.View> 
                 setConnDisable();
             }
         });
+
+        SingleMonitorRequest mutiMonitorRequestPhy=new SingleMonitorRequest(CommandTypeConstant.SINGLE_MONITOR_REQUEST);
+        mutiMonitorRequestPhy.setUserID(AppConstants.USER_ID);
+        mutiMonitorRequestPhy.setDeviceType(AppConstants.DEV_TYPE);
+        mutiMonitorRequestPhy.setRequestID(AppConstants.MUTI_REQ_ID);
+        mutiMonitorRequest.setPatientNumber((short) lastMutiPatientID.size());
+        mutiMonitorRequest.setPatientID(lastMutiPatientID);
+        invoke(TcpUtils.send(mutiMonitorRequestPhy),new Callback<Void>() {
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("重新多人监控生理数据请求发送失败");
+                mView.setPageState(AppConstants.STATE_ERROR);
+                this.unsubscribe();
+                setConnDisable();
+            }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("重新多人监控生理数据请求发送完成");
+                this.unsubscribe();
+            }
+        });
     }
-    List<PatientDetail> mData=new ArrayList<>();
+    //List<PatientDetail> mData=new ArrayList<>();
     /*public void registerFetchResponse()
     {
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.MUTI_DATA,PatientDetail.class)

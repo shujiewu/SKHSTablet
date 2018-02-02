@@ -9,6 +9,7 @@ import android.widget.TextView;
 import cn.sk.skhstablet.ui.activity.BorderActivity;
 import cn.sk.skhstablet.utlis.Utils;
 
+//主界面上方的文字按钮，如“全部选择”，“开始监控”
 public class TextItem extends MenuItem {
 	
 	TextView textView;

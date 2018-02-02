@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,34 +53,37 @@ import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
+import static cn.sk.skhstablet.app.AppConstants.mutiDatas;
+
 /**
  * Created by ldkobe on 2017/4/18.
  */
 
 public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> implements ISingleMonPresenter.View {
-    private RecyclerView rySportParaView;
-    private RecyclerView ryPhyParaView;
-    private PatientDetail patientDetail;
+    private RecyclerView rySportParaView;//运动参数列表
+    private RecyclerView ryPhyParaView;   //生理参数列表
+    private PatientDetail patientDetail;  //病人详细信息
     @Inject
-    public DevParaChangeAdapter devParaChangeAdapter;
+    public DevParaChangeAdapter devParaChangeAdapter;  //设备参数的适配器
     @Inject
-    public PatientParaAdapter patientParaAdapter;
+    public PatientParaAdapter patientParaAdapter;//病人生理参数的适配器
     @Inject
-    public  ExercisePlanAdapter exercisePlanAdapter;
+    public  ExercisePlanAdapter exercisePlanAdapter;//医嘱适配器
 
     private MainActivity mainActivity;
-    private ExpandableListView elvExPlan;
+    private ExpandableListView elvExPlan; //医嘱列表
+    //病人基本信息控件
     TextView name;
     TextView dev;
     TextView percent;
     TextView tvHospitalNumber;
     TextView tvDevNumber;
-
+    TextView tvConstraintContent;
     PaperButton btnStart;
     PaperButton btnStop;
-    PaperButton btnChange;
-    private String singleMonitorID;
-    private HashMap<Integer,String> changeDevPara= new HashMap<>();
+    //PaperButton btnChange;
+    private String singleMonitorID; //单人监测的患者ID
+    private HashMap<Integer,String> changeDevPara= new HashMap<>();//改变了的设备参数   位置映射到值
 
     public HashMap<Integer, String> getChangeDevPara() {
         return changeDevPara;
@@ -185,19 +189,22 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             mPresenter.setView(this);}
     }
 
+    //发送单人监控命令，此代码在加载失败界面出现后点击空白处重新加载时起作用
     @Override
     protected void loadData() {
         mPresenter.sendPatientDetailRequest(AppConstants.lastSinglePatientID);
     }
 
-
+    //发送单人监控命令
     public void loadData(String ID) {
         mPresenter.sendPatientDetailRequest(ID);
     }
 
+    //接收到运动设备数据之后更新界面
     @Override
     public void refreshView(PatientDetail mData) {
 
+        //如果当前存在单人监控患者且运动设备不变，且有运动设备参数才进行局部参数更新
         if(patientDetail!=null&&patientDetail.getDevType()==mData.getDevType()&&patientDetail.getPatientID()==mData.getPatientID()&&patientDetail.getSportDevName()!=null&&patientDetail.getSportDevName().size()!=0)
         {
             devParaChangeAdapter.sportDevName=patientDetail.getSportDevName();
@@ -214,9 +221,9 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                      devParaChangeAdapter.notifyItemChanged(i);
                  }
 
-            }//局部更新
+            }//局部更新设备参数
             System.out.println("局部更新了单人监控的设备数据");
-            patientDetail= mData;//前面先更新了运动数据，后面全部更新
+            patientDetail= mData;//前面先更新了运动数据，然后全部更新
         }
         else
         {
@@ -226,15 +233,19 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             devParaChangeAdapter.setDevType(patientDetail.getDevType());
             devParaChangeAdapter.notifyDataSetChanged();
             System.out.println("更新了单人监控的设备数据");
-        }
+        }//否则全部更新
+
+
+        /*//生理参数直接更新
         patientParaAdapter.phyDevName=patientDetail.getPhyDevName();
         patientParaAdapter.phyDevValue=patientDetail.getPhyDevValue();
         patientParaAdapter.notifyDataSetChanged();
-
+        */
         //设备改变
         if (patientDetail.getDeviceNumber()==null||!patientDetail.getDeviceNumber().equals(tvDevNumber.getText().toString()))
             changeDevPara.clear();
 
+        //更新患者基本信息
         name.setText(patientDetail.getName());
         dev.setText(patientDetail.getDev());
         if(patientDetail.getPercent()!=null)
@@ -242,7 +253,11 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             if(patientDetail.getPercent().isEmpty())
                 percent.setText(patientDetail.getPercent());
             else
+            {
                 percent.setText(patientDetail.getPercent()+"%");
+                System.out.println("通过运动数据更新单人界面进度");
+            }
+
         }
         tvDevNumber.setText(String.valueOf(patientDetail.getDeviceNumber()));
         tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
@@ -251,6 +266,23 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         //{
             //btnChange.setVisibility(View.VISIBLE);
         //}
+        boolean changePlan=false;
+        if(patientDetail.getExercisePlanId()!=nowPlanID)
+        {
+            nowPlanID=patientDetail.getExercisePlanId();
+            changePlan=true;
+        }
+        if(patientDetail.getExercisePlanSectionNumber()!=nowPlanSegment){
+            nowPlanSegment=patientDetail.getExercisePlanSectionNumber();
+            changePlan=true;
+        }
+        if(changePlan&&planIDList!=null)
+        {
+            int IDPos=planIDList.indexOf(nowPlanID);
+            exercisePlanAdapter.IDPositon=IDPos;
+            exercisePlanAdapter.SegPosition=nowPlanSegment-1;
+            exercisePlanAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -258,8 +290,14 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     }
 
+    //接收到医嘱数据后更新界面
+    int nowPlanID;
+    int nowPlanSegment;
+    List<Integer> planIDList;
     @Override
-    public void refreshExercisePlan(List<String> armTypes,List<List<String>> arms) {
+    public void refreshExercisePlan(List<String> armTypes,List<List<String>> arms,String constrait,List<Integer> planID) {
+        tvConstraintContent.setText(constrait);
+        planIDList=planID;
         exercisePlanAdapter.armTypes=armTypes;
         exercisePlanAdapter.arms=arms;
         exercisePlanAdapter.notifyDataSetChanged();
@@ -269,15 +307,30 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         }
     }
 
+    //设置页面状态
     @Override
     public void setPageState(int state) {
+        //如果是成功界面，说明第一次成功打开此界面或者更换了单人监控的患者
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
         {
+           // System.out.println("shezhiyemianzhuangt");
 
+
+           // System.out.println(exercisePlanAdapter.getGroupCount()+"duan");
+           if(exercisePlanAdapter!=null&&elvExPlan!=null)
+            {
+                //exercisePlanAdapter.arms=new ArrayList<>();
+                //exercisePlanAdapter.armTypes=new ArrayList<>();
+               // exercisePlanAdapter.notifyDataSetChanged();
+                exercisePlanAdapter=new ExercisePlanAdapter(new ArrayList<String>(), new ArrayList<List<String>>());
+                tvConstraintContent.setText("");
+                elvExPlan.setAdapter(exercisePlanAdapter);
+           //     System.out.println("shezhiyemianzhuangt3");
+            }
             this.setState(AppConstants.STATE_SUCCESS);
-            if(!pathView.getStop())
+            if(pathView!=null&&!pathView.getStop())
                 pathView.stop();
-            mPresenter.fetchExercisePlan();
+            //mPresenter.fetchExercisePlan();
 
             if (patient.getDeviceNumber()==null||!patient.getDeviceNumber().equals(patientDetail.getDeviceNumber()))
                 changeDevPara.clear();
@@ -289,7 +342,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             patientDetail.setHospitalNumber(patient.getHospitalNumber());
             patientDetail.setName(patient.getName());
             patientDetail.setDevType(patient.getDevType());
-
+            patientDetail.setPercent("");
             patientDetail.setSportDevName(new ArrayList<String>());
             patientDetail.setSportDevValue(new ArrayList<String>());
             patientDetail.setPhyDevName(new ArrayList<String>());
@@ -311,14 +364,55 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                 if(patientDetail.getPercent().isEmpty())
                     percent.setText(patientDetail.getPercent());
                 else
+                {
                     percent.setText(patientDetail.getPercent()+"%");
+                    System.out.println("通过设置页面状态更新单人界面进度");
+                }
             }
             tvDevNumber.setText(patientDetail.getDeviceNumber());
             tvHospitalNumber.setText(String.valueOf(patientDetail.getHospitalNumber()));
+            //exercisePlanAdapter.arms=new ArrayList<>();
+            //exercisePlanAdapter.armTypes=new ArrayList<>();
+            //exercisePlanAdapter.notifyDataSetChanged();
+           // mPresenter.fetchExercisePlan(String.valueOf(patientDetail.getPatientID()));
+            nowPlanSegment=-1;
+            nowPlanID=-1;
+            planIDList=new ArrayList<>();
+            System.out.println("发送"+patientDetail.getName());
+            PatientDetail patientNewDetail=new PatientDetail();
+            patientNewDetail.setPatientID(patient.getPatientID());
+            patientNewDetail.setDeviceNumber(patient.getDeviceNumber());
+            patientNewDetail.setDev(patient.getDev());
+            patientNewDetail.setHospitalNumber(patient.getHospitalNumber());
+            patientNewDetail.setName(patient.getName());
+            patientNewDetail.setDevType(patient.getDevType());
+            patientNewDetail.setPercent("");
+            patientNewDetail.setSportDevName(new ArrayList<String>());
+            patientNewDetail.setSportDevValue(new ArrayList<String>());
+            patientNewDetail.setPhyDevName(new ArrayList<String>());
+            patientNewDetail.setPhyDevValue(new ArrayList<String>());
+            RxBus.getDefault().post(AppConstants.MUTI_DATA, patientNewDetail);
+            loadData(String.valueOf(patientDetail.getPatientID()));
+
+            //mutiDatas.add(patientDetail);
+
+            System.out.println("shezhiwancheng");
+        }
+        else if(state== AppConstants.STATE_LOADING)
+        {
+            if(pathView!=null&&!pathView.getStop())
+                pathView.stop();
+            if(exercisePlanAdapter!=null)
+            {
+                exercisePlanAdapter.arms=new ArrayList<>();
+                exercisePlanAdapter.armTypes=new ArrayList<>();
+                exercisePlanAdapter.notifyDataSetChanged();
+            }
+            this.setState(AppConstants.STATE_LOADING);
         }
         else if(state==AppConstants.STATE_ERROR)
         {
-            if(!pathView.getStop())
+            if(pathView!=null&&!pathView.getStop())
                 pathView.stop();
             this.setState(AppConstants.STATE_ERROR);
         }
@@ -327,34 +421,126 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         {
             this.setState(AppConstants.STATE_EMPTY);
             //还需要清空数据
-            if(!pathView.getStop())
+            changeDevPara.clear();
+            patientDetail=new PatientDetail();
+            nowPlanSegment=-1;
+            nowPlanID=-1;
+            planIDList=new ArrayList<>();
+            if(pathView!=null&&pathView.getStop())
                 pathView.stop();
         }
 
     }
 
+
+    //根据参数控制返回结果显示不同提示
     @Override
     public void setControlState(byte resultState,byte controlState) {
         System.out.println("参数返回成功");
         if(resultState== CommandTypeConstant.SPORT_DEV_CONTORL_SUCC)
         {
-            System.out.println("设备控制成功");
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("参数修改成功")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                        }
+                    })
+                    .show();
+
         }
         if(controlState==CommandTypeConstant. SPORT_DEV_CONTORL_LESS_MIN)
         {
-            System.out.println("低于最小值");
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("参数修改低于最小值")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            //System.out.println("接收到修改密码的状态1");
+                        }
+                    })
+                    .show();
+        }
+        else if(controlState==CommandTypeConstant. SPORT_DEV_CONTORL_GREATER_MAX)
+        {
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("参数修改超过最大值")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            //System.out.println("接收到修改密码的状态1");
+                        }
+                    })
+                    .show();
+        }
+        else if(controlState==CommandTypeConstant.SPORT_DEV_CONTORL_FREE)
+        {
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("参数修改失败！设备正处于空闲态")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            //System.out.println("接收到修改密码的状态1");
+                        }
+                    })
+                    .show();
+        }
+        else if(controlState==CommandTypeConstant.SPORT_DEV_CONTORL_READY)
+        {
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("参数修改失败！设备正处于就绪态")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            //System.out.println("接收到修改密码的状态1");
+                        }
+                    })
+                    .show();
+        }
+        else if(controlState==CommandTypeConstant.SPORT_DEV_CONTORL_RUN)
+        {
+            new SweetAlertDialog(this.getContext(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("参数修改失败！设备正处于运行态")
+                    .setConfirmText("确定")
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            sDialog.dismissWithAnimation();
+                            //System.out.println("接收到修改密码的状态1");
+                        }
+                    })
+                    .show();
+        }
+        else
+        {
+            return;
         }
     }
 
+    public void setChangeDevPara(HashMap<Integer, String> changeDevPara) {
+        this.changeDevPara = changeDevPara;
+    }
+
+    //接收到生理数据后更新界面
     @Override
     public void refreshPhyData(PatientPhyData patientPhyData) {
-        if(patientPhyData!=null&&patientDetail.getDev()==null)
-        {
+        //if(patientPhyData!=null&&patientDetail.getDev()==null)
+        //{
             patientParaAdapter.phyDevName=patientPhyData.getPhyDevName();
             patientParaAdapter.phyDevValue=patientPhyData.getPhyDevValue();
-            System.out.println("生理數據顯示");
+            //System.out.println("生理數據顯示");
             patientParaAdapter.notifyDataSetChanged();
-        }//设备为空才更新数据
+       // }//设备为空才更新数据
         //更新心电数据
         Map<Short,List<Short>> map = patientPhyData.getEcgs();
         if(map!=null)
@@ -364,7 +550,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                 Map.Entry entry = (Map.Entry) iter.next();
 
             }*/
-            Short i=1;
+            Short i=1;//这里暂时只绘制了一条
             List<Short> ecgData=map.get(i);
             pathView.setECG(ecgData);
         }
@@ -374,12 +560,13 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
     }
 
-    //根据病人状态更新
+    //根据全局患者监测的病人状态更新界面
     public void refreshPatient(Patient mData)
     {
         byte devType=mData.getDevType();
         String devName=mData.getDev();
         String devNumber=mData.getDeviceNumber();
+        //如果当前患者设备为空或者设备改变，需要清空设备数据
         if (devNumber==null||!devNumber.equals(patientDetail.getDeviceNumber()))
         {
             System.out.println("更新了单人监控的设备");
@@ -393,7 +580,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             devParaChangeAdapter.notifyDataSetChanged();
 
         }
-        if(!(mData.getPhyConnectState()==CommandTypeConstant.PHY_DEV_CONNECT_ONLINE&&mData.getMonConnectState()==CommandTypeConstant.MON_DEV_CONNECT_ONLINE))
+        //生理仪不在线，则清空患者生理数据
+        if(!(mData.getPhyConnectState()==CommandTypeConstant.PHY_DEV_CONNECT_ONLINE))//&&mData.getMonConnectState()==CommandTypeConstant.MON_DEV_CONNECT_ONLINE))
         {
             patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
             patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
@@ -405,8 +593,11 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         patientDetail.setDev(devName);
         patientDetail.setDeviceNumber(devNumber);
         patientDetail.setDevType(devType);
-        //patientDetail.setPercent(pa);
-        //patientDetail.setPercent(percentValue);
+        patientDetail.setName(mData.getName());
+        patientDetail.setHospitalNumber(mData.getHospitalNumber());
+
+        name.setText(mData.getName());
+        tvHospitalNumber.setText(mData.getHospitalNumber());
         dev.setText(devName);
         tvDevNumber.setText(devNumber);
 
@@ -415,7 +606,11 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             if(patientDetail.getPercent().isEmpty())
                 percent.setText(patientDetail.getPercent());
             else
+            {
                 percent.setText(patientDetail.getPercent()+"%");
+                System.out.println("根据病人状态更新患者的单人监控进度");
+            }
+
         }
 
         //percent.setText(percentValue);
@@ -455,6 +650,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         return patientDetail.getDevType();
     }
 
+    //初始化界面
     @Override
     protected void initView(View view) {
 
@@ -466,12 +662,13 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
         tvDevNumber = (TextView) view.findViewById(R.id.sdevNumber);
         dev = (TextView) view.findViewById(R.id.sdev);
         percent = (TextView) view.findViewById(R.id.spercent);
-
+        tvConstraintContent=(TextView) view.findViewById(R.id.tvConstraintContent);
         rySportParaView = (RecyclerView) view.findViewById(R.id.sry_sport_para);
         rySportParaView.setLayoutManager(new LinearLayoutManager(getActivity()));
         rySportParaView.setAdapter(devParaChangeAdapter);
         TracksItemDecorator itemDecorator = new TracksItemDecorator(10);
         rySportParaView.addItemDecoration(itemDecorator);
+        //参数修改适配器的参数修改监听器
         devParaChangeAdapter.setOnEditChangeListener(new DevParaChangeAdapter.SaveEditListener() {
                                                          @Override
                                                          public void SaveEdit(int position, String devValue) {
@@ -509,7 +706,7 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
 
 
 
-        btnStart = (PaperButton) view.findViewById(R.id.bt_start);
+      /*  btnStart = (PaperButton) view.findViewById(R.id.bt_start);
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -526,8 +723,8 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
                     mPresenter.sendControlStartStop(patientDetail.getPatientID(),patientDetail.getDeviceNumber(),CommandTypeConstant.SPORT_DEV_CONTORL_STOP);
             }
         });
-
-        btnChange= (PaperButton) view.findViewById(R.id.bt_change);
+*/
+        /*btnChange= (PaperButton) view.findViewById(R.id.bt_change);
         btnChange.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -570,11 +767,11 @@ public class SingleMonitorFragment extends BaseFragment<SingleMonPresenterImpl> 
             }
         });
 
-        btnChange.setVisibility(View.GONE);
+        btnChange.setVisibility(View.GONE);*/
 
         pathView=(PathView) view.findViewById(R.id.ecgView);
     }
-    private PathView pathView;
+    private PathView pathView;//心电图
     public PatientDetail getPatientDetail()
     {
         return patientDetail;

@@ -9,9 +9,9 @@
             android:id="@+id/paraSportName1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textColor="@android:color/darker_gray"
-            android:layout_weight="0.4"
+            android:layout_weight="0.9"
             android:gravity="center"
             />
 
@@ -20,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:layout_weight="0.6"
+            android:layout_weight="1"
             android:textColor="@color/maincolor"
             android:gravity="center"
             />

@@ -22,14 +22,15 @@ import cn.sk.skhstablet.protocol.AbstractProtocol;
 import cn.sk.skhstablet.protocol.ControlState;
 import cn.sk.skhstablet.protocol.DeviceId;
 import cn.sk.skhstablet.protocol.MonitorDevForm;
-import cn.sk.skhstablet.protocol.down.DevNameResponse;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
+import cn.sk.skhstablet.protocol.down.ExercisePlanResponse;
 import cn.sk.skhstablet.protocol.down.LoginAckResponse;
 import cn.sk.skhstablet.protocol.down.LoginOtherResponse;
 import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
 import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
+import cn.sk.skhstablet.protocol.down.SignOutResponse;
 import cn.sk.skhstablet.protocol.down.SportDevControlResponse;
 import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
 import cn.sk.skhstablet.protocol.up.IdleHeartRequest;
@@ -66,6 +67,7 @@ import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 import static cn.sk.skhstablet.app.CommandTypeConstant.IDLE_HEART_REQUEST;
 import static cn.sk.skhstablet.app.CommandTypeConstant.LOGIN_OTHER;
 import static cn.sk.skhstablet.app.CommandTypeConstant.MUTI_MONITOR_RESPONSE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.SIGN_OUT_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.model.PatientDetailList.phyValue;
 import static cn.sk.skhstablet.model.PatientDetailList.sportName;
@@ -73,9 +75,11 @@ import static cn.sk.skhstablet.model.PatientDetailList.sportValue;
 
 /**
  * Created by wyb on 2017/4/27.
+ * 这个类负责网络连接，消息分发，大部分是静态方法
  */
 
 public class TcpUtils {
+    //invoke函数用于设置观察者和被观察者所运行的线程，并绑定其生命周期
     public static  <T> void invoke(LifeSubscription lifecycle,Observable<T> observable, Action1<T> callback)
     {
         if(observable==null)
@@ -96,22 +100,6 @@ public class TcpUtils {
         Stateful target = null;
         target=(Stateful)lifecycle;
         callback.setTarget(target);
-        /*if (lifecycle instanceof Stateful) {
-            target = (Stateful) lifecycle;
-            callback.setTarget(target);
-        }*/
-        /**
-         * 先判断网络连接状态和网络是否可用，放在回调那里好呢，还是放这里每次请求都去判断下网络是否可用好呢？
-         * 如果放在请求前面太耗时了，如果放回掉提示的速度慢，要10秒钟请求超时后才提示。
-         * 最后采取的方法是判断网络是否连接放在外面，网络是否可用放在回掉。
-         */
-        /*if (!NetworkUtils.isConnected()) {
-            ToastUtils.showShortToast("网络连接已断开");
-            if (target != null) {
-                //target.setState(AppConstants.STATE_ERROR);
-            }
-            return;
-        }*/
         Subscription subscription = observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(callback);
@@ -119,7 +107,8 @@ public class TcpUtils {
 
     }
     static Connection<AbstractProtocol,AbstractProtocol> mConnection;
-    static boolean isFirst=true;
+    static boolean isFirst=true;//判断是否是首次登陆
+    //网络连接静态类
     public static Observable<Boolean> connect(final String url, final int port) {
         netState=AppConstants.STATE_IN_CONN;
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
@@ -133,21 +122,21 @@ public class TcpUtils {
                                         return   new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 32768,
                                                 4, 2, 0, 0, true);
                                     }
-                                })
+                                }) //增加半包解码器
                         .<AbstractProtocol,AbstractProtocol>addChannelHandlerLast("checksum",
                                 new Func0<ChannelHandler>() {
                                     @Override
                                     public ChannelHandler call() {
                                         return   new CUSUMHandler();
                                     }
-                                })
+                                }) //增加校验
                         .<AbstractProtocol,AbstractProtocol>addChannelHandlerLast("decoder",
                         new Func0<ChannelHandler>() {
                             @Override
                             public ChannelHandler call() {
                                 return new ProtocolDecoder();
                             }
-                        })
+                        })  //解码器
                         .<AbstractProtocol,AbstractProtocol>addChannelHandlerLast("encoder",
                         new Func0<ChannelHandler>() {
                             @Override
@@ -155,11 +144,11 @@ public class TcpUtils {
                                 return new ProtocolEncoder();
                             }
 
-                        })
+                        })  //编码器
                         .channelOption(ChannelOption.SO_KEEPALIVE, true)
                         //.channelOption(ChannelOption.CONNECT_TIMEOUT_MILLIS,5000) //服务器掉线还要等五秒，自己掉线直接重连
                         //.readTimeOut(5, TimeUnit.SECONDS) //5秒未读到数据
-                        .readTimeOut(6, TimeUnit.SECONDS) //6秒未读到数据
+                        .readTimeOut(6, TimeUnit.SECONDS) //通过心跳来实现的，6秒未读到数据则读取超时失败
                         .createConnectionRequest()
                         .subscribe(new Observer<Connection<AbstractProtocol, AbstractProtocol>>() {
                             @Override
@@ -184,8 +173,8 @@ public class TcpUtils {
                                 System.out.println("连接成功");
                                 //if(isFirst)
                                 //{
-                                    System.out.println("首次连接成功");
-                                    sendIdleHeart();//首次连接成功开始发送心跳
+                                    //System.out.println("连接成功");
+                                    sendIdleHeart();//连接成功开始发送心跳
                                 //    isFirst=false;
                                // }
                             }
@@ -249,6 +238,7 @@ public class TcpUtils {
                     }
                 });
     }*/
+    //对服务器响应做观察
     public static Observable<AbstractProtocol> receive() {
         if (mConnection != null) {
             return mConnection.getInput();
@@ -260,7 +250,7 @@ public class TcpUtils {
         Log.e("10.40","5");
         return mConnection.write(Observable.just(s));
     }*/
-
+    //对命令发送情况做观察
     public static Observable<Void> send(AbstractProtocol s) {
         //Log.e("10.40","5");
         if (mConnection != null) {
@@ -273,6 +263,8 @@ public class TcpUtils {
     /**
      * 断开自动重新连接
      */
+
+    //关闭链路
     public static void closeConnection()
     {
         netState=AppConstants.STATE_DIS_CONN;
@@ -281,6 +273,7 @@ public class TcpUtils {
             mConnection.closeNow();
         }
     }
+    //安全地设置网络为不连通
     public static void setConnDisable()
     {
         netState=AppConstants.STATE_DIS_CONN;
@@ -290,10 +283,12 @@ public class TcpUtils {
              reconnect();*/
     }
     private static int reconnectTime=0;
+    //重新连接
     public static void reconnect() {
         reconnectTime++;
         if(reconnectTime==3)
         {
+            //重连三次失败，通知其他组件不要重新发送命令
             RxBus.getDefault().post(AppConstants.RE_SEND_REQUEST,new Boolean(false));
             reconnectTime=0;
             ToastUtils.showShortToast("网络不可达，未知错误");
@@ -338,6 +333,7 @@ public class TcpUtils {
     private static int heartTime =3;
     public static void sendIdleHeart()
     {
+        //每间隔heartTime事件发送一次
         idleScription=Observable.interval(heartTime, TimeUnit.SECONDS).subscribe((new Action1<Long>() {
             @Override
             public void call(Long aLong) {
@@ -350,7 +346,7 @@ public class TcpUtils {
                     public void onCompleted() {
                         super.onCompleted();
                         System.out.println("心跳发送完成");
-                        this.unsubscribe();
+                        this.unsubscribe(); //发送成功后取消订阅
                     }
                     @Override
                     public void onError(Throwable e) {
@@ -366,6 +362,8 @@ public class TcpUtils {
         System.arraycopy(src, begin, bs, 0, count);
         return bs;
     }
+
+    //安全地关闭连接需要取消几个静态方法中的观察者订阅
     public static void logoutUnsubscribe()
     {
         if(idleScription!=null)
@@ -394,6 +392,7 @@ public class TcpUtils {
         }
     }
     public static Subscription fetchScription;
+    //读取服务器响应，这个响应已经经过了decoder解码器，这里只需要做数据分发
     public static void fetchData()
     {
         fetchScription=invoke(TcpUtils.receive(), new Callback<AbstractProtocol>() {
@@ -414,32 +413,60 @@ public class TcpUtils {
                 {
                     case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
                         //dataType=(byte)((ExercisePhysiologicalDataResponse)data).getDeviceId().getDeviceType();
-                        //ExercisePhysiologicalDataResponse response=(ExercisePhysiologicalDataResponse) data;
-                        RxBus.getDefault().post(AppConstants.PHY_DATA,((ExercisePhysiologicalDataResponse) data).getPatientPhyData());
-                        System.out.println("生理数据发送");
+                        //System.out.println("生理数据响应0xB1 处于分发状态");
+                        ExercisePhysiologicalDataResponse response=(ExercisePhysiologicalDataResponse) data;
+                        //如果多人监控界面包含这个患者
+                        if(hasMutiPatient.containsKey(response.getUserID()))
+                        {
+                            //System.out.println("患者"+response.getUserID()+"生理数据响应0xB1 向多人监控界面转发");
+                            RxBus.getDefault().post(AppConstants.MUTI_PHY_DATA,((ExercisePhysiologicalDataResponse) data).getPatientPhyData());
+                        }
+                        if(String.valueOf(response.getUserID()).equals(singleMonitorID))
+                        {
+                            //System.out.println("患者"+response.getUserID()+"生理数据响应0xB1 向单人监控界面转发");
+                            RxBus.getDefault().post(AppConstants.PHY_DATA,((ExercisePhysiologicalDataResponse) data).getPatientPhyData());
+                        }
+                        //post即为数据发送，数据接收的地方为PresenterImpl中注册的观察者
                         break;
                     }
                     case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
                         ///dataType=(byte)((ExerciseEquipmentDataResponse)data).getDeviceId().getDeviceType();
+                        //System.out.println("运动设备数据响应0xC3 处于分发状态");
                         ExerciseEquipmentDataResponse response=(ExerciseEquipmentDataResponse)data;
                         PatientDetail patientDetail=response.getPatientDetail();
-                        if(String.valueOf(patientDetail.getPatientID()).equals(singleMonitorID))
+                        if(String.valueOf(patientDetail.getPatientID()).equals(singleMonitorID))  //如果该数据被单人监控所订阅，需要发送到单人监控界面
                         {
+                            //System.out.println("患者"+patientDetail.getPatientID()+"运动数据响应0xC3 向单人监控界面转发");
                             RxBus.getDefault().post(AppConstants.SINGLE_DATA,patientDetail);
                         }
-                        RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
+                        if(hasMutiPatient.containsKey(patientDetail.getPatientID()))
+                        {
+                            //System.out.println("患者"+patientDetail.getPatientID()+"运动数据响应0xC3 向多人监控界面转发");
+                            RxBus.getDefault().post(AppConstants.MUTI_DATA, patientDetail);
+                        }
                         break;
                     }
-                    case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:
+                    case CommandTypeConstant.EXERCISE_PLAN_RESPONSE:  //医嘱响应还未测试
+                    {
+                        ExercisePlanResponse response=(ExercisePlanResponse)data;
+                        if(response.getPatientID()==Integer.valueOf(singleMonitorID))
+                        {
+                            System.out.println("医嘱响应转发");
+                            RxBus.getDefault().post(AppConstants.EXERCISE_PLAN_STATE,response);
+                        }
+                        break;
+                    }
+                    case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:  //全局患者状态更新和新到患者响应的处理方法一样
                     case CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE:
                         state=((PatientListResponse)data).getState();
                         /*while (!canModify)
                         {
                         }*/
-                        AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
+                        AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();  //这里直接将该数据赋给一个全局变量
                         int size=AppConstants.PATIENT_LIST_DATA.size();
                         for(int i=0;i<size;i++)
                         {
+                            //如果全局患者的姓名hash中不存在该患者，说明是新签到的患者，这里需要添加进来用于对运动设备数据解码时直接根据患者id找到该患者姓名和住院号
                             if(!PATIENT_LIST_NAME_FORM.containsKey(PATIENT_LIST_DATA.get(i).getPatientID()))
                             {
                                 PATIENT_LIST_NAME_FORM.put(PATIENT_LIST_DATA.get(i).getPatientID(),PATIENT_LIST_DATA.get(i).getName());
@@ -481,7 +508,14 @@ public class TcpUtils {
                         AppConstants.PATIENT_LIST_DATA=((PatientListResponse)data).getPatientList();
                         RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,new Boolean(true));//通知数据改变
                         break;*/
-
+                    case CommandTypeConstant.SIGN_OUT_RESPONSE:
+                        List<Integer> signOutPatient=((SignOutResponse)data).getPatientNumber();
+                        if(signOutPatient.size()!=0)
+                        {
+                            AppConstants.SIGN_OUT_PATIENT_LIST=signOutPatient;
+                            RxBus.getDefault().post(AppConstants.PATIENT_LIST_DATA_STATE,SIGN_OUT_RESPONSE);//通知数据改变
+                        }
+                        break;
                     //多人监控，单人监控和病人列表请求的响应
                     case CommandTypeConstant.SINGLE_MONITOR_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
@@ -507,10 +541,10 @@ public class TcpUtils {
                         {
                             return;
                         }
-                        if(reqID==AppConstants.MUTI_REQ_ID)
-                        {
+                        //if(reqID==AppConstants.MUTI_REQ_ID)
+                        //{
                             RxBus.getDefault().post(AppConstants.MUTI_REQ_STATE,new Byte(state));
-                        }
+                        //}
                         break;
                     /*case CommandTypeConstant.PATIENT_LIST_RESPONSE:
                         userID=((PushAckResponse)data).getUserID();
@@ -582,13 +616,7 @@ public class TcpUtils {
                        // System.out.println("退出3");
                         break;
 
-                    //格式名称对照表响应
-                    /*case CommandTypeConstant.DEV_NAEM_RESPONSE:
-                        userID=((DevNameResponse)data).getUserID();
-                        if(userID!=AppConstants.USER_ID)
-                            return;
-                        AppConstants.DEV_NAME=((DevNameResponse)data).getDevName();
-                        break;*/
+                    //运动设备和监护设备协议解析格式响应
                     case CommandTypeConstant.SPORT_DEV_FORM_RESPONSE:
                         userID=((SportDevFormResponse)data).getUserID();
                         reqID=((SportDevFormResponse)data).getRequestID();
@@ -610,6 +638,7 @@ public class TcpUtils {
                         if(state==SUCCESS)
                         {
                             MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
+                            System.out.println();
                             System.out.println("mon form");
                             byte tyep=(byte)0x0f;
                             List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(tyep);
@@ -618,6 +647,7 @@ public class TcpUtils {
                             //MON_DEV_FORM=((MonitorDevFormResponse)data).getDevData();
                         //AppConstants.PHY_FORM_REQ_ID++;
                         break;
+                    //控制命令响应
                     case CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE:{
                         userID=((SportDevControlResponse)data).getUserID();
                         reqID=((SportDevControlResponse)data).getRequestID();

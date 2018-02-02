@@ -6,9 +6,7 @@ import rx.subjects.PublishSubject;
 import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 
-/**
- * Created by quantan.liu on 2017/3/10.
- */
+//RxBus是用来在不同组件之间进行消息传递
 public class RxBus {
     /**
      * 参考网址:  http://www.loongwind.com/archives/264.html 看这个学习rxbus怎么用

@@ -2,6 +2,7 @@ package cn.sk.skhstablet.adapter;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,10 +22,12 @@ import java.util.List;
  */
 
 public class ExercisePlanAdapter extends BaseExpandableListAdapter {
-    //医嘱方案总量
-    public List<String> armTypes;
-    //医嘱分段内容
-    public List<List<String>> arms;
+    //医嘱方案总量，也就是每个医嘱的内容
+    public List<String> armTypes=new ArrayList<>();
+    //每个医嘱的分段内容
+    public List<List<String>> arms=new ArrayList<>();
+    public int IDPositon=-1;
+    public int SegPosition=-1;
     Context context;
     public ExercisePlanAdapter(List<String> armTypes,List<List<String>> arms)
     {
@@ -47,17 +51,26 @@ public class ExercisePlanAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return arms.get(groupPosition).size();
+        if(groupPosition<arms.size())
+            return arms.get(groupPosition).size();
+        else
+            return 0;
     }
 
     @Override
     public Object getGroup(int groupPosition) {
-        return armTypes.get(groupPosition);
+        if(groupPosition<armTypes.size())
+            return armTypes.get(groupPosition);
+        else
+            return null;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return arms.get(groupPosition).get(childPosition);//[groupPosition][childPosition];
+        if(groupPosition<armTypes.size()&&childPosition<arms.get(groupPosition).size())
+            return arms.get(groupPosition).get(childPosition);//[groupPosition][childPosition];
+        else
+            return null;
     }
 
     @Override
@@ -90,9 +103,12 @@ public class ExercisePlanAdapter extends BaseExpandableListAdapter {
                 LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
         param.setMarginStart(100);
         TextView textView = getTextView(context);
-        textView.setText(getGroup(groupPosition).toString());
+        if(getGroup(groupPosition)!=null)
+            textView.setText(getGroup(groupPosition).toString());
         textView.setPadding(0,15, 0, 15);
         textView.setTextSize(18);
+        if(groupPosition==IDPositon&&IDPositon>=0)
+            textView.setTextColor(Color.parseColor("#1E88E5"));
         ll.addView(textView,param);
         return ll;
     }
@@ -106,8 +122,11 @@ public class ExercisePlanAdapter extends BaseExpandableListAdapter {
         LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.
                 LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
         TextView textView = getTextView(context);
-        textView.setText(getChild(groupPosition, childPosition).toString());
+        if(getChild(groupPosition, childPosition)!=null)
+            textView.setText(getChild(groupPosition, childPosition).toString());
         textView.setTextSize(14);
+        if(groupPosition==IDPositon&&childPosition==SegPosition&&IDPositon>=0&&SegPosition>=0)
+            textView.setTextColor(Color.parseColor("#1E88E5"));
         ll.addView(textView,param);
         return ll;
     }

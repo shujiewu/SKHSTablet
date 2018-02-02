@@ -7,9 +7,9 @@ import java.util.List;
  */
 
 public class ExercisePlan {
-    private int exercisePlanID;
-    private String content;
-    private List<String> segment;
+    private int exercisePlanID;//该医嘱id
+    private String content;     //该医嘱总量
+    private List<String> segment;//具体分段
 
     public void setContent(String content) {
         this.content = content;

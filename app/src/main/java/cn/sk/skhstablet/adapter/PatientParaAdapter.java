@@ -18,8 +18,8 @@ import cn.sk.skhstablet.model.PatientDetail;
  */
 
 public class PatientParaAdapter extends RecyclerView.Adapter<PatientParaAdapter.PatientParaHolder> {
-    public List<String> phyDevName;
-    public List<String> phyDevValue;
+    public List<String> phyDevName; //生理参数名称
+    public List<String> phyDevValue;//生理参数值
 
     //根据这个值来判断是多人监控页面采用此适配器还是单人监控页面采用,单人监控页面的字体要大一些
     private int pageState= AppConstants.MUTI_DATA;

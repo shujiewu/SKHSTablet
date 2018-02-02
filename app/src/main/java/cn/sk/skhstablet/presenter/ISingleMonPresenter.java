@@ -11,14 +11,14 @@ import cn.sk.skhstablet.model.PatientPhyData;
 
 public interface ISingleMonPresenter {
     interface View extends BaseView<PatientDetail>{
-        void refreshExercisePlan(List<String> armTypes,List<List<String>> arms);
+        void refreshExercisePlan(List<String> armTypes,List<List<String>> arms,String constrait,List<Integer> planID);
         void setPageState(int state);
         void setControlState(byte resultState,byte controlState);
         void refreshPhyData(PatientPhyData patientPhyData);
     }
     interface Presenter{
         void sendPatientDetailRequest(String ID);
-        void fetchExercisePlan();
+        void fetchExercisePlan(String ID);
         void registerFetchResponse();
         void sendControlStartStop(int patientID,String deviceID,byte type);
     }

@@ -1,5 +1,7 @@
 package cn.sk.skhstablet.model;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static cn.sk.skhstablet.app.AppConstants.DEV_NAME;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
@@ -8,6 +10,7 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
 
 /**
  * Created by ldkobe on 2017/4/16.
+ * Model类，此类用于左侧全局患者监控列表的数据显示并且根据患者运动状态更新单人监控和多人监控界面
  */
 
 public class Patient implements Comparable<Patient>, Serializable{
@@ -188,5 +191,24 @@ public class Patient implements Comparable<Patient>, Serializable{
         this.dev=DEV_NAME.get(devType);
         this.connectState=connectState;
         this.selectStatus=selectStatus;
+    }
+
+
+    List<Byte> MonExceptionState=new ArrayList<>();
+    public void setMonExceptionState(List<Byte> monExceptionState) {
+        MonExceptionState = monExceptionState;
+    }
+
+    public List<Byte> getMonExceptionState() {
+        return MonExceptionState;
+    }
+    List<Byte> ParaExceptionState=new ArrayList<>();
+
+    public void setParaExceptionState(List<Byte> paraExceptionState) {
+        ParaExceptionState = paraExceptionState;
+    }
+
+    public List<Byte> getParaExceptionState() {
+        return ParaExceptionState;
     }
 }

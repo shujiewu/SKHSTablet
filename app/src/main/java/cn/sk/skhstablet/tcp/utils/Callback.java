@@ -18,9 +18,7 @@ import static cn.sk.skhstablet.app.AppConstants.netState;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.logoutUnsubscribe;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.mConnection;
 
-/**
- * Created by quantan.liu on 2017/3/21.
- */
+//原来在这个类统一处理命令发送失败的问题，后来改为在发送命令的地方重写了，所以这里意义不大了
 
 public class Callback<T> extends Subscriber<T> {
     private Stateful target;
@@ -42,17 +40,10 @@ public class Callback<T> extends Subscriber<T> {
 
     @Override
     public void onNext(T data) {
-        //// TODO: 2017/3/22 这边网络请求成功返回都不一样所以不能在这里统一写了（如果是自己公司需要规定一套返回方案）
-        /// TODO: 2017/3/22 这里先统一处理为成功   我们要是想检查返回结果的集合是否是空，只能去子类回掉中完成了。
         onResponse(data);
     }
 
     public void onResponse(T data) {
-        /**
-         * 如果喜欢统一处理成功回掉也是可以的。
-         * 不过获取到的数据都是不规则的，理论上来说需要判断该数据是否为null或者list.size()是否为0
-         * 只有不成立的情况下，才能调用成功方法refreshView/()。如果统一处理就放在每个refreshView中处理。
-         */
         ((BaseView) target).refreshView(data);
     }
     public void onfail() {

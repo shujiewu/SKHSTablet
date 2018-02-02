@@ -17,8 +17,8 @@ import cn.sk.skhstablet.R;
  */
 
 public class SportDevParaAdapter extends RecyclerView.Adapter<SportDevParaAdapter.SportDevParaHolder> {
-    List<String> sportDevName;
-    List<String> sportDevValue;
+    List<String> sportDevName;  //运动设备参数名称
+    List<String> sportDevValue;//运动设备参数值
 
     public SportDevParaAdapter(List<String> sportDevName, List<String> sportDevValue) {
         this.sportDevName = sportDevName;

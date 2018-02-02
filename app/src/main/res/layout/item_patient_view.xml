@@ -116,6 +116,7 @@
         </LinearLayout>
 
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -125,8 +126,8 @@
         >
         <TextView
             android:id="@+id/status"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
             android:layout_marginLeft="@dimen/margin"
             android:layout_marginTop="4dp"
             android:background="@drawable/status_green"

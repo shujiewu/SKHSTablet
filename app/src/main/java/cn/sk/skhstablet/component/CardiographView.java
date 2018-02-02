@@ -96,7 +96,5 @@ public class CardiographView extends View {
         for(int i = 0;i<hNum+1;i++){
             canvas.drawLine(0,i*mGridWidth,mWidth,i*mGridWidth,mPaint);
         }
-
-
     }
 }

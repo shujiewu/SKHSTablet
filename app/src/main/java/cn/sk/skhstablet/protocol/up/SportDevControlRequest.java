@@ -13,9 +13,9 @@ public class SportDevControlRequest extends AbstractProtocol {
     String deviceID;
     private byte parameterCode;
     private byte paraType;
-    private byte paraControlValue;
+    private short paraControlValue;
 
-    public byte getParaControlValue() {
+    public short getParaControlValue() {
         return paraControlValue;
     }
 
@@ -35,7 +35,7 @@ public class SportDevControlRequest extends AbstractProtocol {
         this.deviceID = deviceID;
     }
 
-    public void setParaControlValue(byte paraControlValue) {
+    public void setParaControlValue(short paraControlValue) {
         this.paraControlValue = paraControlValue;
     }
 

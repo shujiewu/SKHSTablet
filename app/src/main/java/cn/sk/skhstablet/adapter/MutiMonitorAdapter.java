@@ -51,8 +51,10 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     @Override
     public void onBindViewHolder(MutiMonitorHolder holder, int position) {
         holder.bind(holder, patientDetailList.get(position));
+        //设置tag为患者ID，下面会用到
         holder.itemView.setTag(patientDetailList.get(position).getPatientID());
 
+        //这里的长按监听器与全局患者列表的监听器不同，不需要判断患者是否已经是多人监控状态，因为肯定是
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(final View view) {
@@ -82,11 +84,15 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
     }
     public class MutiMonitorHolder extends RecyclerView.ViewHolder
     {
-
+        //患者名字
         TextView name;
+        //设备名字
         TextView dev;
-        TextView percent;
+        //医嘱完成百分比
+        //TextView percent;
+        //住院号
         TextView tvHospitalNumber;
+        //设备号
         TextView tvDevNumber;
         //生理参数列表
         RecyclerView recyclerPhyParaView;
@@ -97,7 +103,7 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
             super(view);
             name = (TextView) view.findViewById(R.id.mname);
             dev = (TextView) view.findViewById(R.id.mdev);
-            percent=(TextView) view.findViewById(R.id.mpercent);
+            //percent=(TextView) view.findViewById(R.id.mpercent);
             tvDevNumber = (TextView) view.findViewById(R.id.mdevNumber);
             tvHospitalNumber = (TextView) view.findViewById(R.id.mhospitalNumber);
 
@@ -107,23 +113,25 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         }
 
         public void bind(MutiMonitorHolder viewHolder, PatientDetail patient) {
-            //System.out.println("muti1");
             viewHolder.name.setText(patient.getName());
             viewHolder.dev.setText(patient.getDev());
-            if(patient.getPercent()!=null)
+            /*if(patient.getPercent()!=null)
             {
+                //如果百分比为空，显示为控制，否则在数值的基础上增加百分号
                 if(patient.getPercent().isEmpty())
-                    viewHolder.percent.setText(patient.getPercent());
+                    viewHolder.percent.setText("");
                 else
-                    viewHolder.percent.setText(patient.getPercent()+"%");
-            }
+                {
+                    System.out.println("更新了"+patient.getName()+"进度");
+                    viewHolder.percent.setText(patient.getPercent()+"%"+patient.getName());
+                }
+           }*/
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
             viewHolder. tvDevNumber.setText(patient.getDeviceNumber());
 
-            //网格形式，一行两个
+            //网格形式，总共显示两行患者
             recyclerPhyParaView.setLayoutManager(new GridLayoutManager(context,2));
-
-            //如果参数不为null,才可以显示,既是值为空也可以
+            //如果值为空那么显示出来是空的，但这里不能传入null，否则出错
             if(patient.getPhyDevName()!=null)
                 recyclerPhyParaView.setAdapter(new PatientParaAdapter(patient.getPhyDevName(),patient.getPhyDevValue()));
 
@@ -144,6 +152,6 @@ public class MutiMonitorAdapter extends RecyclerView.Adapter<MutiMonitorAdapter.
         }
     }
     public static interface OnRecyclerViewItemLongClickListener {
-        void onItemLongClick(View view ,Integer data);//参数为患者di
+        void onItemLongClick(View view ,Integer data);//第二个参数为患者ID
     }
 }

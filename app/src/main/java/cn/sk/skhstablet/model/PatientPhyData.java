@@ -8,6 +8,7 @@ import cn.sk.skhstablet.domain.ECG;
 
 /**
  * Created by ldkobe on 2017/5/31.
+ * 生理数据，用于单一患者监控界面数据显示，包含了生理数据和心电数据
  */
 
 public class PatientPhyData {
@@ -15,6 +16,15 @@ public class PatientPhyData {
     private List<String> phyDevValue;
     private Map<Short, List<Short>> ecgs = new HashMap<>();
     private String id;
+    private int patientID;
+
+    public int getPatientID() {
+        return patientID;
+    }
+
+    public void setPatientID(int patientID) {
+        this.patientID = patientID;
+    }
 
     public List<String> getPhyDevName() {
         return phyDevName;

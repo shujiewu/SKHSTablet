@@ -27,7 +27,7 @@ import android.widget.Button;
 
 import cn.sk.skhstablet.R;
 
-
+//这个类是网上找的button类，只在启动和停止按钮使用了，如果不需要此功能的话可以删掉
 public class PaperButton extends Button {
 
     private static final String TAG = PaperButton.class.getSimpleName();

@@ -23,7 +23,7 @@ import cn.sk.skhstablet.R;
 /**
  * Created by ldkobe on 2017/5/3.
  */
-
+//设备参数控制增加和减少的自定义控件，这个类用于整数参数增加和减少，如果后期添加了参数控制的调节精度，需要修改增加和减少的onclick函数
 public class QuantityView extends LinearLayout implements View.OnClickListener {
 
     private Drawable quantityBackground, addButtonBackground, removeButtonBackground;
@@ -100,11 +100,11 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         }
 
         a.recycle();
-        int dp10 = pxFromDp(10);
+        int dp6 = pxFromDp(6);
 
         mButtonAdd = new Button(getContext());
         mButtonAdd.setGravity(Gravity.CENTER);
-        mButtonAdd.setPadding(dp10, dp10, dp10, dp10);
+        mButtonAdd.setPadding(dp6, dp6, dp6, dp6);
         mButtonAdd.setMinimumHeight(0);
         mButtonAdd.setMinimumWidth(0);
         mButtonAdd.setMinHeight(0);
@@ -115,7 +115,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
 
         mButtonRemove = new Button(getContext());
         mButtonRemove.setGravity(Gravity.CENTER);
-        mButtonRemove.setPadding(dp10, dp10, dp10, dp10);
+        mButtonRemove.setPadding(dp6, dp6, dp6, dp6);
         mButtonRemove.setMinimumHeight(0);
         mButtonRemove.setMinimumWidth(0);
         mButtonRemove.setMinHeight(0);
@@ -126,7 +126,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
 
         mTextViewQuantity = new TextView(getContext());
         mTextViewQuantity.setGravity(Gravity.CENTER);
-        mTextViewQuantity.setTextSize(20);
+        mTextViewQuantity.setTextSize(18);
         setQuantityTextColor(quantityTextColor);
         setQuantity(quantity);
         setQuantityBackground(quantityBackground);
@@ -135,7 +135,7 @@ public class QuantityView extends LinearLayout implements View.OnClickListener {
         setOrientation(HORIZONTAL);
 
         addView(mButtonRemove, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
-        addView(mTextViewQuantity,new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,(float)1.0));
+        addView(mTextViewQuantity,new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,(float)1.5));
         addView(mButtonAdd, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
 
         mButtonAdd.setOnClickListener(this);

@@ -18,12 +18,14 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.math.BigDecimal;
+
 import cn.sk.skhstablet.R;
 
 /**
  * Created by ldkobe on 2017/5/3.
  */
-//浮点数的增加和减少框
+//浮点数的增加和减少控件，如果后期添加了参数控制的调节精度，需要修改增加和减少的onclick函数，如果需要修改此控件的样式，也要在此进行修改
 public class FloatQuantityView extends LinearLayout implements View.OnClickListener {
 
     private Drawable quantityBackground, addButtonBackground, removeButtonBackground;
@@ -100,11 +102,11 @@ public class FloatQuantityView extends LinearLayout implements View.OnClickListe
         }
 
         a.recycle();
-        int dp10 = pxFromDp(10);
+        int dp6 = pxFromDp(6);
 
         mButtonAdd = new Button(getContext());
         mButtonAdd.setGravity(Gravity.CENTER);
-        mButtonAdd.setPadding(dp10, dp10, dp10, dp10);
+        mButtonAdd.setPadding(dp6, dp6, dp6, dp6);
         mButtonAdd.setMinimumHeight(0);
         mButtonAdd.setMinimumWidth(0);
         mButtonAdd.setMinHeight(0);
@@ -115,7 +117,7 @@ public class FloatQuantityView extends LinearLayout implements View.OnClickListe
 
         mButtonRemove = new Button(getContext());
         mButtonRemove.setGravity(Gravity.CENTER);
-        mButtonRemove.setPadding(dp10, dp10, dp10, dp10);
+        mButtonRemove.setPadding(dp6, dp6, dp6, dp6);
         mButtonRemove.setMinimumHeight(0);
         mButtonRemove.setMinimumWidth(0);
         mButtonRemove.setMinHeight(0);
@@ -126,7 +128,7 @@ public class FloatQuantityView extends LinearLayout implements View.OnClickListe
 
         mTextViewQuantity = new TextView(getContext());
         mTextViewQuantity.setGravity(Gravity.CENTER);
-        mTextViewQuantity.setTextSize(20);
+        mTextViewQuantity.setTextSize(18);
         setQuantityTextColor(quantityTextColor);
         setQuantity(fquantity);
         setQuantityBackground(quantityBackground);
@@ -135,7 +137,7 @@ public class FloatQuantityView extends LinearLayout implements View.OnClickListe
         setOrientation(HORIZONTAL);
 
         addView(mButtonRemove, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
-        addView(mTextViewQuantity,new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,(float)1.0));
+        addView(mTextViewQuantity,new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,(float)1.5));
         addView(mButtonAdd, new LinearLayout.LayoutParams(0,LayoutParams.MATCH_PARENT,1));
 
         mButtonAdd.setOnClickListener(this);
@@ -155,7 +157,11 @@ public class FloatQuantityView extends LinearLayout implements View.OnClickListe
                 if (onQuantityChangeListener != null) onQuantityChangeListener.onLimitReached();
             } else {
                 fquantity += 0.1;
-                mTextViewQuantity.setText(String.valueOf(fquantity));
+
+                BigDecimal bd = new BigDecimal(fquantity);
+                bd = bd.setScale(2,BigDecimal.ROUND_HALF_UP);
+                mTextViewQuantity.setText(bd.toString());
+
                 if (onQuantityChangeListener != null)
                     onQuantityChangeListener.onQuantityChanged(fquantity, false);
             }
@@ -164,7 +170,10 @@ public class FloatQuantityView extends LinearLayout implements View.OnClickListe
                 if (onQuantityChangeListener != null) onQuantityChangeListener.onLimitReached();
             } else {
                 fquantity -= 0.1;
-                mTextViewQuantity.setText(String.valueOf(fquantity));
+                BigDecimal bd = new BigDecimal(fquantity);
+                bd = bd.setScale(2,BigDecimal.ROUND_HALF_UP);
+                mTextViewQuantity.setText(bd.toString());
+
                 if (onQuantityChangeListener != null)
                     onQuantityChangeListener.onQuantityChanged(fquantity, false);
             }

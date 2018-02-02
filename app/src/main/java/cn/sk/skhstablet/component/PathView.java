@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
-
+//用于心电绘制，这个是原来250个字节用的，现在更改为500个字节，整个界面显示1000个值，也就是4秒的数据
 public class PathView extends CardiographView {
     public PathView(Context context) {
         this(context,null);
@@ -20,55 +20,15 @@ public class PathView extends CardiographView {
     public PathView(Context context, AttributeSet attrs) {
         this(context, attrs,0);
     }
-    //byte [] content=new byte[255];
     public PathView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mPaint = new Paint();
-        mPath = new Path();
-        mPath2=new Path();
-        avgThread = new Thread(runnable);//定期更新平均值的线程启动
+        mPath = new Path();  //用于绘制线条1
+        mPath2=new Path();   //用于绘制线条2
+        avgThread = new Thread(runnable); //开启线程用于绘制
         System.out.println("开始状态"+avgThread.getState());
 
     }
-
-
-    private void drawPath(Canvas canvas) {
-        // 重置path
-        mPath.reset();
-
-        //用path模拟一个心电图样式
-        mPath.moveTo(0,mHeight/2);
-        int tmp = 0;
-        for(int i = 0;i<10;i++) {
-            mPath.lineTo(tmp+20, 100);
-            mPath.lineTo(tmp+70, mHeight / 2 + 50);
-            mPath.lineTo(tmp+80, mHeight / 2);
-
-            mPath.lineTo(tmp+200, mHeight / 2);
-            tmp = tmp+200;
-        }
-        //设置画笔style
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(mLineColor);
-        mPaint.setStrokeWidth(2);
-        canvas.drawPath(mPath,mPaint);
-
-    }
-
-    public void drawECG(Canvas canvas, byte[] content)
-    {
-        mPath.moveTo(0,mHeight/2);
-        int tmp = 0;
-        for(int i = 0;i<content.length;i++) {
-            mPath.lineTo(tmp+i, mHeight / 2+content[i]);
-            tmp+=2;
-        }
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(mLineColor);
-        mPaint.setStrokeWidth(2);
-        canvas.drawPath(mPath,mPaint);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         /*drawPath(canvas);
@@ -80,36 +40,34 @@ public class PathView extends CardiographView {
             drawNewECG(canvas);
             change=false;
         }
-
     }
 
     public boolean change=false;
-    Queue<Short> queue=new LinkedList<Short>();
-    Queue<Short> queue2=new LinkedList<Short>();
+    Queue<Short> queue=new LinkedList<Short>();  //线条1用到的数据队列
+    Queue<Short> queue2=new LinkedList<Short>(); //线条2用到的数据队列
     public double size;
     boolean isfirst=true;
     float tmp = 0;
     Thread avgThread;
     List<Short> content=new ArrayList<>();
-    Random random = new Random();
-    int max=250;
-    int min=0;
     public boolean isNewData=false;
     List<Short> newData=new ArrayList<>();
+    //设置第一条线条的内容
     public void setContent(List<Short> content) {
         change=true;
         for(Short i:content)
         {
             queue.offer(i);
-            queue2.poll();
+            queue2.poll(); //第一条增加几个点 第二条减少几个点
         }
         /*if(queue.size()>=1000)//
         {
             for(int i=0;i<25;i++)
                 queue.poll();
         }*/
-        postInvalidate();
+        postInvalidate();//
     }
+    //设置第二条线条的内容
     public void setContent2(List<Short> content) {
         change=true;
 
@@ -118,31 +76,26 @@ public class PathView extends CardiographView {
             queue2.offer(i);
             queue.poll();
         }
-
-        /*if(queue2.size()>1000)//
-        {
-            for(int i=0;i<250;i++)
-                queue2.poll();
-        }*/
         postInvalidate();
     }
+    //用于设置新的数据
     public void setECG(List<Short> content) {
-        if(newDataSize==8)
+        if(newDataSize==8)//如果超过了8个点，说明两条线都绘制完了  需要重新开始
             newDataSize=0;
         isNewData=true;
         this.newData=content;
         newDataSize++;
-        if(newDataSize==5)
+        if(newDataSize==5) //如果绘制第五个点，需要删除第一条线的250个点的数据
         {
             for(int i=0;i<250;i++)
                 queue.poll();
         }
-        if(newDataSize==1)
+        if(newDataSize==1)//如果绘制第一个点，需要删除第而条线的250个点的数据
         {
             for(int i=0;i<250;i++)
                 queue2.poll();
         }
-        if(stop)//如果绘制是停止状态
+        if(stop)//如果绘制时是停止状态
         {
             stop=false;
             while(true)
@@ -168,6 +121,7 @@ public class PathView extends CardiographView {
         }
     }
     boolean stop=true;
+    //停止绘制，清空数据
     public void stop()
     {
         stop=true;
@@ -178,7 +132,7 @@ public class PathView extends CardiographView {
         newDataSize=0;
         mPath.reset();
         mPath2.reset();
-        if(avgThread.getState()==Thread.State.TIMED_WAITING)//线程正在睡眠
+        if(avgThread.getState()==Thread.State.TIMED_WAITING)//如果线程正在睡眠，快速唤醒并停止
         {
             avgThread.interrupt();
             System.out.println("打断");
@@ -188,14 +142,15 @@ public class PathView extends CardiographView {
     {
         return stop;
     }
+    //绘制新数据
     public void drawNewECG(Canvas canvas)
     {
         if(isfirst)//第一次绘制需要计算每个点绘制的宽度
         {
             mPath.reset();
-            mPath.moveTo(0,mHeight);
+            mPath.moveTo(0,mHeight/2);
             mPath2.reset();
-            mPath2.moveTo(0,mHeight);
+            mPath2.moveTo(0,mHeight/2);
             isfirst=false;
             //System.out.println("首次");
             size=mWidth/1000.0;
@@ -204,22 +159,23 @@ public class PathView extends CardiographView {
 
         mPath.reset();
         mPath2.reset();
+        //如果数据大于4个点，绘制第二条线
         if(newDataSize>4)
         {
-            mPath2.moveTo(0,mHeight);
+            mPath2.moveTo(0,mHeight/2);//mHeight/2是设置的纵坐标基准线
             tmp=0;
-            for(Short i:queue2)
+            for(Short i:queue2)  //绘制所有第二条线数据队列中的数据
             {
-                mPath2.lineTo(tmp, mHeight-3*i);
+                mPath2.lineTo(tmp, mHeight/2-i);
                 tmp+=size;
             }
-            if(queue.size()!=0)
+            if(queue.size()!=0)  //如果第一条线还有数据，则需要绘制第一条线
             {
                 tmp+=250*size;//旧数据与新数据相隔250个点
-                mPath.moveTo(tmp,mHeight-3*queue.peek());
+                mPath.moveTo(tmp,mHeight/2-queue.peek());//第一条线的初始x坐标与第二条线相差250个点的数据
                 for(Short i:queue)
                 {
-                    mPath.lineTo(tmp, mHeight-3*i);
+                    mPath.lineTo(tmp, mHeight/2-i);
                     tmp+=size;
                 }
             }
@@ -231,21 +187,20 @@ public class PathView extends CardiographView {
             tmp=0;
             for(Short i:queue)
             {
-                mPath.lineTo(tmp, mHeight-3*i);
+                mPath.lineTo(tmp, mHeight/2-i);
                 tmp+=size;
             }
             if(queue2.size()!=0)
             {
                 tmp+=250*size;//旧数据与新数据相隔250个点
-                mPath2.moveTo(tmp,mHeight-3*queue2.peek());
+                mPath2.moveTo(tmp,mHeight/2-queue2.peek());
                 for(Short i:queue2)
                 {
-                    mPath2.lineTo(tmp, mHeight-3*i);
+                    mPath2.lineTo(tmp,mHeight/2-i);
                     tmp+=size;
                 }
             }
         }
-        System.out.println("绘制"+queue.size());
         //System.out.println(queue.size());
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(mLineColor);
@@ -270,18 +225,18 @@ public class PathView extends CardiographView {
                     e.printStackTrace();
                     /*avgThread = new Thread(runnable);
                     avgThread.start();*/
-                    if(stop)
+                    if(stop) //如果线程被唤醒且为停止命令，则跳出此循环
                         break;
                 }
                 //重要：在数据集中添加新的点集
                 content.clear();//每100ms绘制25个点
-                if(isNewData)
+                if(isNewData)  //如果是新数据
                 {
                     if(newData!=null)
                     {
                         for(int i=0;i<25;i++)
                         {
-                            content.add(newData.get(num*25+i));
+                            content.add(newData.get(num*25+i));  //添加25个点
                         }
                         num++;
                         if(newDataSize>4)//大于四个点，添加点到第二条曲线
@@ -295,18 +250,8 @@ public class PathView extends CardiographView {
                         //System.out.println("p");
                         //System.out.println("添加");
                     }
-                    /*else
-                    {
-                        if(newDataSize>4)
-                        {
-                            change=true;
-                            for(int i=0;i<25;i++)
-                                queue.poll();
-                            postInvalidate();
-                        }
-                    }*/
                 }
-                if(num==10)//新数据添加并绘制完毕
+                if(num==10)//新数据添加并绘制完毕，10次循环就可以绘制完1秒的数据
                 {
                     num=0;
                     newData=null;
@@ -315,7 +260,7 @@ public class PathView extends CardiographView {
 
                 //System.out.println("运行状态"+avgThread.getState());
             }
-            postInvalidate();
+            postInvalidate();//退出之后需要重新绘制一次 刷新界面为空
             System.out.println("线程已经退出");
             System.out.println("退出状态"+avgThread.getState());
         }

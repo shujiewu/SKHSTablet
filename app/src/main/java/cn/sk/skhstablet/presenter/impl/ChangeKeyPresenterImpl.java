@@ -20,6 +20,7 @@ import static cn.sk.skhstablet.tcp.utils.TcpUtils.setConnDisable;
 
 /**
  * Created by wyb on 2017/4/25.
+ * 修改密码的Presenter实现,对应于changkey的fragment
  */
 
 public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.View> implements IChangekeyPresenter.Presenter {
@@ -34,6 +35,7 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
         request.setLoginName(loginName);
         request.setUserOldKey(oldKey);
         request.setUserNewKey(newKey);
+        //如果还未初始化链路，则直接返回错误
         if(TcpUtils.send(request)==null)
         {
             mView.refreshView(CommandTypeConstant.NO_LOGIN);
@@ -47,7 +49,6 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
                     System.out.println("修改密码发送失败");
                     //发送失败直接弹出未知错误
                     mView.refreshView(CommandTypeConstant.NO_LOGIN);
-                    //netState= AppConstants.STATE_DIS_CONN;
                     this.unsubscribe();
                     setConnDisable();
                 }
@@ -59,7 +60,7 @@ public class ChangeKeyPresenterImpl extends BasePresenter<IChangekeyPresenter.Vi
             });
         }
     }
-    //注册修改密码的观察者
+    //注册修改密码状态返回的观察者
     @Override
     public void registerFetchResponse() {
         Subscription changkeySubscription = RxBus.getDefault().toObservable(AppConstants.CHANGE_KEY_STATE,Byte.class)

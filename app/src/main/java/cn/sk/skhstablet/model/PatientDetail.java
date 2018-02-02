@@ -1,9 +1,11 @@
 package cn.sk.skhstablet.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by ldkobe on 2017/4/18.
+ * 此类在患者基本信息的基础上包含了运动数据和设备数据，用于多患者监控和单患者监控界面数据显示
  */
 
 public class PatientDetail {
@@ -11,10 +13,10 @@ public class PatientDetail {
     private String id;
     private String dev;
     private String percent;
-    private List<String> sportDevName;  //指的是参数名称，而不是设备名称
-    private List<String> phyDevName;
-    private List<String> sportDevValue;
-    private List<String> phyDevValue;
+    private List<String> sportDevName=new ArrayList<>();  //指的是参数名称，而不是设备名称
+    private List<String> phyDevName=new ArrayList<>();;
+    private List<String> sportDevValue=new ArrayList<>();;
+    private List<String> phyDevValue=new ArrayList<>();;
     private String gender;
     public PatientDetail(String name, String id,String dev,String percent,List<String> phyDevName,List<String> phyDevValue,List<String> sportDevName,List<String> sportDevValue )
     {
@@ -119,5 +121,24 @@ public class PatientDetail {
     }
     public byte getDevType() {
         return devType;
+    }
+
+    private int exercisePlanId;
+    private int exercisePlanSectionNumber;
+
+    public int getExercisePlanId() {
+        return exercisePlanId;
+    }
+
+    public int getExercisePlanSectionNumber() {
+        return exercisePlanSectionNumber;
+    }
+
+    public void setExercisePlanId(int exercisePlanId) {
+        this.exercisePlanId = exercisePlanId;
+    }
+
+    public void setExercisePlanSectionNumber(int exercisePlanSectionNumber) {
+        this.exercisePlanSectionNumber = exercisePlanSectionNumber;
     }
 }

@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-//Tab切换的adapter
+//登录界面Tab切换的adapter
 public class TabViewPagerAdapter extends FragmentPagerAdapter {
 
     private final List<Fragment> mFragmentList = new ArrayList<>();

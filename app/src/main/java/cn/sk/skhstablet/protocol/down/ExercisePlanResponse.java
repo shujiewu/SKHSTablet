@@ -18,6 +18,15 @@ public class ExercisePlanResponse extends AbstractProtocol {
     private int patientID;
     private int patientNumber;
     private List<ExercisePlan> exercisePlanList;
+    private String constraintContent;
+
+    public String getConstraintContent() {
+        return constraintContent;
+    }
+
+    public void setConstraintContent(String constraintContent) {
+        this.constraintContent = constraintContent;
+    }
 
     public int getPatientID() {
         return patientID;

@@ -7,6 +7,7 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
 
 /**
  * Created by ldkobe on 2017/4/16.
+ * 测试类，可删除
  */
 
 public class PatientList {

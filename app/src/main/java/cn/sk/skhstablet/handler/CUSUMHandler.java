@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-
+//校验
 @Sharable
 public class CUSUMHandler extends ChannelInboundHandlerAdapter {
 

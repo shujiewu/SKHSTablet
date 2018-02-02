@@ -13,7 +13,7 @@ import android.widget.RelativeLayout;
 
 import cn.sk.skhstablet.ui.activity.BorderActivity;
 import cn.sk.skhstablet.utlis.Utils;
-
+//左侧和上方的按钮需要的父类
 public abstract class MenuItem extends RelativeLayout{
 	
 	public int id;

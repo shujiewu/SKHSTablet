@@ -22,6 +22,7 @@ import com.nineoldandroids.view.ViewHelper;
 import com.tapadoo.alerter.Alerter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,20 @@ import static cn.sk.skhstablet.app.AppConstants.mutiDatas;
 import static cn.sk.skhstablet.app.AppConstants.mutiPosition;
 import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SPORT_DEV_CONTORL_TO;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率上限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率超上限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率超下限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压上限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压超上限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压超下限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压上限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压超上限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压超下限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.血氧下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.血氧超下限;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.closeConnection;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchScription;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.idleScription;
@@ -96,6 +111,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public PatientListAdapter patientListAdapter;
 
     SearchView searchView;
+    //管理多人监控和单人监控的fragmetn
     private FragmentManager fm;
     private FragmentTransaction ft;
     private SingleMonitorFragment singleMonitorFragment;
@@ -148,6 +164,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             }
         });
 
+        //开始时显示多人监控fragment
         fm = getSupportFragmentManager();;
         if(savedInstanceState==null)
             showFragment(FRAGMENT_MUTI);
@@ -157,6 +174,8 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         //发送解析格式请求
         mPresenter.sendFormatRequest();
         initSearchView();
+        //发送全局患者列表请求
+        alerter=Alerter.create(this);
         loadData();
     }
     //搜索框相关的函数
@@ -194,6 +213,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             }
         });
     }
+    //搜索用到的辅助函数，这里可以用来设置匹配规则
     private List<Patient> filter(List<Patient> peoples, String query) {
 
         final List<Patient> filteredModelList = new ArrayList<>();
@@ -211,6 +231,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     public static final int FRAGMENT_SINGLE=0;
     public static final int FRAGMENT_MUTI=1;
     private int position;
+    //这里是用来保存activity的状态，用于activity重建时直接取出数据，但现在设置屏幕不可以旋转，activity不会重建，所以应该暂时用不到
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         boolean show=this.isMenuShowed();
@@ -227,7 +248,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
         outState.putInt(POSITION, position);
         super.onSaveInstanceState(outState);
     }
-
+    //这里用于取出保存的状态
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         int show=savedInstanceState.getInt("menushow");
@@ -291,16 +312,46 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             ft.hide(mutiMonitorFragment);
         }
     }
+    //单人监控
     @Override
     public void loadSinglePatient(String singleID)
     {
         singleMonitorID=singleID;
         //正常点击肯定会设置patient
+        if(singleID==null)
+        {
+            singleMonitorFragment.setPatient(new Patient());
+            singleMonitorFragment.setPageState(AppConstants.STATE_EMPTY);
+        }
+
         singleMonitorFragment.setPatient(patientListAdapter.mDatas.get(mPresenter.hasPatient.get(Integer.parseInt(singleMonitorID))));
-        singleMonitorFragment.loadData(singleMonitorID);
+        System.out.println("更换了单人监控对象"+singleMonitorFragment.getPatient().getName()+"id"+singleMonitorFragment.getPatient().getPatientID());
+        if(mutiMonitorFragment.getPageState()!=AppConstants.STATE_SUCCESS)
+        {
+            mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+
+        }
+        singleMonitorFragment.setPageState(AppConstants.STATE_SUCCESS);
+
+
+        //singleMonitorFragment.loadData(singleMonitorID);
         //singleMonitorFragment.getChangeDevPara().clear();
         isNewSingle=true;
     }
+
+    @Override
+    public void refreshMutiView() {
+        mutiMonitorFragment.refreshView(mutiDatas);
+    }
+
+    @Override
+    public void refreshSinlgeView() {
+        newSingleMonitorID=null;
+        singleMonitorFragment.setPageState(AppConstants.STATE_EMPTY);
+    }
+
+
+    //切换显示fragment
     public void showFragment(int index){
 
         ft=fm.beginTransaction();
@@ -332,10 +383,11 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 ft.commit();
                 fm.executePendingTransactions();
 
-                //新的监控
+                //根据是否是新的监控而读取新数据，还需要根据是否修改了参数而增加保存修改按钮
                 if(newSingleMonitorID!=null&&!newSingleMonitorID.equals(singleMonitorID))
                 {
-                    singleMonitorFragment.setState(STATE_LOADING);
+                   singleMonitorFragment.setPageState(STATE_LOADING);//设置界面状态为正在加载
+
                     //if(singleMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)///shanchu
                     //   singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
                     /*singleMonitorID=newSingleMonitorID;
@@ -343,7 +395,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     singleMonitorFragment.loadData(singleMonitorID);
                     singleMonitorFragment.getChangeDevPara().clear();
                     isNewSingle=true;*/
-                    System.out.println("更换了单人监控对象");
+
                     loadSinglePatient(newSingleMonitorID);
                 }
                 else
@@ -394,11 +446,13 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             mutiMonitorFragment = (MutiMonitorFragment) fragment;
         }
     }
+    //这个函数包括了MainActivity中左侧和上方所有按钮的点击响应函数
     @Override
     public void onItemClick(int id) {
         switch(id){
             case MONITORALL:
                //patientListAdapter.getmDatas();
+                //全部选择
                 for(Patient patient :patientListAdapter.mDatas)
                 {
                     patient.setSelectStatus(PATIENT_SELECT_STATUS_TRUE);
@@ -407,9 +461,11 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
                 break;
             case SINGLEMONITOR:
+                //单人监控界面切换
                 showFragment(FRAGMENT_SINGLE);
                 break;
             case SHOWALL:
+                //显示或关闭全局患者监控列表
                 if(getPatientShow())
                 {
                     hidePatientList();
@@ -427,10 +483,12 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
 
                 break;
             case MUTIMOITOR:
+                //切换到多人监控界面
                 showFragment(FRAGMENT_MUTI);
 
                 break;
             case STARTMONITOR:
+                //开始多人监控
                 patientID.clear();
                 for(Patient patient :patientListAdapter.mDatas)
                 {
@@ -446,21 +504,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 showFragment(FRAGMENT_MUTI);
                 break;
             case LOG_OUT:
-                /*Alerter.create(this)
-                        .setTitle("病人预警")
-                        .setText("赵六血压超过上限！")
-                        .setBackgroundColor(R.color.yal_ms_colorPrimary)
-                        .setDuration(10000)
-                        .setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if(!getPatientShow()) {
-                                    showPatientList();
-                                }
-                                mRecyclerView.getLayoutManager().scrollToPosition(3);
-                            }
-                        })
-                        .show();*/
+                //注销按钮
                 new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("确定退出？")
                         .setConfirmText("确定")
@@ -481,6 +525,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         .show();
                 break;
             case SAVE_EDIT:
+                //保存修改按钮，这里原来写的是一次性可以修改多个设备参数，但设备不允许这么做，只能调节一个参数后才能调节下一个参数，所以这里还需要修改
                 String content="";
                 String key="";
                 String val="";
@@ -497,7 +542,17 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                     key = SPORT_DEV_FORM.get(devType).get(position).getChineseName();
                     val = (String)entry.getValue();
                     positonList.add(position);
-                    changeValueList.add(Integer.parseInt(val.substring(val.indexOf("为")+1)));
+                    String strVal=val.substring(val.indexOf("为")+1);
+                    if(SPORT_DEV_FORM.get(devType).get(position).getRate()!=1.0)
+                    {
+                        int value=(int)(Float.valueOf(strVal)*SPORT_DEV_FORM.get(devType).get(position).getRate());
+                        changeValueList.add(value);
+                    }
+                    else
+                    {
+                        changeValueList.add(Integer.parseInt(strVal));
+                    }
+
                     parameterCodeList.add(SPORT_DEV_FORM.get(devType).get(position).getParameterCode());
                     content=content+key+"   "+val+"\n";
                 }
@@ -512,8 +567,9 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                             public void onClick(SweetAlertDialog sDialog) {
                                 for(int i=0;i<positonList.size();i++)
                                 {
-                                    mPresenter.sendControl(deviceID,parameterCodeList.get(i),SPORT_DEV_CONTORL_TO,(byte)changeValueList.get(i).intValue());
+                                    mPresenter.sendControl(deviceID,parameterCodeList.get(i),SPORT_DEV_CONTORL_TO,(short)changeValueList.get(i).intValue());
                                 }
+                                singleMonitorFragment.setChangeDevPara(new HashMap<Integer, String>());
                                 sDialog.dismissWithAnimation();
                                 //sDialog.dismissWithAnimation();
                                 /*sDialog.setTitleText("修改成功")
@@ -532,13 +588,15 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                         .show();
                 break;
             case CANCEL_SINGLE_MON:
+                //取消单人监控
                 newSingleMonitorID=null;
                 singleMonitorID=null;
                 singleMonitorFragment.setPageState(AppConstants.STATE_EMPTY);
-                mPresenter.sendCancelSingleMonitorReq();
+                //mPresenter.sendCancelSingleMonitorReq();
                 showFragment(FRAGMENT_MUTI);
         }
     }
+    //按返回键将activity移动到后台
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode== KeyEvent.KEYCODE_BACK){
@@ -555,31 +613,155 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
                 .build().injectMainActivity(this);
     }
 
+    //根据全局患者数据更新界面
     @Override
     public void refreshView(List<Patient> mData) {
         patientListAdapter.mDatas= mData;
         patientListAdapter.notifyDataSetChanged();
         //mDatas=mData;
-        int postion=0;
+        int position=0;
+        //患者预警
         for(Patient patient:mData)
         {
-            if(patient.getSportState()== CommandTypeConstant.SPORT_WARNING)
+            List<Byte> paraList=patient.getParaExceptionState();
+            if(!paraList.isEmpty())
             {
-                patientWarning(patient.getName(),postion);
+                //List<Byte> paraList=patient.getParaExceptionState();
+                String type="";
+                int state=0;
+                for(Byte para:paraList)
+                {
+                    switch (para)
+                    {
+                        case 舒张压上限预警:
+                            type+=" 舒张压上限预警";
+                            break;
+                        case 舒张压超上限:
+                            type+=" 舒张压超上限";
+                            state=1;
+                            break;
+                        case 舒张压下限预警:
+                            type+=" 舒张压下限预警";
+                            break;
+                        case 舒张压超下限:
+                            type+=" 舒张压超下限";
+                            state=1;
+                            break;
+                        case 收缩压上限预警:
+                            type+=" 收缩压上限预警";
+                            break;
+                        case 收缩压超上限:
+                            type+=" 收缩压超上限";
+                            state=1;
+                            break;
+                        case 收缩压下限预警:
+                            type+=" 收缩压下限预警";
+                            break;
+                        case 收缩压超下限:
+                            type+=" 收缩压超下限";
+                            state=1;
+                            break;
+                        case 血氧下限预警:
+                            type+=" 血氧下限预警";
+                            break;
+                        case 血氧超下限:
+                            type+=" 血氧超下限";
+                            state=1;
+                            break;
+                        case 心率上限预警:
+                            type+=" 心率上限预警";
+                            break;
+                        case 心率超上限:
+                            type+=" 心率超上限";
+                            state=1;
+                            break;
+                        case 心率下限预警:
+                            type+=" 心率下限预警";
+                            break;
+                        case 心率超下限:
+                            type+=" 心率超下限";
+                            state=1;
+                            break;
+                    }
+                }
+                patientWarning(patient.getName(),position,type,state);
+                System.out.println("生理参数预警："+ type);
             }
-            postion++;
+            position++;
         }
     }
-
+    //局部更新全局患者监测列表
     @Override
     public void refreshView(Patient mData, int position)
     {
         patientListAdapter.mDatas.set(position,mData);
         patientListAdapter.notifyItemChanged(position);
-        if(mData.getSportState()== CommandTypeConstant.SPORT_WARNING)
+        List<Byte> paraList=mData.getParaExceptionState();
+        if(!paraList.isEmpty())
         {
-            patientWarning(mData.getName(),position);
+            System.out.println("运动状态警告");
+            String type="";
+            int state=0;
+            for(Byte para:paraList)
+            {
+                switch (para)
+                {
+                    case 舒张压上限预警:
+                        type+=" 舒张压上限预警";
+                        break;
+                    case 舒张压超上限:
+                        type+=" 舒张压超上限";
+                        state=1;
+                        break;
+                    case 舒张压下限预警:
+                        type+=" 舒张压下限预警";
+                        break;
+                    case 舒张压超下限:
+                        type+=" 舒张压超下限";
+                        state=1;
+                        break;
+                    case 收缩压上限预警:
+                        type+=" 收缩压上限预警";
+                        break;
+                    case 收缩压超上限:
+                        type+=" 收缩压超上限";
+                        state=1;
+                        break;
+                    case 收缩压下限预警:
+                        type+=" 收缩压下限预警";
+                        break;
+                    case 收缩压超下限:
+                        type+=" 收缩压超下限";
+                        state=1;
+                        break;
+                    case 血氧下限预警:
+                        type+=" 血氧下限预警";
+                        break;
+                    case 血氧超下限:
+                        type+=" 血氧超下限";
+                        state=1;
+                        break;
+                    case 心率上限预警:
+                        type+=" 心率上限预警";
+                        break;
+                    case 心率超上限:
+                        type+=" 心率超上限";
+                        state=1;
+                        break;
+                    case 心率下限预警:
+                        type+=" 心率下限预警";
+                        break;
+                    case 心率超下限:
+                        type+=" 心率超下限";
+                        state=1;
+                        break;
+                }
+            }
+            patientWarning(mData.getName(),position,type,state);
+            //patientWarning(mData.getName(),position);
         }
+
+        //这里需要根据患者的设备状态改变来更新多人监控和单人监控界面，如患者离开了设备，清空该界面的运动数据
         if(singleMonitorFragment!=null&&singleMonitorFragment.getPatientDetail()!=null&&singleMonitorID!=null&&mData.getPatientID()==Integer.parseInt(singleMonitorID))
         {
              singleMonitorFragment.refreshPatient(mData);
@@ -590,24 +772,57 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
              mutiMonitorFragment.refreshDevInfo(mData,hasMutiPatient.get(mData.getPatientID()));
         }//更新多人监控
     }
-
-    public void patientWarning(String name, final int position)
+    Alerter alerter;//=Alerter.create(this);
+    String pwName;
+    int pwPosition;
+    String pwType;
+    public void patientWarning(String name, final int position,String type,int state)
     {
-          Alerter.create(this)
-          .setTitle("病人预警")
-          .setText(name+"生理参数预警！")
-          .setBackgroundColor(R.color.yal_ms_colorPrimary)
-          .setDuration(5000)
-          .setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  if(!getPatientShow()) {
-                      showPatientList();
-                  }
-                  mRecyclerView.getLayoutManager().scrollToPosition(position);
-              }
-          })
-          .show();
+        //System.out.println("预警病人"+name);
+        if(!name.equals(pwName)||position!=pwPosition||!type.equals(pwType))
+        {
+            System.out.println("更换了病人预警"+name);
+            pwName=name;
+            pwPosition=position;
+            pwType=type;
+            alerter=Alerter.create(this);
+            if(state==0)
+            {
+                alerter.setTitle("病人预警")
+                        .setText(name+type+"！")
+                        .setBackgroundColor(R.color.yal_ms_colorPrimary)
+                        .setDuration(3000) //弹框持续5s
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(!getPatientShow()) {
+                                    showPatientList();
+                                }
+                                mRecyclerView.getLayoutManager().scrollToPosition(position);
+                            }
+                        })
+                        .show();
+            }
+            else
+            {
+                alerter.setTitle("病人预警")
+                        .setText(name+type+"！")
+                        .setBackgroundColor(R.color.main_bg_color)
+                        .setDuration(3000) //弹框持续5s
+                        .setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                if(!getPatientShow()) {
+                                    showPatientList();
+                                }
+                                mRecyclerView.getLayoutManager().scrollToPosition(position);
+                            }
+                        })
+                        .show();
+            }
+
+        }
+
     }
 
     @Override
@@ -619,30 +834,27 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
     {
         mPresenter.sentPatientListRequest();
     }
+    //发送多人监控请求
     void sendMonitorRequest()
     {
         mutiMonitorFragment.setState(STATE_LOADING);
-        //patientID.add(0);
-       //patientID.add(1,1);
         mPresenter.sendMutiMonitorRequest(patientID);
-
-        //if(mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS)
-        //    mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
     }
-
+    //根据返回的多人监控请求响应设置多人监控界面状态，必须放在MainActivity中，如果放在多人监控的fragment中，会因为界面未初始化而失败
     @Override
     public void setMutiPageState(int state) {
-        if(patientID.size()==0)
+        if(lastMutiPatientID.size()==0)
         {
             mutiMonitorFragment.setState(STATE_EMPTY);
             return;
         }//如果正在监控为0则页面设置为空
-        if(state==AppConstants.STATE_SUCCESS)//&&mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS
+        if(state==AppConstants.STATE_SUCCESS&&mutiMonitorFragment.getState()!=state)//&&mutiMonitorFragment.getState()!= AppConstants.STATE_SUCCESS
         {
-            mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);
+            mutiMonitorFragment.setState(AppConstants.STATE_SUCCESS);//设置界面未成功状态后才会初始化界面
             mutiDatas.clear();
             hasMutiPatient.clear();
             mutiPosition=0;
+            //先根据全局患者监控列表的信息初始化多人监控界面，此时生理数据和运动数据均为空，只能显示患者的基本信息和设备等
              for(Patient patient :patientListAdapter.mDatas)
              {
                  for(int number=0;number<lastMutiPatientID.size();number++)
@@ -681,6 +893,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             singleMonitorFragment.setState(AppConstants.STATE_SUCCESS);
     }
 
+    //退出
     @Override
     public void logoutSuccess(boolean b) {
         //退出
@@ -696,6 +909,7 @@ public class MainActivity extends BorderActivity implements IPatientListPresente
             System.out.println("未知错误");
     }
 
+    //在其他设备登录
     @Override
     public void loginOther(boolean b) {
         if(b)

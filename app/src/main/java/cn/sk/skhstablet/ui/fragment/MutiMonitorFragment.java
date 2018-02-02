@@ -42,15 +42,20 @@ import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
+import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
+import static cn.sk.skhstablet.app.AppConstants.mutiDatas;
+import static cn.sk.skhstablet.app.CommandTypeConstant.PHY_CONN_ONLINE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.PHY_DEV_CONNECT_ONLINE;
+
 /**
  * Created by ldkobe on 2017/4/17.
  */
 
 public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> implements IMutiMonPresenter.View {
-    private RecyclerView recyclerView;
+    private RecyclerView recyclerView;   //多人监控界面是一个大的列表
 
     @Inject
-    MutiMonitorAdapter mutiMonitorAdapter;
+    MutiMonitorAdapter mutiMonitorAdapter; //多人监控界面的适配器
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -126,8 +131,9 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),2 ,LinearLayoutManager.HORIZONTAL,false));
 
         recyclerView.setAdapter(mutiMonitorAdapter);
-        ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
+        ((SimpleItemAnimator)recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);//此代码使得更新界面不会闪烁
 
+        //长按患者进入单人监控的监听器
         mutiMonitorAdapter.setOnItemLongClickListener(new MutiMonitorAdapter.OnRecyclerViewItemLongClickListener(){
             @Override
             public void onItemLongClick(View view ,Integer data){
@@ -151,34 +157,61 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
         mPresenter.setView(this);
     }
 
+    //发送多人监控命令,此代码在加载失败界面出现后点击空白处重新加载时起作用
     @Override
     protected void loadData() {
         mPresenter.fetchPatientDetailData();
     }
 
+    //直接更新所有患者
     @Override
     public void refreshView(List<PatientDetail> mData) {
         mutiMonitorAdapter.patientDetailList=mData;
+
+        for(PatientDetail patientDetail :mData)
+        {
+            System.out.println("直接更新"+patientDetail.getName()+"位置为"+hasMutiPatient.get(patientDetail.getPatientID())+"进度为"+patientDetail.getPercent());
+        }
         mutiMonitorAdapter.notifyDataSetChanged();
     }
+    //局部更新单个患者
     @Override
     public void refreshView(PatientDetail mData,int position) {
         mutiMonitorAdapter.patientDetailList.set(position,mData);
+       // for(PatientDetail patientDetail :mData)
+       // {
+       // System.out.println("jubu更新"+mData.getName()+"位置为"+position+"进度为"+mData.getPercent());
+        // }
+
+        for(PatientDetail patientDetail :mutiMonitorAdapter.patientDetailList)
+        {
+            System.out.println("111"+patientDetail.getName()+"进度"+patientDetail.getPercent());
+        }
         mutiMonitorAdapter.notifyItemChanged(position);
     }
 
-    //根据病人状态更新
+    //根据全局患者监控病人状态改变更新
     public void refreshDevInfo(Patient mData, int position) {
         PatientDetail patientDetail=mutiMonitorAdapter.patientDetailList.get(position);
         if(mData.getDeviceNumber()==null||!mData.getDeviceNumber().equals(patientDetail.getDeviceNumber()))
         {
             System.out.println("更新了设备");
+
+            patientDetail.setName(mData.getName());
+            patientDetail.setHospitalNumber(mData.getHospitalNumber());
+
             patientDetail.setSportDevName(new ArrayList<String>());
             patientDetail.setSportDevValue(new ArrayList<String>());
             patientDetail.setPercent("");
             patientDetail.setDeviceNumber(mData.getDeviceNumber());
             patientDetail.setDev(mData.getDev());
             patientDetail.setDevType(mData.getDevType());
+            //patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
+            //patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
+        }
+        //根据生理仪连接状态清空生理数据列表
+        if(mData.getPhyConnectState()!=PHY_DEV_CONNECT_ONLINE)
+        {
             patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
             patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
         }
@@ -187,18 +220,29 @@ public class MutiMonitorFragment extends BaseFragment<MutiMonPresenterImpl> impl
             patientDetail.setPhyDevName(new ArrayList<String>());//.clear();
             patientDetail.setPhyDevValue(new ArrayList<String>());//.clear();
         }*/
+      //  System.out.println("kankanzhelizhixinglel");
+        mutiDatas.set(position,patientDetail);
         mutiMonitorAdapter.patientDetailList.set(position,patientDetail);
         mutiMonitorAdapter.notifyItemChanged(position);
     }
+
+    //设置页面状态
     @Override
     public void setPageState(int state) {
+        System.out.println("设置多人监控界面");
         if(state==AppConstants.STATE_SUCCESS&&this.getState()!= AppConstants.STATE_SUCCESS)
         {
             this.setState(AppConstants.STATE_SUCCESS);
+            return;
+        }
+        if(state==AppConstants.STATE_ERROR)
+        {
+            System.out.println("设置多人监控界面失败");
+            this.setState(AppConstants.STATE_ERROR);
         }
 
         //else if(state==AppConstants.)
-        System.out.println("pagestatesucceses");
+
     }
 
     @Override

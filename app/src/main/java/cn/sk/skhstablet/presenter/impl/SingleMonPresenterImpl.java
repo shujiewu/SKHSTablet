@@ -19,7 +19,9 @@ import cn.sk.skhstablet.model.PatientPhyData;
 import cn.sk.skhstablet.presenter.BasePresenter;
 import cn.sk.skhstablet.presenter.ISingleMonPresenter;
 import cn.sk.skhstablet.protocol.ControlState;
+import cn.sk.skhstablet.protocol.ExercisePlan;
 import cn.sk.skhstablet.protocol.SportDevForm;
+import cn.sk.skhstablet.protocol.down.ExercisePlanResponse;
 import cn.sk.skhstablet.protocol.up.ExercisePlanRequest;
 import cn.sk.skhstablet.protocol.up.MutiMonitorRequest;
 import cn.sk.skhstablet.protocol.up.SingleMonitorRequest;
@@ -42,16 +44,21 @@ import static cn.sk.skhstablet.app.AppConstants.hasMutiPatient;
 import static cn.sk.skhstablet.app.AppConstants.isCancelSingle;
 import static cn.sk.skhstablet.app.AppConstants.lastMutiPatientID;
 import static cn.sk.skhstablet.app.AppConstants.lastSinglePatientID;
+import static cn.sk.skhstablet.app.AppConstants.mutiPosition;
 import static cn.sk.skhstablet.app.AppConstants.netState;
+import static cn.sk.skhstablet.app.AppConstants.singleMonitorID;
+import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.fetchData;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.reconnect;
 import static cn.sk.skhstablet.tcp.utils.TcpUtils.setConnDisable;
 
 /**
  * Created by wyb on 2017/4/25.
+ * 单人监控的Presenter，对应于SingleMonitroFragment
  */
 
 public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.View> implements ISingleMonPresenter.Presenter {
+    //发送单人监控请求
     @Override
     public void sendPatientDetailRequest(String ID) {
        // PatientDetail patientDetail= PatientDetailList.PATIENTS.get(0);
@@ -59,52 +66,70 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
         sendRequest(ID);
     }
 
+    //以前测试医嘱用的函数
     @Override
-    public void fetchExercisePlan() {
-        List<String> armTypes=new ArrayList<>(Arrays.asList("运动方案1：在跑步机上运动10分钟", "运动方案2：在椭圆机上运动200米", "运动方案3：在跑步机上运动5分钟"));
-        List<List<String>> arms=new ArrayList<>();
-        arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动1分钟", "第二段：以1米每秒的速度运动1分钟")));
-        arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在椭圆机上运动2分钟", "第二段：以1米每秒的速度运动2分钟")));
-        arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动3分钟", "第二段：以1米每秒的速度运动3分钟")));
-        //arms.add(new ArrayList<>(Arrays.asList("第一段：以2米每秒的速度在跑步机上运动4分钟", "第二段：以1米每秒的速度运动4分钟")));
-        mView.refreshExercisePlan(armTypes,arms);
-
-
+    public void fetchExercisePlan(String ID) {
+        ExercisePlanRequest exercisePlanRequest=new ExercisePlanRequest(CommandTypeConstant.EXERCISE_PLAN_REQUEST);
+        exercisePlanRequest.setUserID(AppConstants.USER_ID);
+        exercisePlanRequest.setDeviceType(AppConstants.DEV_TYPE);
+        exercisePlanRequest.setRequestID(AppConstants.SINGLE_REQ_ID);
+        exercisePlanRequest.setPatientID(Integer.parseInt(ID));
+        invoke(TcpUtils.send(exercisePlanRequest), new Callback<Void>() {
+            @Override
+            public void onError(Throwable e) {
+                Log.e("sendsingle","error");
+                mView.setPageState(AppConstants.STATE_ERROR);
+                this.unsubscribe();
+                setConnDisable();
+            }
+            @Override
+            public void onCompleted() {
+                super.onCompleted();
+                System.out.println("发送单人监控医嘱完成");
+                this.unsubscribe();
+            }
+        });
     }
 
     @Override
     public void registerFetchResponse() {
+        //对单人监控所需的设备数据数据返回的观察者
         Subscription mSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_DATA,PatientDetail.class)
                 .subscribe(new Action1<PatientDetail>() {
                     @Override
                     public void call(PatientDetail s) {
+                        System.out.println("运动数据准备在单人监控界面显示");
                         mView.refreshView(s);
 
                     }
                 });
 
+        //对单人监控所需的生理数据返回的观察者
         Subscription mPhySubscription = RxBus.getDefault().toObservable(AppConstants.PHY_DATA,PatientPhyData.class)
                 .subscribe(new Action1<PatientPhyData>() {
                     @Override
                     public void call(PatientPhyData s) {
-                        System.out.println("生理數據接收");
+                        System.out.println("生理数据准备在单人监控界面显示");
                         mView.refreshPhyData(s);
 
                     }
                 });
+        //对单人监控请求响应的观察者
         Subscription singlePageSubscription = RxBus.getDefault().toObservable(AppConstants.SINGLE_REQ_STATE,Byte.class)
                 .subscribe(new Action1<Byte>() {
                     @Override
                     public void call(Byte b) {
-                        if(b== CommandTypeConstant.SUCCESS)
+                        if(b== SUCCESS)
                         {
-                            if(isCancelSingle)
+                            //如果是取消单人监控，即发送的患者数量为1
+                            /*if(isCancelSingle)
                             {
                                 mView.setPageState(AppConstants.STATE_EMPTY);
                                 isCancelSingle=false;
                             }
-                            else
-                                mView.setPageState(AppConstants.STATE_SUCCESS);
+                            else*/
+                           // System.out.print("准备设置单人监控界面");
+                           // mView.setPageState(AppConstants.STATE_SUCCESS);
                         }
 
                         else if(b==CommandTypeConstant.NONE_FAIL)
@@ -117,7 +142,7 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                         //testSinglePatient();
                     }
                 });
-
+        //对控制请求响应的观察者
         Subscription controlSubscription = RxBus.getDefault().toObservable(AppConstants.CONTORL_REQ_STATE,ControlState.class)
                 .subscribe(new Action1<ControlState>() {
                     @Override
@@ -126,20 +151,40 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
                     }
                 });
 
-        Subscription planSubscription = RxBus.getDefault().toObservable(AppConstants.EXERCISE_PLAN_STATE,Byte.class)
-                .subscribe(new Action1<Byte>() {
+        //对医嘱响应的观察者，还没测试使用，只是写在这里
+        Subscription planSubscription = RxBus.getDefault().toObservable(AppConstants.EXERCISE_PLAN_STATE,ExercisePlanResponse.class)
+                .subscribe(new Action1<ExercisePlanResponse>() {
                     @Override
-                    public void call(Byte b) {
-                        //mView.setControlState(b.getResultState(),b.getControlState());
+                    public void call(ExercisePlanResponse exercisePlanResponse) {
+                        System.out.print("医嘱收到1");
+                       // mView.setPageState(AppConstants.STATE_SUCCESS);
+                        if(exercisePlanResponse.getState()==SUCCESS)
+                        {
+                            List<String> armTypes=new ArrayList<>();
+                            List<List<String>> arms=new ArrayList<>();
+                            List<Integer> planID=new ArrayList<Integer>();
+                            List<ExercisePlan> exercisePlanList=exercisePlanResponse.getExercisePlanList();
+                            if(exercisePlanList!=null)
+                            {
+                                for(ExercisePlan exercisePlan:exercisePlanList)
+                                {
+                                    armTypes.add(exercisePlan.getContent());
+                                    arms.add(exercisePlan.getSegment());
+                                    planID.add(exercisePlan.getExercisePlanID());
+                                }
+                            }
+                            mView.refreshExercisePlan(armTypes,arms,exercisePlanResponse.getConstraintContent(),planID);
+                        }
                     }
                 });
         ((LifeSubscription)mView).bindSubscription(singlePageSubscription);
         ((LifeSubscription)mView).bindSubscription(mSubscription);
         ((LifeSubscription)mView).bindSubscription(controlSubscription);
-
+        ((LifeSubscription)mView).bindSubscription(planSubscription);
         ((LifeSubscription)mView).bindSubscription(mPhySubscription);
     }
 
+    //启停控制，可能将来要删除
     @Override
     public void sendControlStartStop(int patientID, String deviceID,byte type) {
         if(deviceID!=null)
@@ -168,16 +213,36 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
             });
         }
     }
-
+    //单人监控请求
     public void sendRequest(String ID)
     {
+        int id=Integer.parseInt(ID);
+        //先查看多人监控是否有该病人，如果有，则不需要发送请求，如果没有，说明从左侧长按选择的，才需要发送请求
+        //发送医嘱请求
+
+        fetchExercisePlan(ID);
+        if(lastMutiPatientID.contains(ID))
+        {
+            lastSinglePatientID=ID;
+            mView.setPageState(AppConstants.STATE_SUCCESS);
+            System.out.println("多人界面包含单人");
+            System.out.println(hasMutiPatient);
+            return;
+        }
+        //发送一个生理数据请求
         SingleMonitorRequest singleMonitorRequest=new SingleMonitorRequest(CommandTypeConstant.SINGLE_MONITOR_REQUEST);
         singleMonitorRequest.setUserID(AppConstants.USER_ID);
         singleMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
         singleMonitorRequest.setRequestID(AppConstants.SINGLE_REQ_ID);
-        singleMonitorRequest.setPatientNumber((short) 1);
-        singleMonitorRequest.setPatientID(Integer.parseInt(ID));
+
+
+        //List<Integer> patientID=lastMutiPatientID;
+        lastMutiPatientID.add(id);
+        singleMonitorRequest.setPatientID(lastMutiPatientID);
+        singleMonitorRequest.setPatientNumber((short) lastMutiPatientID.size());
         lastSinglePatientID=ID;
+        //hasMutiPatient.put(id,mutiPosition++);
+
         invoke(TcpUtils.send(singleMonitorRequest), new Callback<Void>() {
             @Override
             public void onError(Throwable e) {
@@ -194,51 +259,38 @@ public class SingleMonPresenterImpl extends BasePresenter<ISingleMonPresenter.Vi
             }
         });
 
-        ExercisePlanRequest exercisePlanRequest=new ExercisePlanRequest(CommandTypeConstant.EXERCISE_PLAN_REQUEST);
-        exercisePlanRequest.setUserID(AppConstants.USER_ID);
-        exercisePlanRequest.setDeviceType(AppConstants.DEV_TYPE);
-        exercisePlanRequest.setRequestID(AppConstants.SINGLE_REQ_ID);
-        exercisePlanRequest.setPatientID(Integer.parseInt(ID));
-        invoke(TcpUtils.send(exercisePlanRequest), new Callback<Void>() {
-            @Override
-            public void onError(Throwable e) {
-                Log.e("sendsingle","error");
-                mView.setPageState(AppConstants.STATE_ERROR);
-                this.unsubscribe();
-                setConnDisable();
-            }
-            @Override
-            public void onCompleted() {
-                super.onCompleted();
-                System.out.println("发送单人监控医嘱完成");
-                this.unsubscribe();
-            }
-        });
+
 
         //List<Integer> patientIDList=new ArrayList<>();
-        lastMutiPatientID.add(Integer.parseInt(ID));
+        //lastMutiPatientID.add(Integer.parseInt(ID));
         //patientIDList.add(Integer.parseInt(ID));
-        MutiMonitorRequest mutiMonitorRequest=new MutiMonitorRequest(CommandTypeConstant.MUTI_MONITOR_REQUEST);
-        mutiMonitorRequest.setUserID(AppConstants.USER_ID);
-        mutiMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
-        mutiMonitorRequest.setRequestID(AppConstants.SINGLE_SPORT_REQ_ID);
-        mutiMonitorRequest.setPatientNumber((short)1);
-        mutiMonitorRequest.setPatientID(lastMutiPatientID);//zhiyouyige
-        invoke(TcpUtils.send(mutiMonitorRequest), new Callback<Void>() {
-            @Override
-            public void onError(Throwable e) {
-                Log.e("sendsingle","error");
-                mView.setPageState(AppConstants.STATE_ERROR);
-                this.unsubscribe();
-                setConnDisable();
-            }
-            @Override
-            public void onCompleted() {
-                super.onCompleted();
-                System.out.println("发送单人监控康复设备发送完成");
-                this.unsubscribe();
-            }
-        });
+        //还要根据患者是否已经处于多人监控状态而发送运动数据请求
+
+        //if(!hasMutiPatient.containsKey(id))//如果多人监控界面不含有该单人监控患者，则需要发送该请求
+        //{
+            //lastMutiPatientID.add(id);
+            MutiMonitorRequest mutiMonitorRequest=new MutiMonitorRequest(CommandTypeConstant.MUTI_MONITOR_REQUEST);
+            mutiMonitorRequest.setUserID(AppConstants.USER_ID);
+            mutiMonitorRequest.setDeviceType(AppConstants.DEV_TYPE);
+            mutiMonitorRequest.setRequestID(AppConstants.SINGLE_SPORT_REQ_ID);
+            mutiMonitorRequest.setPatientNumber((short)lastMutiPatientID.size());
+            mutiMonitorRequest.setPatientID(lastMutiPatientID);//zhiyouyige
+            invoke(TcpUtils.send(mutiMonitorRequest), new Callback<Void>() {
+                @Override
+                public void onError(Throwable e) {
+                    Log.e("sendsingle","error");
+                    mView.setPageState(AppConstants.STATE_ERROR);
+                    this.unsubscribe();
+                    setConnDisable();
+                }
+                @Override
+                public void onCompleted() {
+                    super.onCompleted();
+                    System.out.println("发送单人监控康复设备发送完成");
+                    this.unsubscribe();
+                }
+            });
+        //}
         //mView.setPageState(AppConstants.STATE_LOADING);
     }
     @Inject

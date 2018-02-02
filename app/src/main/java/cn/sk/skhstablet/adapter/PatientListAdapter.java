@@ -22,6 +22,23 @@ import cn.sk.skhstablet.model.Patient;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_MONITOR;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.MON_ECG_EXCEPTION;
+import static cn.sk.skhstablet.app.CommandTypeConstant.MON_PRE_EXCEPTION;
+import static cn.sk.skhstablet.app.CommandTypeConstant.MON_SPO_EXCEPTION;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率上限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率超上限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.心率超下限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压上限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压超上限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.收缩压超下限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压上限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压超上限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.舒张压超下限;
+import static cn.sk.skhstablet.app.CommandTypeConstant.血氧下限预警;
+import static cn.sk.skhstablet.app.CommandTypeConstant.血氧超下限;
 
 /**
  * Created by ldkobe on 2017/4/18.
@@ -30,7 +47,7 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_TRUE;
 
 public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.PatientListHolder>
 {
-    //全局患者列表
+    //全局患者列表显示的数据
     public List<Patient> mDatas;
     //长按动作的监听，长按之后进入单人监控
     private OnPatientItemLongClickListener mOnItemLongClickListener = null;
@@ -56,7 +73,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
     {
         holder.bind(holder, mDatas.get(position));
         holder.itemView.setTag( mDatas.get(position).getPatientID());
-        //每个项的单击监听,已选择变为未选择，未选择变为已选择，正在监控变为未选择
+        //每个项的单击监听,结果是已选择变为未选择，未选择变为已选择，正在监控变为未选择
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -98,6 +115,9 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                },200);
                if (mOnItemLongClickListener != null) {
                    //注意这里使用getTag方法获取数据
+                   //长按之后将患者状态修改为正在监控
+                   mDatas.get(position).setSelectStatus(PATIENT_SELECT_STATUS_MONITOR);
+                   holder.tvSelectStatus.setText(PATIENT_SELECT_STATUS_MONITOR);
                    mOnItemLongClickListener.onItemLongClick(view, (Integer) view.getTag());
                }
                return true;
@@ -168,14 +188,21 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
     public class PatientListHolder extends RecyclerView.ViewHolder
     {
-
+        //患者姓名
         TextView name;
+        //住院号
         TextView tvHospitalNumber;
+        //性别
         TextView gender;
+        //选择状态：已选择，未选择，正在监控
         TextView tvSelectStatus;
+        //生理仪连接状态
         TextView tvPhyState;
+        //监护设备连接状态
         TextView tvMonState;
+        //患者和设备的连接状态，如果正常连接就显示设备的名字且为绿色，如果不正常，则为灰色离线
         TextView tvSportState;
+        //患者的运动状态，这里用小圆点的形式呈现：未上设备为灰色，打卡未运动为白色，正常运动为绿色，预警为黄色
         TextView status;
         public PatientListHolder(View view) {
             super(view);
@@ -219,7 +246,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             viewHolder.tvSelectStatus.setText(patient.getSelectStatus());
             viewHolder.tvHospitalNumber.setText(patient.getHospitalNumber());
 
-            //设置患者运动状态，也就是圆形的颜色以及设备的值和颜色
+            //设置患者运动状态，也就是圆形的颜色；以及设备的值和颜色
             if(patient.getSportState()!=CommandTypeConstant.SPORT_DEV_CONNECT_OFFLINE)   //运动状态不为未打卡
             {
                 if(patient.getSportState()== CommandTypeConstant.SPORT_NOMAL)
@@ -257,7 +284,7 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             {
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(R.color.textgreen));
                 viewHolder.tvPhyState.setText(context.getResources().getString(R.string.patient_online));
-                if(patient.getMonConnectState()== CommandTypeConstant.MON_DEV_CONNECT_ONLINE)
+                /*if(patient.getMonConnectState()== CommandTypeConstant.MON_DEV_CONNECT_ONLINE)
                 {
                     viewHolder.tvMonState.setTextColor(context.getResources().getColor(R.color.textgreen));
                     viewHolder.tvMonState.setText("正常");
@@ -271,7 +298,59 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
                 {
                     viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.white));
                     viewHolder.tvMonState.setText("准备采集");
+                }*/
+                if(!patient.getParaExceptionState().isEmpty())
+                {
+                    viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_orange));//预警运动
+                    List<Byte> paraList=patient.getParaExceptionState();
+                    for(Byte para:paraList) {
+                        if(para==舒张压超上限||para==舒张压超下限||para==收缩压超上限||para==收缩压超下限||para==血氧超下限||para==心率超上限||para==心率超下限)
+                        {
+                            viewHolder.status.setBackground(context.getResources().getDrawable(R.drawable.status_red));//运动
+                            break;
+                        }
+
+                    }
+
                 }
+                if(patient.getMonExceptionState().size()==0)
+                {
+                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(R.color.textgreen));
+                    viewHolder.tvMonState.setText("正常");
+                }
+                else if(patient.getMonExceptionState().size()>0)
+                {
+                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
+                    List<Byte> MonExcepitonState=patient.getMonExceptionState();
+                    String result="";
+                    for(Byte state:MonExcepitonState)
+                    {
+                        if (state==MON_ECG_EXCEPTION)
+                        {
+                            result+="心电 ";
+                            continue;
+                        }
+                        if (state==MON_SPO_EXCEPTION)
+                        {
+                            result+="血氧 ";
+                            continue;
+                        }
+                        if (state==MON_PRE_EXCEPTION)
+                        {
+                            result+="血压 ";
+                            continue;
+                        }
+                    }
+                    result+="掉线";
+                    System.out.println("异常监护设备："+ result);
+                    viewHolder.tvMonState.setText(result);
+                }
+                /*else
+                {
+                    viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.white));
+                    viewHolder.tvMonState.setText("准备采集");
+                }*/
+
             }
             else if (patient.getPhyConnectState()== CommandTypeConstant.PHY_DEV_CONNECT_OFFLINE)
             {
@@ -290,15 +369,15 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
             else
             {
                 viewHolder.tvMonState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                viewHolder.tvMonState.setText(context.getResources().getString(R.string.none));
+                viewHolder.tvMonState.setText("");
                 viewHolder.tvPhyState.setTextColor(context.getResources().getColor(android.R.color.darker_gray));
-                viewHolder.tvPhyState.setText("");
+                viewHolder.tvPhyState.setText(context.getResources().getString(R.string.none));
             }
 
             viewHolder.gender.setText(patient.getGender());
         }
     }
     public static interface OnPatientItemLongClickListener {
-        void onItemLongClick(View view , int data);
+        void onItemLongClick(View view , int data);//第二个参数为患者id
     }
 }

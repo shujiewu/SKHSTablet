@@ -1,5 +1,7 @@
 package cn.sk.skhstablet.handler;
 
+import android.provider.Settings;
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -19,7 +21,6 @@ import cn.sk.skhstablet.protocol.ExercisePlan;
 import cn.sk.skhstablet.protocol.MonitorDevForm;
 import cn.sk.skhstablet.protocol.SportDevForm;
 import cn.sk.skhstablet.protocol.Version;
-import cn.sk.skhstablet.protocol.down.DevNameResponse;
 import cn.sk.skhstablet.protocol.down.ExerciseEquipmentDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePhysiologicalDataResponse;
 import cn.sk.skhstablet.protocol.down.ExercisePlanResponse;
@@ -28,6 +29,7 @@ import cn.sk.skhstablet.protocol.down.LoginOtherResponse;
 import cn.sk.skhstablet.protocol.down.MonitorDevFormResponse;
 import cn.sk.skhstablet.protocol.down.PatientListResponse;
 import cn.sk.skhstablet.protocol.down.PushAckResponse;
+import cn.sk.skhstablet.protocol.down.SignOutResponse;
 import cn.sk.skhstablet.protocol.down.SportDevControlResponse;
 import cn.sk.skhstablet.protocol.down.SportDevFormResponse;
 import cn.sk.skhstablet.protocol.up.LoginRequest;
@@ -44,15 +46,17 @@ import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NAME_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_LIST_NUMBER_FORM;
 import static cn.sk.skhstablet.app.AppConstants.PATIENT_SELECT_STATUS_FALSE;
 import static cn.sk.skhstablet.app.AppConstants.SPORT_DEV_FORM;
+import static cn.sk.skhstablet.app.CommandTypeConstant.EXERCISE_PLAN_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.LOGIN_SUCCESS;
 import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.PATIENT_LIST_SUCCESS;
 import static cn.sk.skhstablet.app.CommandTypeConstant.PHY_CONN_ONLINE;
+import static cn.sk.skhstablet.app.CommandTypeConstant.SIGN_OUT_RESPONSE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SPORT_DEV_CONNECT_OFFLINE;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SPORT_DEV_CONTORL_SUCC;
 import static cn.sk.skhstablet.app.CommandTypeConstant.SUCCESS;
 import static cn.sk.skhstablet.utlis.Utils.secToTime;
-
+//解码器
 @Sharable
 public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 
@@ -67,72 +71,88 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		//System.out.println(version.reviseVersionNumber);
 		byte commandType = reqBuf.readByte();
 		//DeviceId deviceId = decodeDeviceId(reqBuf);
-		//System.out.println(commandType);
+		System.out.println("下行命令-----------------："+ commandType);
 
+		//System.out.println((int)(char)commandType);
+		//System.out.println((int)(char)(commandType & 0xFF));
 		// System.out.println("request type:" + commandType);
+		//根据命令类型选择不同解码方法
+
 		switch (commandType) {
 
-		case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
-			request = decodeExercisePhysiologicalDataResponse(reqBuf);
-			break;
-		}
-		case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
-			request = decodeExerciseEquipmentDataResponse(reqBuf);
-			break;
-		}
+			case CommandTypeConstant.EXERCISE_PHYSIOLOGICAL_DATA_RESPONSE: {
+				System.out.println("生理数据响应0xB1 处于解码状态");
+				request = decodeExercisePhysiologicalDataResponse(reqBuf);
+				break;
+			}
+			case CommandTypeConstant.EXERCISE_EQUIPMENT_DATA_RESPONSE: {
+				System.out.println("运动设备数据响应0xC3 处于解码状态");
+				request = decodeExerciseEquipmentDataResponse(reqBuf);
+				break;
+			}
 			case CommandTypeConstant.LOGIN_ACK_RESPONSE: {
+				System.out.println("登录响应0x40");
 				request=decodeLoginAckResponse(reqBuf,CommandTypeConstant.LOGIN_ACK_RESPONSE);
 				break;
 			}
 			case CommandTypeConstant.LOGIN_OTHER_RESPONSE: {
+				System.out.println("登录下线命令0x05");
 				request=decodeLoginOtherResponse(reqBuf,CommandTypeConstant.LOGIN_OTHER_RESPONSE);
 				break;
 			}
-            case CommandTypeConstant.LOGOUT_ACK_RESPONSE:{
-                request=decodeLogoutAckResponse(reqBuf,CommandTypeConstant.LOGOUT_ACK_RESPONSE);
-                break;
-            }
-            case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:{
-                request=decodeChangeKeyAckResponse(reqBuf,CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE);
-                break;
-            }
+			case CommandTypeConstant.LOGOUT_ACK_RESPONSE:{
+				System.out.println("注销命令0x70");
+				request=decodeLogoutAckResponse(reqBuf,CommandTypeConstant.LOGOUT_ACK_RESPONSE);
+				break;
+			}
+			case CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE:{
+				System.out.println("修改密码0xB0");
+				request=decodeChangeKeyAckResponse(reqBuf,CommandTypeConstant.CHANGE_KEY_ACK_RESPONSE);
+				break;
+			}
 
-            case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:{
+			case CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE:{
+				System.out.println("签到病人列表获取0x10");
 				request=decodePatientListDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_DATA_RESPONSE);
 				break;
 			}
 			case CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE:{
-                request=decodePatientListNewDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE);
-                break;
-            }
-            case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:{
-                request=decodePatientListUpdateDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE);
-                break;
-            }
+				System.out.println("有人签到0x0D");
+				request=decodePatientListNewDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_NEW_DATA_RESPONSE);
+				break;
+			}
+			case CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE:{
+				System.out.println("病人更新数据命令0x08");
+				request=decodePatientListUpdateDataResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_UPDATE_RESPONSE);
+				break;
+			}
 
 
-            /*case CommandTypeConstant.DEV_NAEM_RESPONSE:{
-                request=decodeDevNameResponse(reqBuf,CommandTypeConstant.DEV_NAEM_RESPONSE);
-                break;
-            }*/
-            case CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE:{
-                request=decodeMonitorDevFormResponse(reqBuf,CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE);
-                break;
-            }
-            case CommandTypeConstant.SPORT_DEV_FORM_RESPONSE:{
-                request=decodeSportDevFormResponse(reqBuf,CommandTypeConstant.SPORT_DEV_FORM_RESPONSE);
-                break;
-            }
+				/*case CommandTypeConstant.DEV_NAEM_RESPONSE:{
+					request=decodeDevNameResponse(reqBuf,CommandTypeConstant.DEV_NAEM_RESPONSE);
+					break;
+				}*/
+			case CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE:{
+				System.out.println("监护设备参数0xA0");
+				request=decodeMonitorDevFormResponse(reqBuf,CommandTypeConstant.MONITOR_DEV_FORM_RESPONSE);
+				break;
+			}
+			case CommandTypeConstant.SPORT_DEV_FORM_RESPONSE:{
+				System.out.println("运动设备参数0x90 请求的响应");
+				request=decodeSportDevFormResponse(reqBuf,CommandTypeConstant.SPORT_DEV_FORM_RESPONSE);
+				break;
+			}
 
 
-            case CommandTypeConstant.SINGLE_MONITOR_RESPONSE: {
-                request=decodePushAckResponse(reqBuf,CommandTypeConstant.SINGLE_MONITOR_RESPONSE);
-                break;
-            }
-            /*case CommandTypeConstant.PATIENT_LIST_RESPONSE:{
-                request=decodePushAckResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_RESPONSE);
-                break;
-            }*/
+			case CommandTypeConstant.SINGLE_MONITOR_RESPONSE: {
+				System.out.println("生理数据 0x30 请求的响应");
+				request=decodePushAckResponse(reqBuf,CommandTypeConstant.SINGLE_MONITOR_RESPONSE);
+				break;
+			}
+			/*case CommandTypeConstant.PATIENT_LIST_RESPONSE:{
+				request=decodePushAckResponse(reqBuf,CommandTypeConstant.PATIENT_LIST_RESPONSE);
+				break;
+			}*/
 
 			case CommandTypeConstant.MUTI_MONITOR_RESPONSE: {
 				request=decodePushAckResponse(reqBuf,CommandTypeConstant.MUTI_MONITOR_RESPONSE);
@@ -140,6 +160,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			}
 
 			case CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE:{
+
 				request=decodeSportDevControlResponse(reqBuf,CommandTypeConstant.SPORT_DEV_CONTROL_RESPONSE);
 				break;
 
@@ -148,8 +169,16 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				//reqBuf.release();
 				break;
 			}
-			case CommandTypeConstant.EXERCISE_PLAN_RESPONSE:
+			case EXERCISE_PLAN_RESPONSE:
 			{
+				System.out.println("医嘱0x0E请求的响应 0xE0");
+				request=decodeExercisePlanResponse(reqBuf,EXERCISE_PLAN_RESPONSE);
+				break;
+			}
+
+			case SIGN_OUT_RESPONSE:
+			{
+				request=decodeSignOutResponse(reqBuf,SIGN_OUT_RESPONSE);
 				break;
 			}
 			default:{
@@ -163,18 +192,31 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		if(request!=null)
 			out.add(request);
 	}
+	//对医嘱请求的解码，这里只是初步的写了一下，服务器还没有写
 	private ExercisePlanResponse decodeExercisePlanResponse(ByteBuf reqBuf,byte commandType) {
 		ExercisePlanResponse response=new ExercisePlanResponse(commandType);
+		response.setDeviceType(reqBuf.readByte());
+		response.setUserID(reqBuf.readIntLE());
+		response.setRequestID(reqBuf.readByte());
 		response.setState(reqBuf.readByte());
 		response.setPatientID(reqBuf.readIntLE());
+		short conLength=reqBuf.readShortLE();
+		System.out.println("生理参数长度：" + conLength);
+		byte res[]=new byte[conLength];
+		reqBuf.readBytes(res);
+		response.setConstraintContent(toUtf8(res));
+		System.out.println("生理参数：" + response.getConstraintContent());
+
 		short number=reqBuf.readShortLE();
+		System.out.println("运动方案数：" + number);
+		List<ExercisePlan> exercisePlanList=new ArrayList<>();
 		for(short i=0;i<number;i++)
 		{
 			ExercisePlan exercisePlan=new ExercisePlan();
 			exercisePlan.setExercisePlanID(reqBuf.readIntLE());
 
-			int length=reqBuf.readUnsignedByte();
-			byte res[]=new byte[length];
+			int length=reqBuf.readUnsignedShortLE();
+			res=new byte[length];
 			reqBuf.readBytes(res);
 			exercisePlan.setContent(toUtf8(res));
 
@@ -182,40 +224,48 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			short segmentNumber=reqBuf.readUnsignedByte();
 			for(short j=0;j<segmentNumber;j++)
 			{
-				length=reqBuf.readUnsignedByte();
+				length=reqBuf.readUnsignedShortLE();
 				res=new byte[length];
 				reqBuf.readBytes(res);
 				segment.add(toUtf8(res));
 			}
 			exercisePlan.setSegment(segment);
+			System.out.println("******** 医嘱content ***********"+exercisePlan.getContent());
+			System.out.println("段数:" + segmentNumber);
+			System.out.println("segment:" + segment);
+			exercisePlanList.add(exercisePlan);
 		}
+		response.setExercisePlanList(exercisePlanList);
 		return response;
 	}
+	//对生理数据的解码
 	private ExercisePhysiologicalDataResponse decodeExercisePhysiologicalDataResponse(ByteBuf reqBuf) {
 		ExercisePhysiologicalDataResponse request = new ExercisePhysiologicalDataResponse();
 		DeviceId deviceId = decodeDeviceId(reqBuf);
 		request.setDeviceId(deviceId);
+		System.out.println("生理仪编号："+ deviceId);
+		request.setUserID(reqBuf.readIntLE());
+		System.out.println("患者ID："+request.getUserID());
 		request.setDataPacketNumber(reqBuf.readUnsignedIntLE());
+		System.out.println("包号："+ request.getDataPacketNumber());
 		request.setPhysiologicalLength(reqBuf.readUnsignedShortLE());
+		System.out.println("生理参数长度："+request.getPhysiologicalLength());
 
-
-		//reqBuf.readBytes(request.getPhysiologicalData());
 		int size=reqBuf.readUnsignedByte();
 		List<String> phyDevName=new ArrayList<String>();
 		List<String> phyDevValue=new ArrayList<String>();
-		System.out.println("size"+size);
+		System.out.println("监护设备数："+size);
 		for(int i=0;i<size;i++)
 		{
 			byte monitorType=reqBuf.readByte();
 			List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(monitorType);
-			//j++;
 			System.out.println(i);
-			System.out.println(monitorType);
+			System.out.println("监护设备类型："+monitorType);
 			for(MonitorDevForm monitorDevForm:monitorDevForms)
 			{
 				phyDevName.add(monitorDevForm.getChineseName());
 				int valuelength=monitorDevForm.getLength();
-				System.out.println("valuelenght"+valuelength);
+				//System.out.println("valuelenght"+valuelength);
 				long value=0;
 				switch (valuelength)
 				{
@@ -233,9 +283,6 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 						break;
 				}
 
-				//byte [] value=new byte[valuelength];
-				//System.arraycopy(phydata,j,value,0,valuelength);
-				//reqBuf.readBytes(value);
 				phyDevValue.add(String.valueOf(value));///byte
 				//j=j+valuelength;
 			}
@@ -244,29 +291,32 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		patientPhyData.setPhyDevName(phyDevName);
 		patientPhyData.setPhyDevValue(phyDevValue);
 
-
+		//对心电数据的解码
 		short ecgAmount = reqBuf.readUnsignedByte();
+		//System.out.print("ecgAmount"+ecgAmount);
 		for (short i = 0; i < ecgAmount; i++) {
 			short ecgNumber = reqBuf.readUnsignedByte();
-
-			short ecgSize=reqBuf.readUnsignedByte();
+			//System.out.print("ecgNumber"+ecgNumber);
+			short ecgSize=reqBuf.readShortLE();
+			//System.out.print("ecgsize"+ecgSize);
 			/*ECG ecg = new ECG(ecgSize);
 			System.out.println("ecg:"+ecg.getLength());
 			reqBuf.readBytes(ecg.getContent());
 			*/
 			List<Short> ecgData=new ArrayList<>();
-			for(short j=0;j<ecgSize;j++)
+			for(short j=0;j<ecgSize/2;j++)
 			{
-				ecgData.add(reqBuf.readUnsignedByte());
-				//System.out.println("ecgData"+ecgData.get(j));
+				ecgData.add((short)(reqBuf.readShortLE()/3));//这里对心电数据做了3倍的缩放，应该根据实际显示情况重新考虑
 			}
-			//System.out.println("ecgnumber"+ecgNumber);
 			patientPhyData.getEcgs().put(ecgNumber,ecgData);
 		}
+
+		patientPhyData.setPatientID(request.getUserID());//设置生理数据对应的病人id
 		request.setPatientPhyData(patientPhyData);
 		return request;
 	}
 
+	//辅助方法解码版本号
 	private Version decodeVersion(ByteBuf reqBuf) {
 		Version version = new Version();
 		version.majorVersionNumber = reqBuf.readUnsignedByte();
@@ -275,6 +325,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		return version;
 	}
 
+	//辅助方法解码设备ID
 	private DeviceId decodeDeviceId(ByteBuf reqBuf) {
 		DeviceId deviceId = new DeviceId();
 		deviceId.deviceType = reqBuf.readByte();
@@ -287,7 +338,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		deviceId.deviceNumber = ByteBufUtil.hexDump(deviceNumber);
 		return deviceId;
 	}
-
+	//解码运动设备数据
 	private AbstractProtocol decodeExerciseEquipmentDataResponse(ByteBuf reqBuf) {
 		ExerciseEquipmentDataResponse request = new ExerciseEquipmentDataResponse();
 		DeviceId deviceId = decodeDeviceId(reqBuf);
@@ -296,65 +347,71 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		request.setPatientId(reqBuf.readIntLE());// 数据库主键，有符号
 		request.setDataPacketNumber(reqBuf.readUnsignedIntLE());
 
-
-		request.setPhysiologicalLength(reqBuf.readUnsignedShortLE());
-		//byte phydata[]=new byte[request.getPhysiologicalLength()];
-		//reqBuf.readBytes(phydata);
-		//request.setPhysiologicalData(phydata);
-		int size=reqBuf.readUnsignedByte();
-		List<String> sportDevName=new ArrayList<String>();  //指的是参数名称，而不是设备名称
-		List<String> phyDevName=new ArrayList<String>();
+		System.out.println("运动设备病人id"+request.getPatientId());
+		PatientDetail patientDetail=new PatientDetail();
 		List<String> sportDevValue=new ArrayList<String>();
-		List<String> phyDevValue=new ArrayList<String>();
-		for(int i=0;i<size;i++)
+		List<String> sportDevName=new ArrayList<String>();  //指的是运动设备的参数名称，而不是设备名称
+		//如果设备类型是体外反搏
+		if(deviceId.deviceType==0x06)
 		{
-			byte monitorType=reqBuf.readByte();
-			List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(monitorType);
-			//j++;
-			for(MonitorDevForm monitorDevForm:monitorDevForms)
+			request.setPhysiologicalLength(reqBuf.readUnsignedShortLE());//这里之前遇到了如果不存在监护设备却有四个字节生理数据长度，不知道这个缺陷是否解决
+			//System.out.println("length"+request.getPhysiologicalLength());
+			int size=reqBuf.readUnsignedByte();
+			List<String> phyDevName=new ArrayList<String>();
+			List<String> phyDevValue=new ArrayList<String>();
+			//解析生理数据
+			for(int i=0;i<size;i++)
 			{
-				phyDevName.add(monitorDevForm.getChineseName());
-				int valuelength=monitorDevForm.getLength();
-				long value=0;
-				switch (valuelength)
+				byte monitorType=reqBuf.readByte();
+
+				List<MonitorDevForm> monitorDevForms=MON_DEV_FORM.get(monitorType);
+				//j++;
+				for(MonitorDevForm monitorDevForm:monitorDevForms)
 				{
-					case 1:
-						value=reqBuf.readByte();
-						break;
-					case 2:
-						value=reqBuf.readShortLE();
-						break;
-					case 4:
-						value=reqBuf.readIntLE();
-						break;
-					case 8:
-						value=reqBuf.readLongLE();
-						break;
+					phyDevName.add(monitorDevForm.getChineseName());
+					int valuelength=monitorDevForm.getLength();
+					long value=0;
+					switch (valuelength)
+					{
+						case 1:
+							value=reqBuf.readByte();
+							break;
+						case 2:
+							value=reqBuf.readShortLE();
+							break;
+						case 4:
+							value=reqBuf.readIntLE();
+							break;
+						case 8:
+							value=reqBuf.readLongLE();
+							break;
+					}
+
+					//byte [] value=new byte[valuelength];
+					//System.arraycopy(phydata,j,value,0,valuelength);
+					//reqBuf.readBytes(value);
+					phyDevValue.add(String.valueOf(value));///byte
+
+					//j=j+valuelength;
 				}
-
-				//byte [] value=new byte[valuelength];
-				    //System.arraycopy(phydata,j,value,0,valuelength);
-				//reqBuf.readBytes(value);
-				phyDevValue.add(String.valueOf(value));///byte
-
-				//j=j+valuelength;
 			}
+			patientDetail.setPhyDevName(phyDevName);
+			patientDetail.setPhyDevValue(phyDevValue);
 		}
-
-
-
 		request.setExercisePlanCompletionRate(reqBuf.readUnsignedByte());
+		System.out.println("医嘱进度"+request.getExercisePlanCompletionRate());
+		sportDevName.add("医嘱进度");
+		sportDevValue.add(request.getExercisePlanCompletionRate()+"%");
 		request.setPerformedExecutionAmount(reqBuf.readUnsignedShortLE());
 		request.setExercisePlanId(reqBuf.readIntLE());// 数据库主键，有符号
 		request.setExercisePlanSectionNumber(reqBuf.readUnsignedByte());
-		//byte[] sportdata = new byte[reqBuf.writerIndex() - request.getChecksum().length - reqBuf.readerIndex()];
-		//reqBuf.readBytes(sportdata);
-		//request.setEquipmentData(sportdata);
-
-		PatientDetail patientDetail=new PatientDetail();
+		patientDetail.setExercisePlanId(request.getExercisePlanId());
+		patientDetail.setExercisePlanSectionNumber(request.getExercisePlanSectionNumber());
 		patientDetail.setPatientID(request.getPatientId());
 		patientDetail.setName(PATIENT_LIST_NAME_FORM.get(request.getPatientId()));
+		//System.out.println("运动数据1"+patientDetail.getName());
 		patientDetail.setHospitalNumber(PATIENT_LIST_NUMBER_FORM.get(request.getPatientId()));
+		//System.out.println("运动数据2"+patientDetail.getHospitalNumber());
 		patientDetail.setDev(DEV_NAME.get(deviceId.deviceType));
 		patientDetail.setDevType(deviceId.deviceType);
 		patientDetail.setDeviceNumber(deviceId.deviceNumber);
@@ -365,10 +422,10 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		List<SportDevForm> sportDevForms=SPORT_DEV_FORM.get(deviceId.deviceType);
 		int valuelength=0;
 
-		//int pos=0;
+		//解析运动设备参数
 		for(SportDevForm sportDevForm:sportDevForms)
 		{
-			//sportDevName.add(sportDevForm.getChineseName());
+			//如果参数长度是固定的
 			if(sportDevForm.getParaType()==CommandTypeConstant.SPORT_DEV_PARA_CERTAIN)
 			{
 				valuelength=sportDevForm.getLength();
@@ -392,36 +449,41 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 						value=reqBuf.readLongLE();
 						break;
 				}
-				//if()
-				/*if(sportDevForm.getRate()==1.0)
-					sportDevValue.add(String.valueOf(value));///byte
-				else
-					sportDevValue.add(String.valueOf(value*sportDevForm.getRate()));*/
+				//如果没有显示单位，只显示中文名
 				if(sportDevForm.getDisplayUnit().isEmpty())
 					sportDevName.add(sportDevForm.getChineseName());
 				else
 				{
-					if(sportDevForm.getDisplayUnit().equals("s"))
+					//如果单位为秒，因为时间在下面转换为00:00:00的格式，所以不需要单位
+					if(sportDevForm.getDisplayUnit().equals("min"))
+					{
 						sportDevName.add(sportDevForm.getChineseName());
+
+					}
 					else
-						sportDevName.add(sportDevForm.getChineseName()+"("+sportDevForm.getDisplayUnit()+")");
+						sportDevName.add(sportDevForm.getChineseName()+sportDevForm.getDisplayUnit());//其他需要在名称后面增加单位
 				}
-				if(sportDevForm.getRate()!=1.0)
+				//如果参数有倍率且不为时间，需要转换数据为小数，这里直接保留了两位小数，后面可以根据显示精度来保留小数
+				if(sportDevForm.getRate()!=1.0&&!sportDevForm.getDisplayUnit().equals("min"))
 				{
 					BigDecimal bd = new BigDecimal(String.valueOf(value/sportDevForm.getRate()));
-					bd = bd.setScale(2,BigDecimal.ROUND_HALF_UP);
+					bd = bd.setScale(2,BigDecimal.ROUND_HALF_UP);//四舍五入两位小数
 					sportDevValue.add(bd.toString());///byte
 				}
 				else
 				{
-					if(sportDevForm.getDisplayUnit().equals("s"))
-						sportDevValue.add(secToTime((int)value));///byte
+					if(sportDevForm.getDisplayUnit().equals("min"))
+					{
+						sportDevValue.add(secToTime((int)value));//如果是时间则转换为00:00:00的格式
+						//System.out.println(secToTime((int)value));
+					}
 					else
 						sportDevValue.add(String.valueOf(value));///byte
 				}
 				//pos=pos+valuelength;
 				//System.out.println(sportDevForm.getChineseName() +"  "+String.valueOf(value*sportDevForm.getRate()));
 			}
+			//如果参数长度不固定，即体外反博的情况，只是读了一个数组，具体解析方法还没写
 			else
 			{
 				valuelength=sportDevForm.getLength();
@@ -453,14 +515,14 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				//pos=pos+length;
 			}
 		}
-		patientDetail.setPhyDevName(phyDevName);
-		patientDetail.setPhyDevValue(phyDevValue);
+
 		patientDetail.setSportDevName(sportDevName);
 		patientDetail.setSportDevValue(sportDevValue);
 		request.setPatientDetail(patientDetail);
 		return request;
 	}
 
+	//登录命令响应的解码
 	private AbstractProtocol decodeLoginAckResponse(ByteBuf resBuf,byte commandType)
 	{
 		LoginAckResponse response=new LoginAckResponse(commandType);
@@ -483,6 +545,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		}
 		return response;
 	}
+	//在其他设备登录的响应解码
 	private AbstractProtocol decodeLoginOtherResponse(ByteBuf resBuf,byte commandType)
 	{
 		LoginOtherResponse response=new LoginOtherResponse(commandType);
@@ -491,6 +554,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		response.setState(resBuf.readByte());
 		return response;
 	}
+	//改变密码的响应解码
 	private AbstractProtocol decodeChangeKeyAckResponse(ByteBuf resBuf,byte commandType)
 	{
 		LoginAckResponse response=new LoginAckResponse(commandType);
@@ -502,6 +566,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		response.setState(resBuf.readByte());
 		return response;
 	}
+	//退出的响应解码
 	private AbstractProtocol decodeLogoutAckResponse(ByteBuf resBuf,byte commandType)
 	{
 		LoginAckResponse response=new LoginAckResponse(commandType);
@@ -518,6 +583,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		//response.setUserName(toUtf8(name));
 		return response;
 	}
+	//服务器推送的响应解码，这里用于生理数据和运动数据请求的响应，因为二者解析方法是一致的
 	private AbstractProtocol decodePushAckResponse(ByteBuf resBuf,byte commandType)
 	{
 		PushAckResponse response=new PushAckResponse(commandType);
@@ -527,12 +593,13 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		response.setState(resBuf.readByte());
 		return response;
 	}
+	//全局病人列表数据更新响应
 	private AbstractProtocol decodePatientListUpdateDataResponse(ByteBuf resBuf,byte commandType)
 	{
 		PatientListResponse response=new PatientListResponse(commandType);
-		//response.setDeviceType(resBuf.readByte());
-		//response.setUserID(resBuf.readIntLE());
-		//response.setRequestID(resBuf.readByte());
+//		response.setDeviceType(resBuf.readByte());
+//		response.setUserID(resBuf.readIntLE());
+//		response.setRequestID(resBuf.readByte());
 		response.setState(PATIENT_LIST_SUCCESS);
 
 		List<Patient> patientList=new ArrayList<>();
@@ -540,31 +607,51 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			patient.setPatientID(resBuf.readIntLE());
 			System.out.println(patient.getPatientID()+"病人id");
 			patient.setPhyConnectState(resBuf.readByte());
-			if(patient.getPhyConnectState()==PHY_CONN_ONLINE)
+
+		if(patient.getPhyConnectState()==PHY_CONN_ONLINE)
+		{
+			//修改
+			byte monExceptionNumber=resBuf.readByte();
+			List<Byte> MonExceptionState=new ArrayList<>();
+			for(byte k=0;k<monExceptionNumber;k++)
 			{
-				patient.setMonConnectState(resBuf.readByte());
-				System.out.println(1);
+				MonExceptionState.add(resBuf.readByte());
 			}
+			patient.setMonExceptionState(MonExceptionState);
+			//patient.setMonConnectState(resBuf.readByte());
+			//System.out.println(1);
+			byte paraExceptionNumber=resBuf.readByte();
+			List<Byte> ParaExceptionState=new ArrayList<>();
+			for(byte k=0;k<paraExceptionNumber;k++)
+			{
+				ParaExceptionState.add(resBuf.readByte());
+			}
+			patient.setParaExceptionState(ParaExceptionState);
+			System.out.println("异常监护参数："+patient.getParaExceptionState());
+		}
+
 			patient.setSportState(resBuf.readByte());
 			if(patient.getSportState()!=SPORT_DEV_CONNECT_OFFLINE)
 			{
-				System.out.println(2);
+				//System.out.println(2);
 				byte [] deviceNumber=new byte[8];
 				resBuf.readBytes(deviceNumber);
 				//System.out.println(ByteBufUtil.hexDump(deviceNumber)+"number");
 				patient.setDeviceNumber(ByteBufUtil.hexDump(deviceNumber));
 				patient.setDevType(resBuf.readByte());
 				patient.setDev(DEV_NAME.get(patient.getDevType()));
-				System.out.println("更新病人1"+patient.getDev());
+				//System.out.println("更新病人1"+patient.getDev());
 				patient.setConnectState(resBuf.readByte());
 				patient.setSportPlanID(resBuf.readIntLE());
 				patient.setSportPlanSegment(resBuf.readByte());
 			}
 			patient.setSelectStatus(PATIENT_SELECT_STATUS_FALSE);
+		System.out.println(patient.getPatientID()+"患者xxx运动设备"+patient.getDev());
 			patientList.add(patient);
 		response.setPatientList(patientList);
 		return response;
 	}
+	//第一次接收到全局病人列表数据
 	private AbstractProtocol decodePatientListDataResponse(ByteBuf resBuf,byte commandType)
 	{
 		PatientListResponse response=new PatientListResponse(commandType);
@@ -588,7 +675,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			if(commandType==PATIENT_LIST_DATA_RESPONSE)
 			{
 				byte gender=resBuf.readByte();
-				if(gender==0x00)
+				if(gender==0x01)
 					patient.setGender("男");
 				else
 					patient.setGender("女");
@@ -604,36 +691,55 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				byte res[]=new byte[hospitalLength];
 				resBuf.readBytes(res);
 				patient.setHospitalNumber(toUtf8(res));
-				System.out.println(patient.getHospitalNumber());
+				System.out.println("住院号"+ patient.getHospitalNumber());
 
 			}
 			patient.setPhyConnectState(resBuf.readByte());
 			if(patient.getPhyConnectState()==PHY_CONN_ONLINE)
 			{
-				patient.setMonConnectState(resBuf.readByte());
-				System.out.println(1);
+				//修改
+				System.out.println("生理仪连接");
+				byte monExceptionNumber=resBuf.readByte();
+				List<Byte> MonExceptionState=new ArrayList<>();
+				for(byte k=0;k<monExceptionNumber;k++)
+				{
+					MonExceptionState.add(resBuf.readByte());
+				}
+				patient.setMonExceptionState(MonExceptionState);
+				//patient.setMonConnectState(resBuf.readByte());
+				//System.out.println(1);
+				byte paraExceptionNumber=resBuf.readByte();
+				List<Byte> ParaExceptionState=new ArrayList<>();
+				for(byte k=0;k<paraExceptionNumber;k++)
+				{
+					ParaExceptionState.add(resBuf.readByte());
+				}
+				patient.setParaExceptionState(ParaExceptionState);
+
 			}
 			patient.setSportState(resBuf.readByte());
 			if(patient.getSportState()!=SPORT_DEV_CONNECT_OFFLINE)
 			{
-				System.out.println(2);
+				System.out.println("已打卡");
 				byte [] deviceNumber=new byte[8];
 				resBuf.readBytes(deviceNumber);
 				//System.out.println(ByteBufUtil.hexDump(deviceNumber)+"number");
 				patient.setDeviceNumber(ByteBufUtil.hexDump(deviceNumber));
 				patient.setDevType(resBuf.readByte());
 				patient.setDev(DEV_NAME.get(patient.getDevType()));
-				System.out.println("首次病人1"+patient.getDev()+patient.getDevType());
+				//System.out.println("首次病人1"+patient.getDev()+patient.getDevType());
 				patient.setConnectState(resBuf.readByte());
 				patient.setSportPlanID(resBuf.readIntLE());
 				patient.setSportPlanSegment(resBuf.readByte());
 			}
+			System.out.println(patient.getPatientID()+"患者xxx运动设备"+patient.getDev());
 			patient.setSelectStatus(PATIENT_SELECT_STATUS_FALSE);
 			patientList.add(patient);
 		}
 		response.setPatientList(patientList);
 		return response;
 	}
+	//新签到病人的响应
 	private AbstractProtocol decodePatientListNewDataResponse(ByteBuf resBuf,byte commandType)
 	{
 		PatientListResponse response=new PatientListResponse(commandType);
@@ -656,36 +762,55 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 			System.out.println(patient.getPatientID()+"病人id");
 			//if(commandType==PATIENT_LIST_DATA_RESPONSE)
 			//{
-				byte gender=resBuf.readByte();
-				if(gender==0x00)
-					patient.setGender("男");
-				else
-					patient.setGender("女");
+			byte gender=resBuf.readByte();
+			if(gender==0x01)
+				patient.setGender("男");
+			else
+				patient.setGender("女");
 
-				short nameLength=resBuf.readUnsignedByte();
-				byte req[]=new byte[nameLength];
-				resBuf.readBytes(req);
-				patient.setName(toUtf8(req));
-				System.out.println(patient.getName()+"姓名");
+			short nameLength=resBuf.readUnsignedByte();
+			byte req[]=new byte[nameLength];
+			resBuf.readBytes(req);
+			patient.setName(toUtf8(req));
+			System.out.println(patient.getName()+"姓hbhbhbh名");
 
-				short hospitalLength=resBuf.readUnsignedByte();
-				System.out.println(String.valueOf(hospitalLength)+"hoslength");
-				byte res[]=new byte[hospitalLength];
-				resBuf.readBytes(res);
-				patient.setHospitalNumber(toUtf8(res));
-				System.out.println(patient.getHospitalNumber());
+			short hospitalLength=resBuf.readUnsignedByte();
+			System.out.println(String.valueOf(hospitalLength)+"hoslength");
+			byte res[]=new byte[hospitalLength];
+			resBuf.readBytes(res);
+			patient.setHospitalNumber(toUtf8(res));
+			System.out.println("住院号"+ patient.getHospitalNumber());
 
 			//}
 			patient.setPhyConnectState(resBuf.readByte());
 			if(patient.getPhyConnectState()==PHY_CONN_ONLINE)
 			{
-				patient.setMonConnectState(resBuf.readByte());
+				System.out.println("生理仪在线");
+				//修改
+				byte monExceptionNumber=resBuf.readByte();
+				List<Byte> MonExceptionState=new ArrayList<>();
+				for(byte k=0;k<monExceptionNumber;k++)
+				{
+					MonExceptionState.add(resBuf.readByte());
+				}
+				patient.setMonExceptionState(MonExceptionState);
+				//patient.setMonConnectState(resBuf.readByte());
 				System.out.println(1);
+				byte paraExceptionNumber=resBuf.readByte();
+				List<Byte> ParaExceptionState=new ArrayList<>();
+				for(byte k=0;k<paraExceptionNumber;k++)
+				{
+					ParaExceptionState.add(resBuf.readByte());
+				}
+				patient.setParaExceptionState(ParaExceptionState);
 			}
+
+
 			patient.setSportState(resBuf.readByte());
 			if(patient.getSportState()!=SPORT_DEV_CONNECT_OFFLINE)
 			{
-				//System.out.println(2);
+
+				System.out.println("已打卡！");
 				byte [] deviceNumber=new byte[8];
 				resBuf.readBytes(deviceNumber);
 				//System.out.println(ByteBufUtil.hexDump(deviceNumber)+"number");
@@ -703,32 +828,12 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		response.setPatientList(patientList);
 		return response;
 	}
-	/*private AbstractProtocol decodeDevNameResponse(ByteBuf resBuf,byte commandType)
-	{
-		DevNameResponse response=new DevNameResponse(commandType);
-		response.setUserID(resBuf.readIntLE());
-		response.setDevNumber(resBuf.readByte());
 
-		byte number=response.getDevNumber();
-		HashMap<Byte,String> devName=new HashMap<>();
-		for(byte i=0;i<number;i++)
-		{
-			byte devType=resBuf.readByte();
-			byte req[]=new byte[64];
-			resBuf.readBytes(req);
-			String name=toUtf8(req);
-
-			devName.put(devType,name);
-		}
-		response.setDevName(devName);
-
-		return response;
-	}*/
-
-
+	//对监护设备协议解析格式响应的解码
 	private AbstractProtocol decodeMonitorDevFormResponse(ByteBuf resBuf,byte commandType)
 	{
 		MonitorDevFormResponse response=new MonitorDevFormResponse(commandType);
+		System.out.println("监护设备协议解析格式响应的解码：0xA0");
 		response.setDeviceType(resBuf.readByte());
 		response.setUserID(resBuf.readIntLE());
 		response.setRequestID(resBuf.readByte());
@@ -773,14 +878,15 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				monitorDevForm.setPosition(resBuf.readByte());
 				monitorDevForms.add(monitorDevForm);
 			}
-			System.out.println("montype"+devType);
-			Collections.sort(monitorDevForms,Utils.monitorDevComp);//按照序号排序
+			//System.out.println("montype"+devType);
+			Collections.sort(monitorDevForms,Utils.monitorDevComp);//按照参数的顺序序号对list进行排序
 			devData.put(devType,monitorDevForms);
 
 		}
 		response.setDevData(devData);
 		return response;
 	}
+	//对运动设备参数解析协议响应的解码
 	private AbstractProtocol decodeSportDevFormResponse(ByteBuf resBuf,byte commandType)
 	{
 		SportDevFormResponse response=new SportDevFormResponse(commandType);
@@ -874,7 +980,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 
 		return response;
 	}
-
+	//对参数控制响应的解码
 	private AbstractProtocol  decodeSportDevControlResponse(ByteBuf resBuf,byte commandType)
 	{
 		SportDevControlResponse response=new SportDevControlResponse(commandType);
@@ -894,6 +1000,7 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 		}
 		return  response;
 	}
+	//将byte数组以utf-8的编码方式转换为string
 	public static String toUtf8(byte str[]) {
 		String result = null;
 		try {
@@ -912,5 +1019,18 @@ public class ProtocolDecoder extends MessageToMessageDecoder<ByteBuf> {
 				| ((src[offset+2] & 0xFF)<<16)
 				| ((src[offset+3] & 0xFF)<<24));
 		return value;
+	}
+	//通知有人签退
+	private AbstractProtocol decodeSignOutResponse(ByteBuf resBuf,byte commandType)
+	{
+		SignOutResponse response=new SignOutResponse(commandType);
+		short number=resBuf.readShortLE();
+		List<Integer> patientNumber=new ArrayList<>();
+		for(short i=0;i<number;i++)
+		{
+			patientNumber.add(resBuf.readIntLE());
+		}
+		response.setPatientNumber(patientNumber);
+		return response;
 	}
 }
